@@ -471,6 +471,71 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 /* ===================== PROTOTYPE BADGE ===================== */
 .proto-badge { position: fixed; bottom: 8px; left: 8px; font-size: 10px; color: var(--color-text-tertiary); background: var(--color-background-secondary); padding: 3px 8px; border-radius: var(--border-radius-sm); z-index: 5; border: 1px solid var(--color-border-tertiary); }
 
+/* ===================== SUMMARY CARDS CLICÁVEIS ===================== */
+.summary-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+.summary-card:hover { border-color: var(--color-border-secondary); }
+.summary-card.card-active { border-color: var(--color-brand); box-shadow: 0 0 0 2px var(--color-brand-light); }
+.summary-card.card-active-red { border-color: var(--color-critical); box-shadow: 0 0 0 2px var(--color-critical-light); }
+.summary-card.card-active-amber { border-color: var(--color-high); box-shadow: 0 0 0 2px var(--color-high-light); }
+.card-filter-hint { font-size: 9px; color: var(--color-text-tertiary); margin-top: 2px; display: none; }
+.summary-card:hover .card-filter-hint { display: block; }
+.summary-card.card-active .card-filter-hint, .summary-card.card-active-red .card-filter-hint, .summary-card.card-active-amber .card-filter-hint { display: block; color: var(--color-brand); }
+
+/* ===================== ALERT TYPE FILTER (tabela) ===================== */
+.alert-filter-bar { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.alert-filter-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; padding: 3px 7px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; white-space: nowrap; }
+.alert-filter-chip:hover { border-color: var(--color-border-secondary); }
+.alert-filter-chip.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+.alert-filter-chip i { font-size: 11px; }
+.filter-label { font-size: 10px; color: var(--color-text-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
+
+/* ===================== RADAR / LIVE TRACKING GLOBAL ===================== */
+.radar-overlay { position: fixed; inset: 0; background: #070d1a; z-index: 300; display: flex; flex-direction: column; animation: fadeIn 200ms ease; }
+.radar-header { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid #1a2540; flex-shrink: 0; }
+.radar-logo { font-size: 13px; font-weight: 700; color: #4fd1b8; letter-spacing: -0.3px; }
+.radar-logo span { color: #fff; opacity: 0.5; }
+.radar-title { font-size: 12px; color: rgba(79,209,184,0.7); }
+.radar-live { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(79,209,184,0.6); }
+.radar-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #4fd1b8; animation: blink 1.4s infinite; }
+.radar-close { background: none; border: 1px solid #1a2540; color: #4fd1b8; padding: 5px 12px; border-radius: var(--border-radius-sm); cursor: pointer; font-size: 11px; margin-left: auto; transition: all 0.15s; }
+.radar-close:hover { background: #1a2540; }
+.radar-body { flex: 1; position: relative; overflow: hidden; }
+.radar-canvas { position: absolute; inset: 0; }
+.radar-grid-h, .radar-grid-v { position: absolute; background: rgba(79,209,184,0.05); }
+.radar-grid-h { width: 100%; height: 1px; }
+.radar-grid-v { height: 100%; width: 1px; }
+.radar-circle { position: absolute; border: 1px solid rgba(79,209,184,0.08); border-radius: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+.radar-sweep { position: absolute; width: 50%; height: 2px; transform-origin: left center; animation: sweep 5s linear infinite; background: linear-gradient(to right, rgba(79,209,184,0.5), transparent); top: 50%; left: 50%; }
+@keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.service-node { position: absolute; transform: translate(-50%,-50%); cursor: pointer; z-index: 5; }
+.sn-dot { width: 12px; height: 12px; border-radius: 50%; position: relative; transition: transform 0.15s; }
+.service-node:hover .sn-dot { transform: scale(1.4); }
+.sn-critical { background: #E24B4A; box-shadow: 0 0 10px rgba(226,75,74,0.7); animation: pulse-dot 1s infinite; }
+.sn-high     { background: #EF9F27; box-shadow: 0 0 8px rgba(239,159,39,0.6); }
+.sn-medium   { background: #378ADD; box-shadow: 0 0 6px rgba(55,138,221,0.5); }
+.sn-ok       { background: #1D9E75; box-shadow: 0 0 5px rgba(29,158,117,0.5); }
+@keyframes pulse-dot { 0%,100% { box-shadow: 0 0 10px rgba(226,75,74,0.7); } 50% { box-shadow: 0 0 22px rgba(226,75,74,0.9), 0 0 40px rgba(226,75,74,0.3); } }
+.sn-ring { position: absolute; border-radius: 50%; border: 1px solid; animation: ring-out 2s infinite; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+.sn-critical .sn-ring { border-color: rgba(226,75,74,0.4); width: 24px; height: 24px; }
+.sn-high .sn-ring     { border-color: rgba(239,159,39,0.3); width: 22px; height: 22px; }
+@keyframes ring-out { 0% { transform: translate(-50%,-50%) scale(1); opacity: 0.8; } 100% { transform: translate(-50%,-50%) scale(2.5); opacity: 0; } }
+.sn-label { position: absolute; left: 16px; top: -4px; white-space: nowrap; font-size: 10px; color: rgba(200,220,240,0.75); pointer-events: none; text-shadow: 0 1px 4px #000; }
+.sn-time { font-size: 9px; color: rgba(200,220,240,0.4); display: block; }
+.sn-popup { display: none; position: absolute; left: 16px; top: 18px; background: #0e1830; border: 1px solid rgba(79,209,184,0.3); border-radius: var(--border-radius-sm); padding: 10px 12px; width: 210px; z-index: 20; font-size: 11px; color: #a0b8d0; pointer-events: none; }
+.service-node:hover .sn-popup { display: block; }
+.sn-popup-route { font-size: 12px; font-weight: 600; color: #d0e8f8; margin-bottom: 4px; }
+.sn-popup-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+.sn-popup-key { color: rgba(160,184,208,0.6); }
+.sn-popup-sev-critical { color: #E24B4A; font-weight: 700; }
+.sn-popup-sev-high     { color: #EF9F27; font-weight: 700; }
+.sn-popup-sev-medium   { color: #378ADD; font-weight: 700; }
+.radar-legend { position: absolute; bottom: 16px; left: 20px; display: flex; flex-direction: column; gap: 5px; }
+.legend-row { display: flex; align-items: center; gap: 7px; font-size: 10px; color: rgba(160,184,208,0.5); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.radar-stats { position: absolute; top: 16px; right: 20px; text-align: right; display: flex; flex-direction: column; gap: 4px; }
+.rstat { font-size: 10px; color: rgba(79,209,184,0.5); }
+.rstat strong { font-size: 14px; color: #4fd1b8; display: block; }
+
 /* ===================== TOOLTIP ===================== */
 .tt-wrap { position: relative; display: inline-flex; }
 .tt-icon { width: 16px; height: 16px; border-radius: 50%; background: var(--color-cc-purple-light); color: var(--color-cc-purple); font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: help; }
@@ -512,10 +577,6 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
             <div class="status-dots" id="status-dots"></div>
           </div>
           <div class="filter-section">
-            <div class="filter-title">tipo de alerta</div>
-            <div id="alert-type-filters"></div>
-          </div>
-          <div class="filter-section">
             <select class="filter-dropdown"><option>business unit</option></select>
             <select class="filter-dropdown"><option>site / cliente</option></select>
             <select class="filter-dropdown"><option>provider</option></select>
@@ -527,14 +588,11 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
       </div>
       <!-- CONTENT -->
       <div class="content-area">
-        <div class="summary-bar">
-          <div class="summary-card"><div class="s-label">serviços ativos</div><div class="s-val">47</div></div>
-          <div class="summary-card"><div class="s-label">alertas abertos</div><div class="s-val red">12</div></div>
-          <div class="summary-card"><div class="s-label">sem dono</div><div class="s-val amber">5</div></div>
-          <div class="summary-card"><div class="s-label">SLA crítica &lt;15min</div><div class="s-val red">2</div></div>
-        </div>
+        <div class="summary-bar" id="summary-bar"></div>
         <div class="content-header">
           <div class="content-title" id="market-title">brasil · 5 serviços</div>
+          <div class="alert-filter-bar" id="alert-filter-bar"></div>
+          <button class="btn btn-secondary" onclick="openMainLiveTracking()" style="white-space:nowrap"><i class="ti ti-radar"></i> live tracking</button>
           <div class="sort-group">
             <button class="sort-btn active" onclick="setSort('provider')">por provider</button>
             <button class="sort-btn" onclick="setSort('priority')">por prioridade</button>
@@ -687,6 +745,8 @@ const state = {
   ccFlowStep: 0,
   uberVoucherUsed: false,
   assignedServices: {},
+  dashFilter: null,        // null | 'alerts' | 'unassigned' | 'sla-critical'
+  alertTypeFilter: null,   // null | alert type key
 };
 
 /* ===================== NAVEGAÇÃO ===================== */
@@ -712,7 +772,8 @@ function renderMainPage() {
   renderMarketNav();
   renderCountryPills();
   renderStatusDots();
-  renderAlertTypeFilters();
+  renderSummaryBar();
+  renderAlertFilterBar();
   renderServiceList();
   updateMarketTitle();
 }
@@ -772,15 +833,97 @@ function renderStatusDots() {
   document.getElementById('status-dots').innerHTML = html;
 }
 
-function renderAlertTypeFilters() {
-  const types = Object.entries(ALERT_ICONS);
-  let html = '';
-  types.forEach(([k,icon]) => {
-    html += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:var(--color-text-secondary);cursor:pointer;" onclick="this.style.opacity=this.style.opacity==='0.4'?'1':'0.4'">
-      <i class="ti ${icon}" style="font-size:13px;"></i> ${k.replace(/_/g,' ')}
+/* ===================== LIVE TRACKING RADAR (MAIN PAGE) ===================== */
+function openMainLiveTracking() {
+  const existing = document.getElementById('radar-overlay');
+  if(existing) existing.remove();
+
+  const svcs = getFilteredServices();
+  const total = svcs.length;
+  const critical = svcs.filter(s => s.alerts.some(a => a.severity === 'critical')).length;
+  const withAlerts = svcs.filter(s => s.alerts.length > 0).length;
+
+  // Posições determinísticas espalhadas no canvas
+  const positions = [
+    {x:28,y:35},{x:55,y:22},{x:72,y:48},{x:42,y:62},{x:65,y:70},
+    {x:20,y:55},{x:80,y:30},{x:38,y:42},{x:58,y:55},{x:75,y:65},
+  ];
+
+  const nodesHtml = svcs.map((s, i) => {
+    const pos = positions[i % positions.length];
+    const maxSev = s.alerts.reduce((m,a) => {
+      const ord = {critical:0,high:1,medium:2};
+      return !m || (ord[a.severity]??3) < (ord[m.severity]??3) ? a.severity : m;
+    }, s.alerts.length ? null : 'ok');
+    const dotCls = maxSev === 'critical' ? 'sn-critical' : maxSev === 'high' ? 'sn-high' : maxSev === 'medium' ? 'sn-medium' : 'sn-ok';
+    const sevLabel = maxSev === 'critical' ? 'CRÍTICO' : maxSev === 'high' ? 'ALTO' : maxSev === 'medium' ? 'MÉDIO' : 'OK';
+    const sevCls = maxSev ? `sn-popup-sev-${maxSev}` : 'sn-popup-sev-medium';
+    const alertTypes = s.alerts.map(a => a.type.replace(/_/g,' ')).join(', ') || '—';
+    const agent = state.assignedServices[s.id] || s.agent || '—';
+    const ring = (maxSev === 'critical' || maxSev === 'high') ? '<div class="sn-ring"></div>' : '';
+    return `<div class="service-node" style="left:${pos.x}%;top:${pos.y}%" onclick="closeRadar();navigateTo('service-detail','${s.id}')">
+      <div class="sn-dot ${dotCls}">${ring}</div>
+      <div class="sn-label">${s.route}<span class="sn-time">${s.localTime} · ${s.provider}</span></div>
+      <div class="sn-popup">
+        <div class="sn-popup-route">${s.route}</div>
+        <div class="sn-popup-row"><span class="sn-popup-key">status</span><span class="${sevCls}">${sevLabel}</span></div>
+        <div class="sn-popup-row"><span class="sn-popup-key">alertas</span><span>${alertTypes}</span></div>
+        <div class="sn-popup-row"><span class="sn-popup-key">pax</span><span>${s.pax}</span></div>
+        <div class="sn-popup-row"><span class="sn-popup-key">agente</span><span>${agent}</span></div>
+        <div style="margin-top:6px;font-size:9px;color:rgba(79,209,184,0.6)">clique para abrir detalhe</div>
+      </div>
     </div>`;
-  });
-  document.getElementById('alert-type-filters').innerHTML = html;
+  }).join('');
+
+  // Linhas de grid
+  const gridLines = [25,50,75].map(p =>
+    `<div class="radar-grid-h" style="top:${p}%"></div><div class="radar-grid-v" style="left:${p}%"></div>`
+  ).join('');
+
+  // Círculos de radar
+  const circles = [15,30,45].map(r =>
+    `<div class="radar-circle" style="width:${r*2}%;height:${r*2}%;top:50%;left:50%"></div>`
+  ).join('');
+
+  const filterLabel = state.dashFilter
+    ? { alerts:'alertas abertos', unassigned:'sem agente', 'sla-critical':'SLA crítica' }[state.dashFilter]
+    : state.alertTypeFilter ? state.alertTypeFilter.replace(/_/g,' ')
+    : state.selectedMarket;
+
+  const el = document.createElement('div');
+  el.id = 'radar-overlay';
+  el.className = 'radar-overlay';
+  el.innerHTML = `
+    <div class="radar-header">
+      <div class="radar-logo">BUSUP <span>brainer</span></div>
+      <div class="radar-title">live tracking · ${filterLabel} · ${total} serviços</div>
+      <div class="radar-live"><div class="radar-live-dot"></div>em tempo real</div>
+      <button class="radar-close" onclick="closeRadar()"><i class="ti ti-x"></i> fechar</button>
+    </div>
+    <div class="radar-body">
+      <div class="radar-canvas">
+        ${gridLines}${circles}
+        <div class="radar-sweep"></div>
+        ${nodesHtml}
+      </div>
+      <div class="radar-legend">
+        <div class="legend-row"><div class="legend-dot" style="background:#E24B4A;box-shadow:0 0 5px #E24B4A"></div>crítico</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#EF9F27"></div>alto</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#378ADD"></div>médio</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#1D9E75"></div>sem alerta</div>
+      </div>
+      <div class="radar-stats">
+        <div class="rstat"><strong>${total}</strong>serviços monitorados</div>
+        <div class="rstat"><strong style="color:#E24B4A">${critical}</strong>alertas críticos</div>
+        <div class="rstat"><strong>${withAlerts}</strong>com alerta ativo</div>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+function closeRadar() {
+  const el = document.getElementById('radar-overlay');
+  if(el) el.remove();
 }
 
 function updateMarketTitle() {
@@ -788,8 +931,74 @@ function updateMarketTitle() {
   document.getElementById('market-title').textContent = `${state.selectedMarket} · ${svcs.length} serviços`;
 }
 
-function getFilteredServices() {
+function getBaseServices() {
   return SERVICES.filter(s => s.market === state.selectedMarket || state.selectedMarket === 'all');
+}
+
+function getFilteredServices() {
+  let svcs = getBaseServices();
+  // Filtro dos cards do dashboard
+  if(state.dashFilter === 'alerts') svcs = svcs.filter(s => s.alerts.length > 0);
+  if(state.dashFilter === 'unassigned') svcs = svcs.filter(s => !state.assignedServices[s.id] && !s.agent);
+  if(state.dashFilter === 'sla-critical') svcs = svcs.filter(s => s.alerts.some(a => a.slaMin !== null && a.slaMin < 15));
+  // Filtro de tipo de alerta
+  if(state.alertTypeFilter) svcs = svcs.filter(s => s.alerts.some(a => a.type === state.alertTypeFilter));
+  return svcs;
+}
+
+/* ===================== SUMMARY BAR CLICÁVEL ===================== */
+function renderSummaryBar() {
+  const base = getBaseServices();
+  const withAlerts = base.filter(s => s.alerts.length > 0).length;
+  const unassigned = base.filter(s => !state.assignedServices[s.id] && !s.agent).length;
+  const slaCrit = base.filter(s => s.alerts.some(a => a.slaMin !== null && a.slaMin < 15)).length;
+
+  const cards = [
+    { key: null,           label: 'serviços ativos', val: base.length, cls: '', valCls: '', hint: 'ver todos' },
+    { key: 'alerts',       label: 'alertas abertos', val: withAlerts,  cls: 'card-active-red',   valCls: 'red', hint: 'filtrar por alertas' },
+    { key: 'unassigned',   label: 'sem dono',         val: unassigned, cls: 'card-active-amber', valCls: 'amber', hint: 'filtrar sem agente' },
+    { key: 'sla-critical', label: 'SLA crítica <15min', val: slaCrit,  cls: 'card-active-red',   valCls: 'red', hint: 'filtrar SLA crítica' },
+  ];
+
+  let html = '';
+  cards.forEach(c => {
+    const isActive = state.dashFilter === c.key;
+    const activeCls = isActive ? c.cls : '';
+    html += `<div class="summary-card ${activeCls}" onclick="setDashFilter('${c.key}')">
+      <div class="s-label">${c.label}</div>
+      <div class="s-val ${c.valCls}">${c.val}</div>
+      <div class="card-filter-hint">${isActive ? '✕ limpar filtro' : c.hint}</div>
+    </div>`;
+  });
+  document.getElementById('summary-bar').innerHTML = html;
+}
+
+function setDashFilter(key) {
+  // Toggle: clicar no mesmo card remove o filtro
+  state.dashFilter = (state.dashFilter === key) ? null : key;
+  renderSummaryBar();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+/* ===================== ALERT TYPE FILTER BAR ===================== */
+function renderAlertFilterBar() {
+  const types = Object.entries(ALERT_ICONS);
+  let html = `<span class="filter-label">alerta:</span>`;
+  types.forEach(([k, icon]) => {
+    const active = state.alertTypeFilter === k ? 'active' : '';
+    html += `<button class="alert-filter-chip ${active}" onclick="setAlertTypeFilter('${k}')">
+      <i class="ti ${icon}"></i>${k.replace(/_/g,' ')}
+    </button>`;
+  });
+  document.getElementById('alert-filter-bar').innerHTML = html;
+}
+
+function setAlertTypeFilter(type) {
+  state.alertTypeFilter = (state.alertTypeFilter === type) ? null : type;
+  renderAlertFilterBar();
+  renderServiceList();
+  updateMarketTitle();
 }
 
 function renderServiceList() {
@@ -868,7 +1077,11 @@ function assignService(id) {
 
 function selectMarket(m) {
   state.selectedMarket = m;
+  state.dashFilter = null;
+  state.alertTypeFilter = null;
   renderMarketNav();
+  renderSummaryBar();
+  renderAlertFilterBar();
   renderServiceList();
   updateMarketTitle();
 }
