@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brainer 2.0 — Centro de Operações de Tráfego</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+/* ===================== RESET & BASE ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
+
+/* ===================== DESIGN TOKENS ===================== */
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f3;
+  --color-background-tertiary: #eeede9;
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: #5f5e5a;
+  --color-text-tertiary: #888780;
+  --color-border-primary: #1a1a18;
+  --color-border-secondary: #b4b2a9;
+  --color-border-tertiary: #d3d1c7;
+  --color-brand: #1D9E75;
+  --color-brand-light: #E1F5EE;
+  --color-brand-dark: #085041;
+  --color-cc-purple: #7F77DD;
+  --color-cc-purple-light: #EEEDFE;
+  --color-critical: #E24B4A;
+  --color-critical-light: #FCEBEB;
+  --color-high: #EF9F27;
+  --color-high-light: #FAEEDA;
+  --color-medium: #378ADD;
+  --color-medium-light: #E6F1FB;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #1c1c1a;
+    --color-background-secondary: #242422;
+    --color-background-tertiary: #2c2c2a;
+    --color-text-primary: #f0efe9;
+    --color-text-secondary: #a8a7a0;
+    --color-text-tertiary: #6e6d68;
+    --color-border-primary: #f0efe9;
+    --color-border-secondary: #444441;
+    --color-border-tertiary: #333331;
+  }
+}
+
+/* ===================== LAYOUT ===================== */
+#app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.view { display: none; flex: 1; overflow: hidden; }
+.view.active { display: flex; flex-direction: column; animation: fadeIn 150ms ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ===================== TOPBAR ===================== */
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 48px; min-height: 48px;
+  background: var(--color-background-primary);
+  border-bottom: 1px solid var(--color-border-tertiary);
+  z-index: 100;
+}
+.topbar-logo { font-weight: 700; font-size: 14px; color: var(--color-text-primary); letter-spacing: -0.3px; }
+.topbar-logo span { color: var(--color-brand); }
+.topbar-modes { display: flex; gap: 4px; background: var(--color-background-secondary); border-radius: 20px; padding: 3px; }
+.mode-pill {
+  padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: none; background: transparent; color: var(--color-text-secondary);
+  transition: all 0.15s;
+}
+.mode-pill.active-traffic { background: var(--color-brand); color: #fff; }
+.mode-pill.active-cc { background: var(--color-cc-purple); color: #fff; }
+.live-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--color-text-tertiary);
+  background: var(--color-background-secondary);
+  border-radius: 12px; padding: 3px 8px;
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--color-brand);
+  animation: blink 1.4s infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.topbar-spacer { flex: 1; }
+.topbar-back { font-size: 12px; color: var(--color-text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); background: none; }
+.topbar-back:hover { background: var(--color-background-secondary); }
+.agent-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+.avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+.avatar-green { background: var(--color-brand); }
+.avatar-purple { background: var(--color-cc-purple); }
+
+/* ===================== MAIN PAGE — SIDEBAR ===================== */
+.main-body { display: flex; flex: 1; overflow: hidden; }
+.sidebar {
+  width: 210px; min-width: 210px;
+  background: var(--color-background-secondary);
+  border-right: 1px solid var(--color-border-tertiary);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-block { padding: 12px 10px; }
+.sidebar-block + .sidebar-block { border-top: 1px solid var(--color-border-tertiary); }
+.sidebar-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-text-tertiary); margin-bottom: 6px; padding: 0 4px; }
+.sidebar-scroll { flex: 1; overflow-y: auto; }
+.market-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: var(--border-radius-sm);
+  cursor: pointer; font-size: 12px; color: var(--color-text-secondary);
+  border-left: 2px solid transparent; margin-bottom: 2px;
+}
+.market-item:hover { background: var(--color-background-tertiary); }
+.market-item.active { border-left-color: var(--color-brand); color: var(--color-text-primary); font-weight: 500; background: var(--color-background-primary); }
+.market-badge {
+  margin-left: auto; min-width: 18px; height: 18px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; padding: 0 4px;
+}
+.badge-red { background: var(--color-critical-light); color: var(--color-critical); }
+.badge-gray { background: var(--color-background-tertiary); color: var(--color-text-tertiary); }
+.filter-section { margin-bottom: 10px; }
+.filter-title { font-size: 10px; font-weight: 600; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.country-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.country-pill {
+  font-size: 11px; padding: 3px 7px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--color-border-tertiary); background: var(--color-background-primary);
+  color: var(--color-text-secondary);
+}
+.country-pill.selected { background: var(--color-brand-light); border-color: var(--color-brand); color: var(--color-brand-dark); }
+.status-dots { display: flex; flex-wrap: wrap; gap: 4px; }
+.status-dot-item { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; position: relative; }
+.status-dot-item:hover::after { content: attr(data-tip); position: absolute; left: 24px; top: 0; background: #222; color: #fff; font-size: 10px; white-space: nowrap; padding: 2px 6px; border-radius: 4px; z-index: 999; pointer-events: none; }
+.status-dot-item.inactive { opacity: 0.3; }
+.filter-dropdown { width: 100%; margin-top: 4px; font-size: 11px; padding: 4px 6px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; }
+
+/* ===================== CONTENT AREA ===================== */
+.content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.summary-bar {
+  display: flex; gap: 10px; padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+}
+.summary-card {
+  flex: 1; padding: 8px 12px; border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary);
+}
+.summary-card .s-label { font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 2px; }
+.summary-card .s-val { font-size: 18px; font-weight: 700; line-height: 1; }
+.s-val.red { color: var(--color-critical); }
+.s-val.amber { color: var(--color-high); }
+.content-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--color-border-tertiary);
+}
+.content-title { font-size: 14px; font-weight: 600; flex: 1; }
+.sort-group { display: flex; gap: 4px; }
+.sort-btn { font-size: 11px; padding: 4px 10px; border-radius: 12px; border: 1px solid var(--color-border-tertiary); background: none; cursor: pointer; color: var(--color-text-secondary); }
+.sort-btn.active { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.service-list { flex: 1; overflow-y: auto; }
+
+/* ===================== SERVICE TABLE ===================== */
+.table-header {
+  display: grid; grid-template-columns: 60px 70px 1fr 140px 90px 80px 110px 90px 32px;
+  gap: 0; padding: 0 16px; height: 32px; align-items: center;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary); position: sticky; top: 0; z-index: 10;
+}
+.table-header > div { font-size: 10px; font-weight: 600; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.4px; }
+.provider-divider {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px 4px; font-size: 11px; font-weight: 600; color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border-tertiary); margin-top: 4px;
+}
+.provider-divider .prov-badge { font-size: 10px; background: var(--color-critical-light); color: var(--color-critical); padding: 1px 6px; border-radius: 8px; font-weight: 700; }
+.service-row {
+  display: grid; grid-template-columns: 60px 70px 1fr 140px 90px 80px 110px 90px 32px;
+  gap: 0; padding: 0 16px; height: 40px; align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.04); cursor: pointer;
+  transition: filter 0.1s;
+}
+.service-row:hover { filter: brightness(0.97); }
+.row-in-progress-issues { background: #FCEBEB; }
+.row-pending-unsolved    { background: #FAEEDA; }
+.row-in-progress         { background: #EAF3DE; }
+.row-planned             { background: #E6F1FB; }
+.row-completed           { background: var(--color-background-secondary); }
+.cell { font-size: 12px; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell-sm { font-size: 11px; color: var(--color-text-secondary); }
+.route-name { font-size: 12px; font-weight: 500; display: block; }
+.route-meta { font-size: 10px; color: var(--color-text-tertiary); display: block; }
+.alerts-cell { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
+.alert-icon-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: var(--border-radius-sm); font-size: 12px;
+}
+.chip-critical { background: var(--color-critical-light); color: var(--color-critical); }
+.chip-high     { background: var(--color-high-light); color: var(--color-high); }
+.chip-medium   { background: var(--color-medium-light); color: var(--color-medium); }
+.chip-cc       { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.sla-cell { display: flex; flex-direction: column; gap: 2px; }
+.sla-val { font-size: 11px; font-weight: 600; }
+.sla-ok { color: var(--color-brand); }
+.sla-warn { color: var(--color-high); }
+.sla-danger { color: var(--color-critical); animation: pulse 1s ease-in-out infinite alternate; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
+.sla-bar { height: 3px; border-radius: 2px; background: var(--color-border-tertiary); width: 60px; }
+.sla-bar-fill { height: 100%; border-radius: 2px; }
+.bar-ok   { background: var(--color-brand); }
+.bar-warn { background: var(--color-high); }
+.bar-danger { background: var(--color-critical); }
+.ai-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 3px 7px; border-radius: 10px; }
+.ai-ready { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.ai-analyzing { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.assign-btn { font-size: 10px; padding: 3px 8px; border-radius: 10px; border: 1px dashed var(--color-border-secondary); background: none; cursor: pointer; color: var(--color-text-tertiary); }
+.assign-btn:hover { border-color: var(--color-brand); color: var(--color-brand); }
+.agent-name { font-size: 11px; display: flex; align-items: center; gap: 4px; }
+.agent-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-brand); }
+.arrow-btn { background: none; border: none; cursor: pointer; color: var(--color-text-tertiary); font-size: 14px; }
+.collapse-row { padding: 8px 16px; font-size: 11px; color: var(--color-brand); cursor: pointer; text-align: center; border-top: 1px dashed var(--color-border-tertiary); }
+.collapse-row:hover { background: var(--color-brand-light); }
+
+/* ===================== SERVICE DETAIL ===================== */
+.detail-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.service-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+}
+.service-header-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.service-title { font-size: 18px; font-weight: 700; flex: 1; }
+.service-meta { display: flex; gap: 12px; font-size: 12px; color: var(--color-text-secondary); flex-wrap: wrap; }
+.service-meta span { display: flex; align-items: center; gap: 4px; }
+.status-pill { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 10px; }
+.pill-critical { background: var(--color-critical-light); color: var(--color-critical); }
+.pill-high     { background: var(--color-high-light); color: var(--color-high); }
+.pill-medium   { background: var(--color-medium-light); color: var(--color-medium); }
+.pill-ok       { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+.btn-secondary { background: var(--color-background-secondary); border-color: var(--color-border-tertiary); color: var(--color-text-secondary); }
+.btn-secondary:hover { background: var(--color-background-tertiary); }
+.btn-brand { background: var(--color-brand); color: #fff; }
+.btn-brand:hover { background: var(--color-brand-dark); }
+.btn-critical { background: var(--color-critical); color: #fff; }
+.btn-high { background: var(--color-high); color: #fff; }
+.btn-medium { background: var(--color-medium); color: #fff; }
+.detail-extra { display: none; padding: 10px 0; }
+.detail-extra.open { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.extra-field { font-size: 11px; }
+.extra-label { color: var(--color-text-tertiary); margin-bottom: 2px; }
+.extra-val { font-weight: 500; }
+.detail-body { display: flex; flex: 1; overflow: hidden; }
+.detail-left { flex: 1; overflow-y: auto; padding: 16px; }
+.detail-right { width: 268px; min-width: 268px; overflow-y: auto; border-left: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+.section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.section-title { font-size: 13px; font-weight: 600; }
+.section-sub { font-size: 11px; color: var(--color-text-tertiary); }
+.cascade-banner { display: flex; align-items: center; gap: 8px; background: var(--color-brand-light); border: 1px solid var(--color-brand); border-radius: var(--border-radius-md); padding: 8px 12px; margin-bottom: 12px; font-size: 11px; color: var(--color-brand-dark); }
+.cc-banner { display: flex; align-items: center; gap: 8px; background: var(--color-cc-purple-light); border: 1px solid var(--color-cc-purple); border-radius: var(--border-radius-md); padding: 8px 12px; margin-bottom: 12px; font-size: 11px; color: var(--color-cc-purple); }
+.alert-card { border-radius: var(--border-radius-md); border: 1px solid var(--color-border-tertiary); margin-bottom: 10px; overflow: hidden; }
+.alert-card-critical { border-left: 3px solid var(--color-critical); }
+.alert-card-high { border-left: 3px solid var(--color-high); }
+.alert-card-medium { border-left: 3px solid var(--color-medium); }
+.alert-card-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--color-background-primary); flex-wrap: wrap; }
+.alert-type-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 8px; text-transform: uppercase; }
+.badge-critical { background: var(--color-critical-light); color: var(--color-critical); }
+.badge-high     { background: var(--color-high-light); color: var(--color-high); }
+.badge-medium   { background: var(--color-medium-light); color: var(--color-medium); }
+.open-pill { font-size: 10px; padding: 2px 6px; border-radius: 8px; border: 1px solid var(--color-border-secondary); color: var(--color-text-secondary); }
+.sla-chip { font-size: 11px; font-weight: 600; margin-left: auto; }
+.resolve-btn { padding: 5px 14px; border-radius: 14px; font-size: 11px; font-weight: 600; color: #fff; border: none; cursor: pointer; }
+.alert-desc { padding: 8px 12px 10px; font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); }
+
+/* ===================== COPILOT PANEL ===================== */
+.copilot-header { background: var(--color-brand-dark); color: #fff; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+.copilot-title { font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.copilot-badge { font-size: 10px; background: var(--color-brand); padding: 2px 7px; border-radius: 8px; }
+.copilot-body { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.ai-rec-card { background: var(--color-brand-light); border-radius: var(--border-radius-md); padding: 12px; border: 1px solid #b6e8d5; }
+.ai-rec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--color-brand-dark); letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.ai-rec-text { font-size: 12px; color: var(--color-brand-dark); line-height: 1.5; margin-bottom: 10px; }
+.ai-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.ai-action-btn { font-size: 11px; padding: 4px 10px; border-radius: 10px; cursor: pointer; border: 1px solid; font-weight: 500; }
+.aab-green { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.aab-amber { background: var(--color-high-light); color: var(--color-high); border-color: var(--color-high); }
+.ai-feedback { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--color-text-tertiary); }
+.fb-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--color-border-secondary); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.15s; }
+.fb-btn.liked { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.fb-btn.disliked { background: var(--color-critical); color: #fff; border-color: var(--color-critical); }
+.info-card { background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+.info-card-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); margin-bottom: 8px; }
+.driver-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.driver-stat { font-size: 11px; }
+.ds-label { color: var(--color-text-tertiary); }
+.ds-val { font-weight: 600; }
+.push-status { font-size: 11px; display: flex; align-items: center; gap: 6px; }
+.push-sent { color: var(--color-brand); }
+.push-not-read { color: var(--color-high); }
+.today-svc-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-top: 1px solid var(--color-border-tertiary); }
+.today-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.dot-critical { background: var(--color-critical); }
+.dot-risk { background: var(--color-high); }
+.dot-ok { background: var(--color-brand); }
+.today-info { flex: 1; }
+.today-route { font-size: 11px; font-weight: 500; }
+.today-eta { font-size: 10px; color: var(--color-text-tertiary); }
+.today-note { font-size: 10px; color: var(--color-cc-purple); font-style: italic; }
+.log-timeline { padding: 10px 12px; }
+.log-item { display: flex; gap: 8px; padding-bottom: 10px; position: relative; }
+.log-item::before { content: ''; position: absolute; left: 5px; top: 14px; bottom: 0; width: 1px; background: var(--color-border-tertiary); }
+.log-item:last-child::before { display: none; }
+.log-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+.log-dot-action { background: var(--color-brand); }
+.log-dot-alert  { background: var(--color-critical); }
+.log-dot-sla    { background: var(--color-high); }
+.log-dot-cc     { background: var(--color-cc-purple); }
+.log-content { flex: 1; }
+.log-time { font-size: 10px; color: var(--color-text-tertiary); }
+.log-text { font-size: 11px; }
+.log-sub  { font-size: 10px; color: var(--color-text-secondary); font-style: italic; }
+.log-tag  { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 6px; text-transform: uppercase; margin-top: 2px; display: inline-block; }
+.tag-action { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.tag-alert  { background: var(--color-critical-light); color: var(--color-critical); }
+.tag-sla    { background: var(--color-high-light); color: var(--color-high); }
+.tag-cc     { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+
+/* ===================== RESOLVE POPUP ===================== */
+.popup-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 150ms ease;
+}
+.popup-box {
+  background: var(--color-background-primary); border-radius: var(--border-radius-lg);
+  width: 560px; max-width: 96vw; max-height: 88vh;
+  display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.popup-header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--color-border-tertiary); }
+.popup-sla { font-size: 12px; font-weight: 700; margin-left: auto; animation: pulse 1s infinite alternate; }
+.popup-close { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--color-text-tertiary); padding: 2px; }
+.popup-body { overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 16px; }
+.popup-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); margin-bottom: 8px; }
+.checklist { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); overflow: hidden; }
+.step-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--color-border-tertiary); }
+.step-item:first-child { border-top: none; }
+.step-item.step-done { background: var(--color-background-secondary); }
+.step-item.step-current { background: #F0FAF6; }
+.step-cb { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; margin-top: 1px; font-size: 10px; font-weight: 700; transition: all 0.15s; }
+.step-cb.done { background: var(--color-brand); border-color: var(--color-brand); color: #fff; }
+.step-cb.current { border-color: var(--color-brand); border-width: 2px; }
+.step-content { flex: 1; }
+.step-text { font-size: 12px; line-height: 1.5; }
+.step-text.done-text { text-decoration: line-through; color: var(--color-text-tertiary); }
+.step-cta { margin-top: 6px; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 4px 10px; border-radius: 10px; cursor: pointer; border: 1px solid; font-weight: 500; }
+.cta-primary { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.cta-amber   { background: var(--color-high-light); color: var(--color-high); border-color: var(--color-high); }
+.cta-secondary { background: var(--color-background-secondary); color: var(--color-text-secondary); border-color: var(--color-border-secondary); }
+.escalate-row { display: flex; gap: 8px; }
+.escalate-btn { flex: 1; padding: 8px 12px; border-radius: var(--border-radius-md); cursor: pointer; border: 1px solid; text-align: left; }
+.esc-amber { background: var(--color-high-light); border-color: var(--color-high); color: var(--color-high); }
+.esc-red   { background: var(--color-critical-light); border-color: var(--color-critical); color: var(--color-critical); }
+.esc-title { font-size: 12px; font-weight: 600; }
+.esc-sub   { font-size: 10px; opacity: 0.8; }
+.incident-toggle { display: flex; align-items: center; gap: 8px; }
+.incident-cb { width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-brand); }
+.incident-label { font-size: 12px; }
+.incident-fields { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.incident-select, .incident-textarea { width: 100%; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-sm); padding: 6px 8px; font-size: 12px; background: var(--color-background-primary); color: var(--color-text-primary); }
+.incident-textarea { min-height: 70px; resize: vertical; font-family: var(--font-sans); }
+.popup-footer { padding: 12px 16px; border-top: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); display: flex; align-items: center; gap: 10px; }
+.resolution-toggle { display: flex; gap: 4px; }
+.res-opt { font-size: 11px; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--color-border-secondary); cursor: pointer; background: var(--color-background-primary); color: var(--color-text-secondary); }
+.res-opt.active { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.footer-spacer { flex: 1; }
+.btn-save { background: var(--color-background-secondary); border: 1px solid var(--color-border-secondary); color: var(--color-text-primary); }
+.btn-close-alert { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+
+/* ===================== CUSTOMER CARE ===================== */
+.cc-layout { display: flex; flex: 1; overflow: hidden; }
+.chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.chat-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--color-border-tertiary); }
+.chat-header-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.chat-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--color-cc-purple); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+.new-chat-btn { margin-left: auto; font-size: 11px; padding: 5px 10px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); background: none; cursor: pointer; color: var(--color-text-secondary); }
+.new-chat-btn:hover { background: var(--color-background-secondary); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.msg { display: flex; gap: 8px; max-width: 90%; }
+.msg.msg-bot { align-self: flex-start; }
+.msg.msg-user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--color-cc-purple); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+.msg-bubble { max-width: 480px; padding: 8px 12px; border-radius: var(--border-radius-lg); font-size: 12px; line-height: 1.5; }
+.msg-bot .msg-bubble { background: var(--color-background-secondary); border-bottom-left-radius: 4px; }
+.msg-user .msg-bubble { background: var(--color-cc-purple); color: #fff; border-bottom-right-radius: 4px; }
+.msg-card { background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); overflow: hidden; margin-top: 8px; font-size: 12px; }
+.card-header-purple { background: var(--color-cc-purple-light); padding: 8px 12px; border-bottom: 1px solid #d5d2f8; }
+.card-name { font-weight: 700; font-size: 13px; color: var(--color-cc-purple); }
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 12px; }
+.card-field { font-size: 11px; }
+.card-field-label { color: var(--color-text-tertiary); }
+.card-field-val { font-weight: 500; }
+.booking-section { padding: 10px 12px; }
+.booking-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 6px; }
+.booking-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--color-border-tertiary); font-size: 11px; }
+.booking-route { flex: 1; font-weight: 500; }
+.booking-time { color: var(--color-text-tertiary); }
+.booking-actions { display: flex; gap: 4px; }
+.booking-btn { font-size: 10px; padding: 2px 8px; border-radius: 8px; cursor: pointer; border: 1px solid; }
+.bb-view  { background: var(--color-cc-purple-light); border-color: var(--color-cc-purple); color: var(--color-cc-purple); }
+.bb-cancel { background: var(--color-critical-light); border-color: var(--color-critical); color: var(--color-critical); }
+.reading-item { display: flex; align-items: center; gap: 8px; padding: 5px 12px; font-size: 11px; border-top: 1px solid var(--color-border-tertiary); }
+.read-ok  { color: var(--color-brand); font-weight: 600; font-size: 10px; }
+.read-err { color: var(--color-critical); font-weight: 600; font-size: 10px; }
+.report-opts { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.report-opt {
+  padding: 8px 10px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary);
+  cursor: pointer; font-size: 12px; transition: all 0.15s;
+}
+.report-opt.selected { border-color: var(--color-cc-purple); background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.report-textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-sm); font-size: 12px; font-family: var(--font-sans); min-height: 60px; resize: vertical; background: var(--color-background-primary); color: var(--color-text-primary); }
+.send-traffic-btn { background: var(--color-cc-purple); color: #fff; border: none; padding: 7px 16px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.send-traffic-btn:hover { opacity: 0.9; }
+.resolution-card { background: #F0FAF6; border: 1px solid var(--color-brand); border-radius: var(--border-radius-md); padding: 12px; }
+.res-card-title { font-size: 12px; font-weight: 700; color: var(--color-brand-dark); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.res-card-text { font-size: 12px; color: var(--color-brand-dark); margin-bottom: 10px; }
+.uber-btn { background: #000; color: #fff; border: none; padding: 7px 16px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.uber-btn:disabled { opacity: 0.5; cursor: default; }
+.chat-input-area { padding: 12px 16px; border-top: 1px solid var(--color-border-tertiary); display: flex; gap: 8px; }
+.chat-input { flex: 1; padding: 8px 12px; border: 1px solid var(--color-border-tertiary); border-radius: 20px; font-size: 12px; background: var(--color-background-primary); color: var(--color-text-primary); outline: none; }
+.chat-input:focus { border-color: var(--color-cc-purple); }
+.chat-send-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--color-cc-purple); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.chat-send-btn:hover { opacity: 0.9; }
+.typing-indicator { display: flex; gap: 4px; align-items: center; padding: 8px 12px; }
+.typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-cc-purple); animation: typing 1.2s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+.history-panel { width: 220px; min-width: 220px; border-left: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); overflow-y: auto; }
+.history-header { padding: 12px 14px; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 6px; }
+.history-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--color-text-tertiary); padding: 10px 14px 4px; }
+.history-item { padding: 8px 14px; cursor: pointer; border-bottom: 1px solid var(--color-border-tertiary); transition: background 0.1s; }
+.history-item:hover { background: var(--color-background-tertiary); }
+.history-item.active { background: var(--color-cc-purple-light); }
+.hist-name { font-size: 12px; font-weight: 500; }
+.hist-route { font-size: 10px; color: var(--color-text-tertiary); }
+.hist-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 2px; }
+.hist-time { font-size: 10px; color: var(--color-text-tertiary); }
+.hist-badge { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 6px; text-transform: uppercase; }
+.hb-green  { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.hb-purple { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.hb-amber  { background: var(--color-high-light); color: var(--color-high); }
+
+/* ===================== TOAST ===================== */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { padding: 10px 16px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 500; min-width: 200px; max-width: 320px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideUp 0.2s ease; pointer-events: all; display: flex; align-items: center; gap: 8px; }
+.toast-success { background: var(--color-brand); color: #fff; }
+.toast-info    { background: var(--color-cc-purple); color: #fff; }
+.toast-warning { background: var(--color-high); color: #fff; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===================== MODAL (live tracking) ===================== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; }
+.modal-box { background: var(--color-background-primary); border-radius: var(--border-radius-lg); width: 480px; max-width: 96vw; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--color-border-tertiary); }
+.modal-title { font-size: 14px; font-weight: 600; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--color-text-tertiary); }
+.map-placeholder { height: 200px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary); font-size: 12px; margin: 16px; border-radius: var(--border-radius-md); border: 1px dashed var(--color-border-secondary); }
+.modal-footer { padding: 12px 16px; border-top: 1px solid var(--color-border-tertiary); display: flex; justify-content: flex-end; }
+
+/* ===================== PROTOTYPE BADGE ===================== */
+.proto-badge { position: fixed; bottom: 8px; left: 8px; font-size: 10px; color: var(--color-text-tertiary); background: var(--color-background-secondary); padding: 3px 8px; border-radius: 8px; z-index: 5; border: 1px solid var(--color-border-tertiary); }
+
+/* ===================== TOOLTIP ===================== */
+.tt-wrap { position: relative; display: inline-flex; }
+.tt-icon { width: 16px; height: 16px; border-radius: 50%; background: var(--color-cc-purple-light); color: var(--color-cc-purple); font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: help; }
+.tt-box { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 6px; background: #222; color: #fff; font-size: 10px; padding: 5px 8px; border-radius: var(--border-radius-sm); white-space: nowrap; max-width: 220px; white-space: normal; text-align: center; z-index: 500; pointer-events: none; }
+.tt-wrap:hover .tt-box { display: block; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- VIEW: MAIN PAGE -->
+  <div class="view active" id="view-main-page">
+    <div class="topbar">
+      <div class="topbar-logo">BUSUP <span>brainer</span></div>
+      <div class="topbar-modes">
+        <button class="mode-pill active-traffic" onclick="switchMode('traffic')">tráfego</button>
+        <button class="mode-pill" onclick="switchMode('cc')">customer care</button>
+      </div>
+      <div class="live-badge"><div class="live-dot"></div>live · atualização automática</div>
+      <div class="topbar-spacer"></div>
+      <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
+    </div>
+    <div class="main-body">
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="sidebar-block">
+          <div class="sidebar-label">mercados ativos</div>
+          <div id="market-nav"></div>
+        </div>
+        <div class="sidebar-block sidebar-scroll">
+          <div class="filter-section">
+            <div class="filter-title">países</div>
+            <div class="country-pills" id="country-pills"></div>
+          </div>
+          <div class="filter-section">
+            <div class="filter-title">status do serviço</div>
+            <div class="status-dots" id="status-dots"></div>
+          </div>
+          <div class="filter-section">
+            <div class="filter-title">tipo de alerta</div>
+            <div id="alert-type-filters"></div>
+          </div>
+          <div class="filter-section">
+            <select class="filter-dropdown"><option>business unit</option></select>
+            <select class="filter-dropdown"><option>site / cliente</option></select>
+            <select class="filter-dropdown"><option>provider</option></select>
+            <select class="filter-dropdown"><option>tipo de rota</option></select>
+            <select class="filter-dropdown"><option>nome da rota</option></select>
+            <select class="filter-dropdown"><option>prioridade</option></select>
+          </div>
+        </div>
+      </div>
+      <!-- CONTENT -->
+      <div class="content-area">
+        <div class="summary-bar">
+          <div class="summary-card"><div class="s-label">serviços ativos</div><div class="s-val">47</div></div>
+          <div class="summary-card"><div class="s-label">alertas abertos</div><div class="s-val red">12</div></div>
+          <div class="summary-card"><div class="s-label">sem dono</div><div class="s-val amber">5</div></div>
+          <div class="summary-card"><div class="s-label">SLA crítica &lt;15min</div><div class="s-val red">2</div></div>
+        </div>
+        <div class="content-header">
+          <div class="content-title" id="market-title">brasil · 5 serviços</div>
+          <div class="sort-group">
+            <button class="sort-btn active" onclick="setSort('provider')">por provider</button>
+            <button class="sort-btn" onclick="setSort('priority')">por prioridade</button>
+          </div>
+        </div>
+        <div class="service-list" id="service-list-container">
+          <div class="table-header">
+            <div>hora local</div><div>hora serviço</div><div>rota</div><div>site · cliente</div>
+            <div>alertas</div><div>SLA</div><div>IA brainer</div><div>agente</div><div></div>
+          </div>
+          <div id="service-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: SERVICE DETAIL -->
+  <div class="view" id="view-service-detail">
+    <div class="topbar">
+      <button class="topbar-back" onclick="navigateTo('main-page')"><i class="ti ti-arrow-left"></i> brasil</button>
+      <div class="topbar-logo">BUSUP <span>brainer</span></div>
+      <div class="live-badge"><div class="live-dot"></div>live</div>
+      <div class="topbar-spacer"></div>
+      <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
+    </div>
+    <div class="detail-layout" id="detail-layout"></div>
+  </div>
+
+  <!-- VIEW: CC CHATBOT -->
+  <div class="view" id="view-cc-chatbot">
+    <div class="topbar">
+      <div class="topbar-logo">BUSUP <span>brainer</span></div>
+      <div class="topbar-modes">
+        <button class="mode-pill" onclick="switchMode('traffic')">tráfego</button>
+        <button class="mode-pill active-cc" onclick="switchMode('cc')">customer care</button>
+      </div>
+      <div class="live-badge"><div class="live-dot"></div>live</div>
+      <div class="topbar-spacer"></div>
+      <div class="agent-chip">Ana Lima · CC Global <div class="avatar avatar-purple">AL</div></div>
+    </div>
+    <div class="cc-layout">
+      <div class="chat-area">
+        <div class="chat-header">
+          <div class="chat-icon"><i class="ti ti-robot"></i></div>
+          <div class="chat-header-title">assistente CC · brainer</div>
+          <button class="new-chat-btn" onclick="newChat()"><i class="ti ti-plus"></i> nova conversa</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <input class="chat-input" id="chat-input" placeholder="Digite um nome, ID ou describe o problema..." onkeydown="if(event.key==='Enter')sendChatMessage()" />
+          <button class="chat-send-btn" onclick="sendChatMessage()"><i class="ti ti-send"></i></button>
+        </div>
+      </div>
+      <div class="history-panel">
+        <div class="history-header"><i class="ti ti-clock"></i> histórico</div>
+        <div class="history-group-label">hoje</div>
+        <div class="history-item active">
+          <div class="hist-name">Maria da Silva</div>
+          <div class="hist-route">Guru 9 — Entrada</div>
+          <div class="hist-meta"><span class="hist-time">05:52</span><span class="hist-badge hb-green">resolvido</span></div>
+        </div>
+        <div class="history-item">
+          <div class="hist-name">João Santos</div>
+          <div class="hist-route">95 — Cotia - E</div>
+          <div class="hist-meta"><span class="hist-time">06:10</span><span class="hist-badge hb-purple">reportado</span></div>
+        </div>
+        <div class="history-item">
+          <div class="hist-name">Ana Costa</div>
+          <div class="hist-route">07 — Itapecerica</div>
+          <div class="hist-meta"><span class="hist-time">06:31</span><span class="hist-badge hb-amber">aguardando</span></div>
+        </div>
+        <div class="history-group-label">ontem</div>
+        <div class="history-item">
+          <div class="hist-name">Pedro Alves</div>
+          <div class="hist-route">Rota LX-3 — Entrada</div>
+          <div class="hist-meta"><span class="hist-time">07:18</span><span class="hist-badge hb-green">resolvido</span></div>
+        </div>
+        <div class="history-item">
+          <div class="hist-name">Carla Lima</div>
+          <div class="hist-route">Guru 5 — Entrada</div>
+          <div class="hist-meta"><span class="hist-time">05:55</span><span class="hist-badge hb-green">resolvido</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTOTYPE BADGE -->
+  <div class="proto-badge">protótipo · dados mockados</div>
+</div>
+
+<script>
+/* ===================== DADOS MOCKADOS ===================== */
+const SERVICES = [
+  { id:'svc-001', route:'Guru 9 — Entrada', client:'Amazon Guru', site:'Betim MG 02', provider:'AB Turismo', market:'brasil', localTime:'05:42', serviceTime:'05:42 BR', pax:46, status:'in-progress-issues', alerts:[{id:'alt-001',type:'no_play',severity:'critical',slaMin:8,alertStatus:'open',resolutionStatus:'pending',fromCC:true},{id:'alt-002',type:'major_delay',severity:'high',slaMin:31,alertStatus:'open',resolutionStatus:'pending',fromCC:false,dependsOn:'alt-001'}], agent:'Eriqueson M.', aiReady:true },
+  { id:'svc-002', route:'Guru 5 — Entrada', client:'Amazon Guru', site:'Barueri SP 07', provider:'AB Turismo', market:'brasil', localTime:'05:50', serviceTime:'05:50 BR', pax:38, status:'pending-unsolved', alerts:[{id:'alt-003',type:'no_stop',severity:'high',slaMin:31,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:true },
+  { id:'svc-003', route:'95 — Cotia via Itapevi - E', client:'Mercado Livre', site:'Barueri SP 07', provider:'AB Turismo', market:'brasil', localTime:'06:00', serviceTime:'06:00 BR', pax:22, status:'in-progress', alerts:[{id:'alt-004',type:'minor_delay',severity:'medium',slaMin:52,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:false },
+  { id:'svc-004', route:'07 — Itapecerica - S', client:'Boticário', site:'MWM Motores SP', provider:'Expresso Palmares', market:'brasil', localTime:'06:10', serviceTime:'06:10 BR', pax:51, status:'in-progress-issues', alerts:[{id:'alt-005',type:'no_play',severity:'critical',slaMin:6,alertStatus:'open',resolutionStatus:'pending',fromCC:false},{id:'alt-006',type:'driver_alert',severity:'critical',slaMin:6,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:'Eriqueson M.', aiReady:true },
+  { id:'svc-005', route:'15 — Contagem - E', client:'Volkswagen', site:'Betim MG 02', provider:'Expresso Palmares', market:'brasil', localTime:'06:15', serviceTime:'06:15 BR', pax:18, status:'planned', alerts:[{id:'alt-007',type:'no_readings',severity:'medium',slaMin:null,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:false },
+  { id:'svc-006', route:'Rota LX-3 — Entrada', client:'Accenture PT', site:'Lisboa Norte', provider:'Carris Metropolitana', market:'portugal', localTime:'07:15', serviceTime:'08:15 PT', pax:34, status:'in-progress-issues', alerts:[{id:'alt-008',type:'major_delay',severity:'critical',slaMin:12,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:true },
+];
+
+const PROCEDURES = {
+  no_play:{ title:'No Play', client:'Amazon BR', steps:[{text:'Verificar tracking — confirmar posição do veículo',cta:null},{text:'Contatar operador e identificar o motivo da não iniciação',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se sem resposta em 20 min → comunicar passageiros sobre o atraso',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Se motorista não localizado em 30 min → solicitar veículo substituto',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
+  major_delay:{ title:'Major Delay', client:'Amazon BR', steps:[{text:'Verificar live tracking — confirmar se há trânsito real na rota',cta:null},{text:'Contatar operador para identificar causa do atraso',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Enviar push informando atraso aos passageiros',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Se atraso superior a 30 min → avaliar substituição',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
+  no_stop:{ title:'No Stop', client:'Mercado Livre BR', steps:[{text:'Verificar tracking — confirmar se ponto foi de fato pulado',cta:null},{text:'Contatar motorista via operador para entender o motivo',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se ponto pulado confirmado → verificar passageiros impactados',cta:{label:'ver passageiros',icon:'ti-users',color:'secondary'}},{text:'Autorizar transporte alternativo se necessário',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
+  driver_alert:{ title:'Driver Alert', client:'Boticário BR', steps:[{text:'Verificar categoria do alerta enviado pelo motorista',cta:null},{text:'Contatar motorista diretamente via operador',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Avaliar gravidade e comunicar passageiros se necessário',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Registrar ocorrência e classificar incidente',cta:null}] },
+  minor_delay:{ title:'Minor Delay', client:'Mercado Livre BR', steps:[{text:'Verificar ETA atual no tracking',cta:null},{text:'Monitorar por 5 minutos — atraso pode se resolver sozinho',cta:null},{text:'Se persistir, enviar push preventivo aos passageiros',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}}] },
+  no_readings:{ title:'No Readings', client:'Volkswagen BR', steps:[{text:'Verificar se rota exige leitura de QR obrigatoriamente',cta:null},{text:'Contatar operador para confirmar embarque dos passageiros',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se embarque confirmado sem leitura → fechar como não incidente',cta:null}] },
+};
+
+const DRIVER_CONTEXT = {
+  name:'Carlos Mendes', delaysLast30:0, incidentsLast30:0, pushSent:true, pushRead:false,
+  todayServices:[
+    {route:'Guru 9 — Entrada',time:'05:42',status:'critical',eta:'em curso · atrasado',aiNote:'serviço atual com alerta ativo'},
+    {route:'Guru 9 — Saída',time:'07:30',status:'risk',eta:'ETA em risco',aiNote:'impactado se atraso não resolver até 06:45'},
+    {route:'Amazon ML-2 — Entrada',time:'09:00',status:'ok',eta:'ETA no prazo',aiNote:'sem impacto previsto'},
+  ],
+};
+
+const SERVICE_LOG = [
+  {time:'05:30',text:'serviço atribuído · Eriqueson M.',tag:'assign',tagColor:'action'},
+  {time:'05:39',text:'CC recebeu reporte de passageiro',sub:'ônibus não apareceu no ponto',tag:'cc report',tagColor:'cc'},
+  {time:'05:42',text:'alerta disparado: no play',tag:'crítico · SLA 60 min',tagColor:'alert'},
+  {time:'05:43',text:'alerta disparado: major delay',tag:'alto',tagColor:'sla'},
+  {time:'05:50',text:'SLA atingiu 50% · aviso ativado',tag:'30 min restantes',tagColor:'sla'},
+  {time:'06:02',text:'agente contatou AB Turismo',tag:'ação registrada',tagColor:'action'},
+];
+
+const ALERT_ICONS = {
+  no_play:'ti-player-play', major_delay:'ti-clock-exclamation', minor_delay:'ti-clock',
+  no_stop:'ti-map-pin-pause', no_readings:'ti-qrcode-off', driver_alert:'ti-user-exclamation',
+  skipped_stop:'ti-map-pin-off',
+};
+
+/* ===================== ESTADO ===================== */
+const state = {
+  currentMode: 'traffic',
+  currentView: 'main-page',
+  selectedService: null,
+  selectedAlert: null,
+  resolvePopupOpen: false,
+  selectedMarket: 'brasil',
+  activeCountries: ['brasil','portugal'],
+  sortBy: 'provider',
+  stepsDone: {},
+  incidentFlagged: true,
+  resolutionStatus: 'resolved',
+  aiLike: null,
+  chatMessages: [],
+  ccFlowStep: 0,
+  uberVoucherUsed: false,
+  assignedServices: {},
+};
+
+/* ===================== NAVEGAÇÃO ===================== */
+function navigateTo(view, svcId=null) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  if(svcId) state.selectedService = svcId;
+  state.currentView = view;
+  const el = document.getElementById('view-' + view);
+  if(el) { el.classList.add('active'); }
+  if(view === 'service-detail') renderDetail();
+  if(view === 'main-page') renderMainPage();
+  if(view === 'cc-chatbot') renderCC();
+}
+
+function switchMode(mode) {
+  state.currentMode = mode;
+  if(mode === 'cc') navigateTo('cc-chatbot');
+  else navigateTo('main-page');
+}
+
+/* ===================== MAIN PAGE ===================== */
+function renderMainPage() {
+  renderMarketNav();
+  renderCountryPills();
+  renderStatusDots();
+  renderAlertTypeFilters();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+function renderMarketNav() {
+  const markets = ['brasil','portugal'];
+  const counts = {brasil:7, portugal:2};
+  const extra = [{label:'pós-operação',badge:4}];
+  let html = '';
+  markets.forEach(m => {
+    if(state.activeCountries.includes(m)) {
+      const flag = m==='brasil'?'🇧🇷':'🇵🇹';
+      const cnt = counts[m]||0;
+      const active = state.selectedMarket===m ? 'active' : '';
+      html += `<div class="market-item ${active}" onclick="selectMarket('${m}')">
+        <span>${flag} ${m}</span>
+        <span class="market-badge ${cnt>0?'badge-red':'badge-gray'}">${cnt}</span>
+      </div>`;
+    }
+  });
+  extra.forEach(e => {
+    html += `<div class="market-item" onclick="">
+      <span>${e.label}</span>
+      <span class="market-badge badge-red">${e.badge}</span>
+    </div>`;
+  });
+  document.getElementById('market-nav').innerHTML = html;
+}
+
+function renderCountryPills() {
+  const countries = [{code:'brasil',flag:'🇧🇷'},{code:'portugal',flag:'🇵🇹'},{code:'espanha',flag:'🇪🇸'},{code:'méxico',flag:'🇲🇽'},{code:'usa',flag:'🇺🇸'}];
+  let html = '';
+  countries.forEach(c => {
+    const sel = state.activeCountries.includes(c.code)?'selected':'';
+    html += `<span class="country-pill ${sel}" onclick="toggleCountry('${c.code}')">${c.flag} ${c.code}</span>`;
+  });
+  document.getElementById('country-pills').innerHTML = html;
+}
+
+function renderStatusDots() {
+  const dots = [
+    {color:'#E24B4A',tip:'critical issues'},
+    {color:'#EF9F27',tip:'pending unsolved'},
+    {color:'#1D9E75',tip:'in progress'},
+    {color:'#378ADD',tip:'planned'},
+    {color:'#b4b2a9',tip:'completed'},
+    {color:'#7F77DD',tip:'cc flagged'},
+    {color:'#085041',tip:'on time'},
+    {color:'#FCEBEB',tip:'delayed'},
+    {color:'#EAF3DE',tip:'early'},
+    {color:'#1a1a18',tip:'outros'},
+  ];
+  let html = '';
+  dots.forEach(d => {
+    html += `<div class="status-dot-item" style="background:${d.color}" data-tip="${d.tip}" title="${d.tip}"></div>`;
+  });
+  document.getElementById('status-dots').innerHTML = html;
+}
+
+function renderAlertTypeFilters() {
+  const types = Object.entries(ALERT_ICONS);
+  let html = '';
+  types.forEach(([k,icon]) => {
+    html += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:var(--color-text-secondary);cursor:pointer;" onclick="this.style.opacity=this.style.opacity==='0.4'?'1':'0.4'">
+      <i class="ti ${icon}" style="font-size:13px;"></i> ${k.replace(/_/g,' ')}
+    </div>`;
+  });
+  document.getElementById('alert-type-filters').innerHTML = html;
+}
+
+function updateMarketTitle() {
+  const svcs = getFilteredServices();
+  document.getElementById('market-title').textContent = `${state.selectedMarket} · ${svcs.length} serviços`;
+}
+
+function getFilteredServices() {
+  return SERVICES.filter(s => s.market === state.selectedMarket || state.selectedMarket === 'all');
+}
+
+function renderServiceList() {
+  const svcs = getFilteredServices();
+  let html = '';
+  if(state.sortBy === 'provider') {
+    const byProvider = {};
+    svcs.forEach(s => {
+      if(!byProvider[s.provider]) byProvider[s.provider] = [];
+      byProvider[s.provider].push(s);
+    });
+    Object.entries(byProvider).forEach(([prov,list]) => {
+      const alertCount = list.reduce((a,s)=>a+s.alerts.length,0);
+      html += `<div class="provider-divider"><i class="ti ti-building"></i>${prov}<span class="prov-badge">${alertCount} alertas</span></div>`;
+      list.forEach(s => { html += renderServiceRow(s); });
+    });
+  } else {
+    const sorted = [...svcs].sort((a,b) => {
+      const order = {critical:0,high:1,medium:2};
+      const aMax = Math.min(...a.alerts.map(al=>order[al.severity]??3));
+      const bMax = Math.min(...b.alerts.map(al=>order[al.severity]??3));
+      return aMax - bMax;
+    });
+    sorted.forEach(s => { html += renderServiceRow(s); });
+  }
+  html += `<div class="collapse-row" onclick="showToast('Expandindo serviços sem alerta...','info')">+ 7 serviços sem alerta ativo — clique para expandir</div>`;
+  document.getElementById('service-list').innerHTML = html;
+}
+
+function renderServiceRow(s) {
+  const agent = state.assignedServices[s.id] || s.agent;
+  const alertsHtml = s.alerts.map(a => {
+    const icon = ALERT_ICONS[a.type] || 'ti-alert-circle';
+    const cls = a.severity==='critical'?'chip-critical':a.severity==='high'?'chip-high':'chip-medium';
+    let html = `<span class="alert-icon-chip ${cls}" title="${a.type.replace(/_/g,' ')}"><i class="ti ${icon}"></i></span>`;
+    if(a.fromCC) html += `<span class="alert-icon-chip chip-cc" title="originado no CC"><i class="ti ti-headset"></i></span>`;
+    return html;
+  }).join('');
+  const critSla = s.alerts.reduce((m,a)=>a.slaMin!==null&&(m===null||a.slaMin<m)?a.slaMin:m, null);
+  const slaHtml = critSla !== null ? renderSlaCell(critSla, 60) : '<span style="color:var(--color-text-tertiary);font-size:11px;">—</span>';
+  const aiHtml = s.aiReady
+    ? `<span class="ai-badge ai-ready"><i class="ti ti-sparkles"></i>análise pronta</span>`
+    : `<span class="ai-badge ai-analyzing"><i class="ti ti-loader"></i>analisando</span>`;
+  const agentHtml = agent
+    ? `<span class="agent-name"><span class="agent-dot"></span>${agent.split(' ')[0]}</span>`
+    : `<button class="assign-btn" onclick="event.stopPropagation();assignService('${s.id}')">assign</button>`;
+  return `<div class="service-row row-${s.status}" onclick="navigateTo('service-detail','${s.id}')">
+    <div class="cell cell-sm">${s.localTime}</div>
+    <div class="cell cell-sm">${s.serviceTime}</div>
+    <div class="cell"><span class="route-name">${s.route}</span><span class="route-meta">${s.provider}</span></div>
+    <div class="cell"><span class="route-name" style="font-size:11px">${s.site}</span><span class="route-meta">${s.client}</span></div>
+    <div class="cell"><div class="alerts-cell">${alertsHtml}</div></div>
+    <div class="cell">${slaHtml}</div>
+    <div class="cell">${aiHtml}</div>
+    <div class="cell">${agentHtml}</div>
+    <div class="cell"><button class="arrow-btn" onclick="navigateTo('service-detail','${s.id}')"><i class="ti ti-chevron-right"></i></button></div>
+  </div>`;
+}
+
+function renderSlaCell(min, total) {
+  const pct = Math.min(100, ((total-min)/total)*100);
+  let cls = 'sla-ok', barCls = 'bar-ok';
+  if(min < 15) { cls='sla-danger'; barCls='bar-danger'; }
+  else if(min < total*0.5) { cls='sla-warn'; barCls='bar-warn'; }
+  return `<div class="sla-cell">
+    <span class="sla-val ${cls}">${min} min</span>
+    <div class="sla-bar"><div class="sla-bar-fill ${barCls}" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function assignService(id) {
+  state.assignedServices[id] = 'Eriqueson M.';
+  showToast('Serviço atribuído para Eriqueson M.', 'success');
+  renderServiceList();
+}
+
+function selectMarket(m) {
+  state.selectedMarket = m;
+  renderMarketNav();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+function toggleCountry(c) {
+  if(state.activeCountries.includes(c)) {
+    if(state.activeCountries.length > 1) state.activeCountries = state.activeCountries.filter(x=>x!==c);
+  } else { state.activeCountries.push(c); }
+  renderCountryPills();
+  renderMarketNav();
+}
+
+function setSort(s) {
+  state.sortBy = s;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderServiceList();
+}
+
+/* ===================== SERVICE DETAIL ===================== */
+function renderDetail() {
+  const svc = SERVICES.find(s=>s.id===state.selectedService);
+  if(!svc) return;
+  const agent = state.assignedServices[svc.id] || svc.agent;
+  const critAlert = svc.alerts.reduce((m,a) => {
+    const ord = {critical:0,high:1,medium:2};
+    return !m || (ord[a.severity]??3) < (ord[m.severity]??3) ? a : m;
+  }, null);
+
+  const hasCascade = svc.alerts.some(a => a.dependsOn);
+  const hasCC = svc.alerts.some(a => a.fromCC);
+
+  let alertsHtml = '';
+  if(hasCascade) alertsHtml += `<div class="cascade-banner"><i class="ti ti-link"></i> Alerta em cascata: resolva o No Play primeiro para desbloquear o Major Delay</div>`;
+  if(hasCC) alertsHtml += `<div class="cc-banner"><i class="ti ti-headset"></i> Alerta originado no Customer Care — passageiro relatou ocorrência às 05:39</div>`;
+
+  svc.alerts.forEach(a => {
+    const proc = PROCEDURES[a.type];
+    const clsBorder = `alert-card-${a.severity}`;
+    const clsBadge = `badge-${a.severity}`;
+    const clsResolve = a.severity==='critical'?'btn-critical':a.severity==='high'?'btn-high':'btn-medium';
+    const slaHtml = a.slaMin !== null ? renderSlaCell(a.slaMin, 60) : '—';
+    alertsHtml += `<div class="alert-card ${clsBorder}">
+      <div class="alert-card-header">
+        <span class="alert-type-badge ${clsBadge}">${(proc?.title||a.type).toUpperCase()}</span>
+        <span class="open-pill">aberto</span>
+        <span class="open-pill">pendente</span>
+        ${a.slaMin!==null?`<span class="sla-chip ${a.slaMin<15?'sla-danger':a.slaMin<30?'sla-warn':'sla-ok'}">${a.slaMin} min</span>`:''}
+        <button class="resolve-btn ${clsResolve}" onclick="openResolvePopup('${a.id}','${svc.id}')">resolver</button>
+      </div>
+      <div class="alert-desc"><i class="ti ${ALERT_ICONS[a.type]||'ti-alert'}"></i> ${a.type.replace(/_/g,' ')} · severidade ${a.severity} · ${a.fromCC?'originado no CC':'detecção automática'}</div>
+    </div>`;
+  });
+
+  const dotClass = {critical:'dot-critical',risk:'dot-risk',ok:'dot-ok'};
+  const todaySvcs = DRIVER_CONTEXT.todayServices.map(ts => `
+    <div class="today-svc-item">
+      <span class="today-dot ${dotClass[ts.status]||'dot-ok'}"></span>
+      <div class="today-info">
+        <div class="today-route">${ts.route} · ${ts.time}</div>
+        <div class="today-eta">${ts.eta}</div>
+        <div class="today-note">${ts.aiNote}</div>
+      </div>
+    </div>`).join('');
+
+  const logHtml = SERVICE_LOG.map(l => `
+    <div class="log-item">
+      <div class="log-dot log-dot-${l.tagColor}"></div>
+      <div class="log-content">
+        <div class="log-time">${l.time}</div>
+        <div class="log-text">${l.text}</div>
+        ${l.sub?`<div class="log-sub">"${l.sub}"</div>`:''}
+        <span class="log-tag tag-${l.tagColor}">${l.tag}</span>
+      </div>
+    </div>`).join('');
+
+  const statusLabel = svc.status.replace(/-/g,' ');
+  const statusPillClass = svc.status==='in-progress-issues'?'pill-critical':svc.status==='pending-unsolved'?'pill-high':svc.status==='in-progress'?'pill-ok':'pill-medium';
+
+  const aiText = critAlert?.type === 'no_play'
+    ? 'Veículo não iniciou rota. Carlos Mendes tem histórico limpo (0 atrasos/30d). Recomendação: ligue imediatamente para o operador AB Turismo. Se sem resposta em 15 min, autorize Uber para os 46 passageiros. Push preventivo já enviado.'
+    : 'Monitorar a situação. Verificar se há tráfego intenso na rota via live tracking. Se atraso persistir por mais 10 min, enviar push informativo para passageiros.';
+
+  document.getElementById('detail-layout').innerHTML = `
+    <div class="service-header">
+      <div class="service-header-top">
+        <div class="service-title">${svc.route}</div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="toggleExtraFields()"><i class="ti ti-plus"></i> detalhes</button>
+          <button class="btn btn-brand" onclick="openLiveTracking('${svc.route}')"><i class="ti ti-map-pin"></i> live tracking</button>
+        </div>
+      </div>
+      <div class="service-meta">
+        <span><i class="ti ti-clock"></i>${svc.localTime}</span>
+        <span><i class="ti ti-building"></i>${svc.provider}</span>
+        <span><i class="ti ti-users"></i>${svc.pax} pax</span>
+        <span><i class="ti ti-map"></i>${svc.site}</span>
+        <span class="status-pill ${statusPillClass}">${statusLabel}</span>
+        ${agent?`<span style="display:flex;align-items:center;gap:4px;font-size:11px;background:var(--color-brand-light);padding:3px 8px;border-radius:10px;color:var(--color-brand-dark)"><i class="ti ti-user-check"></i>${agent}</span>`:''}
+      </div>
+      <div class="detail-extra" id="detail-extra-fields">
+        <div class="extra-field"><div class="extra-label">cliente</div><div class="extra-val">${svc.client}</div></div>
+        <div class="extra-field"><div class="extra-label">mercado</div><div class="extra-val">${svc.market}</div></div>
+        <div class="extra-field"><div class="extra-label">hora serviço</div><div class="extra-val">${svc.serviceTime}</div></div>
+        <div class="extra-field"><div class="extra-label">ID serviço</div><div class="extra-val">${svc.id}</div></div>
+        <div class="extra-field"><div class="extra-label">tipo rota</div><div class="extra-val">Entrada</div></div>
+        <div class="extra-field"><div class="extra-label">veículo</div><div class="extra-val">Ônibus 42</div></div>
+        <div class="extra-field"><div class="extra-label">motorista ID</div><div class="extra-val">DRV-2281</div></div>
+        <div class="extra-field"><div class="extra-label">passageiros confirmados</div><div class="extra-val">${svc.pax}</div></div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-left">
+        <div class="section-header">
+          <span class="section-title">alertas deste serviço (${svc.alerts.length})</span>
+          <span class="section-sub">ordenado por criticidade</span>
+          <div class="tt-wrap"><span class="tt-icon">?</span><div class="tt-box">Alertas ordenados do mais crítico para o menos crítico. SLA mostra tempo restante para resolução conforme SLA do cliente.</div></div>
+        </div>
+        ${alertsHtml}
+      </div>
+      <div class="detail-right">
+        <div class="copilot-header">
+          <div class="copilot-title"><i class="ti ti-sparkles"></i> brainer · copilot</div>
+          ${svc.aiReady?'<span class="copilot-badge">análise pronta</span>':''}
+        </div>
+        <div class="copilot-body">
+          <div class="ai-rec-card">
+            <div class="ai-rec-label"><i class="ti ti-sparkles"></i> recomendação</div>
+            <div class="ai-rec-text">${aiText}</div>
+            <div class="ai-actions">
+              <button class="ai-action-btn aab-green" onclick="showToast('Ligação iniciada para AB Turismo · +55 11 3333-4444','success')"><i class="ti ti-phone"></i> ligar agora</button>
+              <button class="ai-action-btn aab-amber" onclick="showToast('Push enviado para ${svc.pax} passageiros','success')"><i class="ti ti-message"></i> push pax</button>
+            </div>
+            <div class="ai-feedback">
+              <span>útil?</span>
+              <button class="fb-btn ${state.aiLike==='like'?'liked':''}" id="fb-like" onclick="setAiFeedback('like')"><i class="ti ti-thumb-up"></i></button>
+              <button class="fb-btn ${state.aiLike==='dislike'?'disliked':''}" id="fb-dislike" onclick="setAiFeedback('dislike')"><i class="ti ti-thumb-down"></i></button>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">contexto do motorista</div>
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px;">${DRIVER_CONTEXT.name}</div>
+            <div class="driver-stats">
+              <div class="driver-stat"><div class="ds-label">atrasos/30d</div><div class="ds-val">${DRIVER_CONTEXT.delaysLast30}</div></div>
+              <div class="driver-stat"><div class="ds-label">incidentes/30d</div><div class="ds-val">${DRIVER_CONTEXT.incidentsLast30}</div></div>
+            </div>
+            <div class="push-status">
+              <span class="${DRIVER_CONTEXT.pushSent?'push-sent':''}"><i class="ti ti-send"></i> push ${DRIVER_CONTEXT.pushSent?'enviado':'não enviado'}</span>
+              ${DRIVER_CONTEXT.pushSent?`<span class="push-not-read"><i class="ti ti-eye-off"></i> não lido</span>`:''}
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">serviços assignados hoje</div>
+            ${todaySvcs}
+          </div>
+          <div style="border-top:1px solid var(--color-border-tertiary);padding-top:10px;">
+            <div class="info-card-title" style="padding:0 12px 6px;">log do serviço</div>
+            <div class="log-timeline">${logHtml}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleExtraFields() {
+  const el = document.getElementById('detail-extra-fields');
+  el.classList.toggle('open');
+}
+
+function setAiFeedback(type) {
+  state.aiLike = state.aiLike === type ? null : type;
+  const likeBtn = document.getElementById('fb-like');
+  const dislikeBtn = document.getElementById('fb-dislike');
+  if(likeBtn) { likeBtn.className = 'fb-btn' + (state.aiLike==='like'?' liked':''); }
+  if(dislikeBtn) { dislikeBtn.className = 'fb-btn' + (state.aiLike==='dislike'?' disliked':''); }
+  if(state.aiLike) showToast(state.aiLike==='like'?'Obrigado pelo feedback positivo!':'Feedback registrado. Vamos melhorar!', state.aiLike==='like'?'success':'warning');
+}
+
+/* ===================== RESOLVE POPUP ===================== */
+function openResolvePopup(alertId, svcId) {
+  state.selectedAlert = alertId;
+  state.selectedService = svcId;
+  if(!state.stepsDone[alertId]) state.stepsDone[alertId] = [0];
+  renderResolvePopup();
+}
+
+function renderResolvePopup() {
+  const svc = SERVICES.find(s=>s.id===state.selectedService);
+  const alert = svc?.alerts.find(a=>a.id===state.selectedAlert);
+  if(!svc||!alert) return;
+  const proc = PROCEDURES[alert.type];
+  const done = state.stepsDone[alert.id] || [0];
+
+  const stepsHtml = (proc?.steps||[]).map((step, i) => {
+    const isDone = done.includes(i) && i < Math.max(...done);
+    const isCurrent = i === Math.max(...done);
+    const cls = isDone ? 'step-done' : isCurrent ? 'step-current' : '';
+    const cbCls = isDone ? 'done' : isCurrent ? 'current' : '';
+    const cbContent = isDone ? '✓' : '';
+    const ctaHtml = step.cta && !isDone ? `<button class="step-cta cta-${step.cta.color}" onclick="triggerCTA('${step.cta.label}')"><i class="ti ${step.cta.icon}"></i> ${step.cta.label}</button>` : '';
+    return `<div class="step-item ${cls}" id="step-${state.selectedAlert}-${i}">
+      <div class="step-cb ${cbCls}" onclick="toggleStep('${alert.id}',${i})">${cbContent}</div>
+      <div class="step-content">
+        <div class="step-text ${isDone?'done-text':''}">${step.text}</div>
+        ${ctaHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  const clsBadge = `badge-${alert.severity}`;
+  const slaDisplay = alert.slaMin !== null ? `${alert.slaMin} min` : '—';
+  const slaColorCls = alert.slaMin !== null && alert.slaMin < 15 ? 'sla-danger' : alert.slaMin !== null && alert.slaMin < 30 ? 'sla-warn' : 'sla-ok';
+
+  const existing = document.getElementById('resolve-popup');
+  if(existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.className = 'popup-overlay';
+  popup.id = 'resolve-popup';
+  popup.innerHTML = `
+    <div class="popup-box" onclick="event.stopPropagation()">
+      <div class="popup-header">
+        <span class="alert-type-badge ${clsBadge}">${(proc?.title||alert.type).toUpperCase()}</span>
+        <span style="font-size:12px;color:var(--color-text-secondary)">${svc.route}</span>
+        <span class="popup-sla ${slaColorCls}"><i class="ti ti-clock"></i> ${slaDisplay}</span>
+        <button class="popup-close" onclick="closeResolvePopup()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="popup-body">
+        <div>
+          <div class="popup-section-label">procedimento · ${proc?.client||''} · ${proc?.title||''}</div>
+          <div class="checklist">${stepsHtml}</div>
+        </div>
+        <div>
+          <div class="popup-section-label">escalamento</div>
+          <div class="escalate-row">
+            <button class="escalate-btn esc-amber" onclick="escalate(2,'${svc.client}')">
+              <div class="esc-title"><i class="ti ti-arrow-up"></i> escalar level 2</div>
+              <div class="esc-sub">supervisor de tráfego</div>
+            </button>
+            <button class="escalate-btn esc-red" onclick="escalate(3,'${svc.client}')">
+              <div class="esc-title"><i class="ti ti-alert-triangle"></i> escalar level 3</div>
+              <div class="esc-sub">notificar cliente ${svc.client}</div>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="popup-section-label">incidente</div>
+          <div class="incident-toggle">
+            <input type="checkbox" class="incident-cb" id="incident-cb" ${state.incidentFlagged?'checked':''} onchange="toggleIncident(this.checked)">
+            <label class="incident-label" for="incident-cb">marcar como incidente</label>
+          </div>
+          <div class="incident-fields" id="incident-fields" style="${state.incidentFlagged?'':'display:none'}">
+            <select class="incident-select">
+              <option>falha mecânica</option>
+              <option>problema de sinal</option>
+              <option>acidente</option>
+              <option>atraso por trânsito</option>
+              <option>erro do motorista</option>
+              <option>outro</option>
+            </select>
+            <textarea class="incident-textarea" placeholder="Comentário sobre o incidente..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <span style="font-size:11px;font-weight:600;color:var(--color-text-secondary)">resolução:</span>
+        <div class="resolution-toggle">
+          <span class="res-opt ${state.resolutionStatus==='resolved'?'active':''}" onclick="setResolution('resolved')">resolvido</span>
+          <span class="res-opt ${state.resolutionStatus==='unresolved'?'active':''}" onclick="setResolution('unresolved')">não resolvido</span>
+        </div>
+        <div class="footer-spacer"></div>
+        <button class="btn btn-save" onclick="closeResolvePopup()">salvar e sair</button>
+        <button class="btn btn-close-alert" onclick="closeAlert('${alert.id}','${svc.id}')">fechar alerta</button>
+      </div>
+    </div>`;
+  popup.addEventListener('click', e => { if(e.target === popup) closeResolvePopup(); });
+  document.body.appendChild(popup);
+}
+
+function closeResolvePopup() {
+  const popup = document.getElementById('resolve-popup');
+  if(popup) popup.remove();
+}
+
+function toggleStep(alertId, idx) {
+  if(!state.stepsDone[alertId]) state.stepsDone[alertId] = [0];
+  const done = state.stepsDone[alertId];
+  const current = Math.max(...done);
+  if(idx !== current) return;
+  const svc = SERVICES.find(s=>s.alerts.some(a=>a.id===alertId));
+  const alert = svc?.alerts.find(a=>a.id===alertId);
+  const proc = PROCEDURES[alert?.type];
+  const totalSteps = proc?.steps?.length || 0;
+  if(idx < totalSteps - 1) {
+    state.stepsDone[alertId] = [...done, idx+1];
+  } else {
+    state.stepsDone[alertId] = [...done, idx];
+  }
+  renderResolvePopup();
+}
+
+function triggerCTA(label) {
+  const messages = {
+    'ligar para operador': 'Ligação iniciada para AB Turismo · +55 11 3333-4444',
+    'enviar push ao passageiro': 'Push enviado para os passageiros',
+    'autorizar uber': 'Uber autorizado · custo imputado ao operador',
+    'ver passageiros': 'Abrindo lista de passageiros impactados...',
+  };
+  showToast(messages[label] || `Ação executada: ${label}`, 'success');
+}
+
+function escalate(level, client) {
+  const msg = level===2 ? 'Escalado para supervisor · Eriqueson M. notificado' : `Nível 3 acionado · ${client} notificado`;
+  showToast(msg, level===3?'warning':'info');
+}
+
+function toggleIncident(checked) {
+  state.incidentFlagged = checked;
+  const fields = document.getElementById('incident-fields');
+  if(fields) fields.style.display = checked ? '' : 'none';
+}
+
+function setResolution(val) {
+  state.resolutionStatus = val;
+  document.querySelectorAll('.res-opt').forEach(el => {
+    el.classList.toggle('active', el.textContent.trim() === (val==='resolved'?'resolvido':'não resolvido'));
+  });
+}
+
+function closeAlert(alertId, svcId) {
+  const svc = SERVICES.find(s=>s.id===svcId);
+  if(svc) {
+    svc.alerts = svc.alerts.filter(a=>a.id!==alertId);
+    if(svc.alerts.length===0) svc.status = 'in-progress';
+  }
+  closeResolvePopup();
+  showToast('Alerta fechado · resolvido', 'success');
+  renderDetail();
+}
+
+/* ===================== LIVE TRACKING MODAL ===================== */
+function openLiveTracking(route) {
+  const existing = document.getElementById('live-modal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'live-modal';
+  modal.innerHTML = `
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title"><i class="ti ti-map-pin"></i> Live Tracking — ${route}</span>
+        <button class="modal-close" onclick="document.getElementById('live-modal').remove()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="map-placeholder"><i class="ti ti-map" style="font-size:32px;margin-right:10px;"></i>Mapa em tempo real — integração pendente</div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="document.getElementById('live-modal').remove()">fechar</button></div>
+    </div>`;
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+/* ===================== CUSTOMER CARE ===================== */
+function renderCC() {
+  if(state.ccFlowStep === 0) {
+    state.ccFlowStep = 1;
+    loadInitialChat();
+  }
+}
+
+function loadInitialChat() {
+  const container = document.getElementById('chat-messages');
+  container.innerHTML = '';
+  const msgs = buildInitialMessages();
+  msgs.forEach(m => appendMessage(m, false));
+  setTimeout(() => container.scrollTop = container.scrollHeight, 100);
+}
+
+function buildInitialMessages() {
+  return [
+    { from:'bot', text:'Olá! Sou o assistente Brainer CC. Busque um passageiro pelo nome, ID ou booking para começar.' },
+    { from:'user', text:'Maria da Silva' },
+    { from:'bot', html: buildProfileCard() },
+    { from:'user', text:'ela disse que o ônibus não chegou hoje de manhã' },
+    { from:'bot', html: buildReportCard() },
+  ];
+}
+
+function buildProfileCard() {
+  return `<div>Encontrei o perfil de <strong>Maria da Silva</strong>. Veja os dados abaixo:</div>
+  <div class="msg-card">
+    <div class="card-header-purple"><div class="card-name">Maria da Silva</div><div style="font-size:11px;color:var(--color-text-secondary)">ID: PAX-88421 · Amazon Guru</div></div>
+    <div class="card-grid">
+      <div class="card-field"><div class="card-field-label">telefone</div><div class="card-field-val">+55 11 9 8821-4432</div></div>
+      <div class="card-field"><div class="card-field-label">e-mail</div><div class="card-field-val">maria.silva@amazon.com</div></div>
+      <div class="card-field"><div class="card-field-label">site</div><div class="card-field-val">Betim MG 02</div></div>
+      <div class="card-field"><div class="card-field-label">rota habitual</div><div class="card-field-val">Guru 9 — Entrada</div></div>
+    </div>
+    <div class="booking-section">
+      <div class="booking-section-label">hoje</div>
+      <div class="booking-item"><span class="booking-route">Guru 9 — Entrada</span><span class="booking-time">05:42</span><div class="booking-actions"><button class="booking-btn bb-view" onclick="showToast('Abrindo serviço Guru 9 no dashboard...','info')">ver serviço</button><button class="booking-btn bb-cancel" onclick="showToast('Booking BSP-88421 cancelado','warning')">cancelar</button></div></div>
+      <div class="booking-section-label" style="margin-top:8px">próximos</div>
+      <div class="booking-item"><span class="booking-route">Guru 9 — Saída</span><span class="booking-time">amanhã 07:30</span><div class="booking-actions"><button class="booking-btn bb-view" onclick="showToast('Abrindo serviço...','info')">ver</button></div></div>
+    </div>
+    <div class="booking-section" style="border-top:1px solid var(--color-border-tertiary)">
+      <div class="booking-section-label">últimas leituras (7 dias)</div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 13/05</span><span class="read-ok">✓ Leitura correta</span></div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 12/05</span><span class="read-ok">✓ Leitura correta</span></div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 09/05</span><span class="read-err">✗ ERRO</span></div>
+    </div>
+  </div>`;
+}
+
+function buildReportCard() {
+  return `<div>Entendido. Com base no contexto, o serviço Guru 9 — Entrada (05:42) está com alerta ativo de <strong>No Play</strong>. Selecione o tipo de ocorrência para reportar ao tráfego:</div>
+  <div class="msg-card" style="padding:12px">
+    <div class="report-opts" id="report-opts">
+      <div class="report-opt selected" onclick="toggleReportOpt(this)"><i class="ti ti-player-play"></i> Ônibus não saiu (No Play)</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-clock-exclamation"></i> Atraso significativo</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-map-pin-pause"></i> Ponto pulado</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-user-exclamation"></i> Problema com motorista</div>
+    </div>
+    <textarea class="report-textarea" placeholder="Comentário adicional (opcional)..."></textarea>
+    <button class="send-traffic-btn" id="btn-send-traffic" onclick="sendToTraffic()"><i class="ti ti-send"></i> enviar para tráfego</button>
+  </div>`;
+}
+
+function toggleReportOpt(el) {
+  document.querySelectorAll('#report-opts .report-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function sendToTraffic() {
+  const btn = document.getElementById('btn-send-traffic');
+  if(btn) { btn.disabled = true; btn.textContent = 'enviando...'; }
+  appendMessage({from:'user', text:'enviado'});
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    appendMessage({from:'bot', text:'✓ Reporte enviado para o time de tráfego às 05:53. Protocolo #RPT-00892 gerado.'});
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      appendMessage({from:'bot', html: buildResolutionCard()});
+    }, 1800);
+  }, 900);
+}
+
+function buildResolutionCard() {
+  return `<div>Atualização do tráfego recebida:</div>
+  <div class="resolution-card">
+    <div class="res-card-title"><i class="ti ti-check"></i> Resposta do tráfego</div>
+    <div class="res-card-text">Operador AB Turismo contatado. Motorista Carlos Mendes localizou atraso por congestionamento na Via Anhanguera. ETA atualizado para 06:20. Passageiros estão sendo comunicados via push.</div>
+    <button class="uber-btn" id="btn-uber" onclick="generateVoucher()"><i class="ti ti-car"></i> gerar voucher Uber</button>
+  </div>`;
+}
+
+function generateVoucher() {
+  const btn = document.getElementById('btn-uber');
+  if(btn) { btn.disabled = true; }
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    appendMessage({from:'bot', text:'Voucher gerado · código BRAINER-X923. Chamado #RPT-00892 finalizado automaticamente. ✓ resolvido'});
+    showToast('Voucher Uber gerado · BRAINER-X923', 'success');
+  }, 800);
+}
+
+function appendMessage(msg, scroll=true) {
+  const container = document.getElementById('chat-messages');
+  if(!container) return;
+  const div = document.createElement('div');
+  div.className = `msg msg-${msg.from}`;
+  const avatar = msg.from === 'bot'
+    ? `<div class="msg-avatar" style="background:var(--color-cc-purple)"><i class="ti ti-robot" style="font-size:13px"></i></div>`
+    : `<div class="msg-avatar" style="background:var(--color-text-secondary)">AL</div>`;
+  const content = msg.html
+    ? `<div class="msg-bubble">${msg.html}</div>`
+    : `<div class="msg-bubble">${msg.text}</div>`;
+  div.innerHTML = avatar + content;
+  container.appendChild(div);
+  if(scroll) setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+}
+
+function showTyping() {
+  const container = document.getElementById('chat-messages');
+  if(!container) return;
+  const div = document.createElement('div');
+  div.className = 'msg msg-bot';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-avatar" style="background:var(--color-cc-purple)"><i class="ti ti-robot" style="font-size:13px"></i></div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  container.appendChild(div);
+  setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-indicator');
+  if(el) el.remove();
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  if(!input || !input.value.trim()) return;
+  const text = input.value.trim();
+  input.value = '';
+  appendMessage({from:'user', text});
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    appendMessage({from:'bot', text:'Entendido. Posso buscar outro passageiro ou ajudar com mais alguma coisa?'});
+  }, 800);
+}
+
+function newChat() {
+  state.ccFlowStep = 0;
+  state.uberVoucherUsed = false;
+  document.getElementById('chat-messages').innerHTML = '';
+  setTimeout(() => {
+    appendMessage({from:'bot', text:'Nova conversa iniciada. Como posso ajudar?'});
+  }, 100);
+}
+
+/* ===================== TOAST ===================== */
+function showToast(message, type='success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icon = type==='success'?'ti-check':type==='warning'?'ti-alert-triangle':'ti-info-circle';
+  toast.innerHTML = `<i class="ti ${icon}"></i>${message}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(()=>toast.remove(),300); }, 3000);
+}
+
+/* ===================== INIT ===================== */
+renderMainPage();
+</script>
+</body>
+</html>
