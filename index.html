@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brainer 2.0 — Centro de Operações de Tráfego</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ===================== RESET & BASE ===================== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -490,67 +492,38 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 .btn-live:hover { background: var(--color-brand); border-color: var(--color-brand); }
 .btn-live i { color: #4fd1b8; }
 
-/* ===================== LIVE TRACKING MAP ===================== */
-.map-overlay { position: fixed; inset: 0; background: #111a14; z-index: 300; display: flex; flex-direction: column; animation: fadeIn 200ms ease; }
-.map-header { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid #1d2e20; flex-shrink: 0; background: #0c1510; }
-.map-logo { font-size: 13px; font-weight: 700; color: #4fd1b8; letter-spacing: -0.3px; }
-.map-logo span { color: rgba(255,255,255,0.4); }
-.map-title { font-size: 12px; color: rgba(160,210,180,0.7); }
-.map-live { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(79,209,184,0.6); }
-.map-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #4fd1b8; animation: blink 1.4s infinite; }
-.map-close { background: none; border: 1px solid #1d2e20; color: #4fd1b8; padding: 5px 12px; border-radius: var(--border-radius-sm); cursor: pointer; font-size: 11px; margin-left: auto; transition: all 0.15s; }
-.map-close:hover { background: #1d2e20; }
+/* ===================== LIVE TRACKING MAP (LEAFLET) ===================== */
+.map-overlay { position: fixed; inset: 0; background: #1a1a18; z-index: 300; display: flex; flex-direction: column; animation: fadeIn 200ms ease; }
+.map-header { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid #2a2a28; flex-shrink: 0; background: #141412; }
+.map-logo { font-size: 13px; font-weight: 700; color: var(--color-brand); letter-spacing: -0.3px; }
+.map-logo span { color: rgba(255,255,255,0.35); }
+.map-title { font-size: 12px; color: rgba(255,255,255,0.5); }
+.map-live { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(29,158,117,0.8); }
+.map-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-brand); animation: blink 1.4s infinite; }
+.map-close { background: none; border: 1px solid #333; color: rgba(255,255,255,0.6); padding: 5px 12px; border-radius: var(--border-radius-sm); cursor: pointer; font-size: 11px; margin-left: auto; transition: all 0.15s; }
+.map-close:hover { background: #2a2a28; color: #fff; }
 .map-body { flex: 1; position: relative; overflow: hidden; }
-/* Fundo do mapa — estilo satélite urbano */
-.map-bg { position: absolute; inset: 0; background: #111a14; }
-.map-road { position: absolute; background: #1e2e22; }
-.map-road-h { width: 100%; }
-.map-road-v { height: 100%; }
-.map-road-label { position: absolute; font-size: 9px; color: rgba(160,200,170,0.3); white-space: nowrap; }
-.map-block { position: absolute; background: #161f18; border: 1px solid #1a2a1d; }
-/* Ônibus animados */
-.bus-track { position: absolute; height: 0; pointer-events: none; }
-.bus { position: absolute; display: flex; align-items: center; gap: 5px; cursor: pointer; pointer-events: all; z-index: 10; transform: translateY(-50%); }
-.bus-icon { width: 28px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; position: relative; flex-shrink: 0; transition: transform 0.15s; }
-.bus:hover .bus-icon { transform: scale(1.2); }
-.bus-icon::before { content: ''; position: absolute; left: -5px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
-.bus-rtl .bus-icon::before { left: auto; right: -5px; border-left-width: 5px; border-left-style: solid; border-right: none; }
-.bus-ltr .bus-icon::before { border-right-width: 5px; border-right-style: solid; }
-.bus-label { background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 3px; font-size: 9px; color: rgba(255,255,255,0.8); white-space: nowrap; backdrop-filter: blur(2px); }
-.bus-critical .bus-icon { background: #E24B4A; box-shadow: 0 0 8px rgba(226,75,74,0.7); animation: bus-pulse 1s ease-in-out infinite alternate; }
-.bus-critical .bus-icon::before { border-right-color: #E24B4A; }
-.bus-high .bus-icon     { background: #EF9F27; box-shadow: 0 0 6px rgba(239,159,39,0.5); }
-.bus-high .bus-icon::before { border-right-color: #EF9F27; }
-.bus-medium .bus-icon   { background: #378ADD; box-shadow: 0 0 5px rgba(55,138,221,0.4); }
-.bus-medium .bus-icon::before { border-right-color: #378ADD; }
-.bus-ok .bus-icon       { background: #1D9E75; box-shadow: 0 0 4px rgba(29,158,117,0.4); }
-.bus-ok .bus-icon::before { border-right-color: #1D9E75; }
-@keyframes bus-pulse { from { box-shadow: 0 0 8px rgba(226,75,74,0.7); } to { box-shadow: 0 0 18px rgba(226,75,74,1), 0 0 30px rgba(226,75,74,0.4); } }
-/* Animações de movimento — LTR */
-@keyframes move-ltr-1 { 0%{left:-8%} 100%{left:108%} }
-@keyframes move-ltr-2 { 0%{left:-8%} 100%{left:108%} }
-@keyframes move-ltr-3 { 0%{left:-8%} 100%{left:108%} }
-/* Animações de movimento — RTL */
-@keyframes move-rtl-1 { 0%{left:108%} 100%{left:-8%} }
-@keyframes move-rtl-2 { 0%{left:108%} 100%{left:-8%} }
-/* Popup do ônibus */
-.bus-popup { display: none; position: absolute; bottom: 26px; left: 0; background: #0e1a11; border: 1px solid rgba(79,209,184,0.35); border-radius: var(--border-radius-sm); padding: 10px 12px; width: 220px; z-index: 20; font-size: 11px; color: #a0c8b0; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
-.bus:hover .bus-popup { display: block; }
-.bp-route { font-size: 12px; font-weight: 600; color: #d0f0e0; margin-bottom: 6px; }
-.bp-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-.bp-key { color: rgba(160,200,170,0.55); }
-.bp-critical { color: #E24B4A; font-weight: 700; }
-.bp-high     { color: #EF9F27; font-weight: 700; }
-.bp-medium   { color: #378ADD; font-weight: 700; }
-.bp-ok       { color: #1D9E75; font-weight: 700; }
-.bp-hint { margin-top: 6px; font-size: 9px; color: rgba(79,209,184,0.5); border-top: 1px solid rgba(79,209,184,0.15); padding-top: 5px; }
-/* Legenda e stats do mapa */
-.map-legend { position: absolute; bottom: 16px; left: 16px; display: flex; flex-direction: column; gap: 5px; background: rgba(0,0,0,0.5); padding: 8px 10px; border-radius: var(--border-radius-sm); border: 1px solid rgba(79,209,184,0.15); }
-.legend-row { display: flex; align-items: center; gap: 7px; font-size: 10px; color: rgba(160,200,170,0.6); }
+#leaflet-map { width: 100%; height: 100%; }
+/* Popup Leaflet customizado */
+.leaflet-popup-content-wrapper { background: #1c1c1a !important; border: 1px solid #444 !important; border-radius: 6px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important; }
+.leaflet-popup-tip { background: #1c1c1a !important; }
+.leaflet-popup-content { margin: 12px 14px !important; color: #c8c8c0; font-size: 12px; min-width: 200px; font-family: var(--font-sans); }
+.lp-route { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #333; }
+.lp-row { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 3px; font-size: 11px; }
+.lp-key { color: rgba(200,200,190,0.45); }
+.lp-critical { color: #E24B4A; font-weight: 700; }
+.lp-high     { color: #EF9F27; font-weight: 700; }
+.lp-medium   { color: #378ADD; font-weight: 700; }
+.lp-ok       { color: #1D9E75; font-weight: 700; }
+.lp-btn { display: block; margin-top: 10px; text-align: center; background: var(--color-brand); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%; }
+.lp-btn:hover { background: var(--color-brand-dark); }
+/* Legenda e stats */
+.map-legend { position: absolute; bottom: 24px; left: 10px; z-index: 1000; background: rgba(14,14,12,0.88); padding: 8px 10px; border-radius: 4px; border: 1px solid #333; display: flex; flex-direction: column; gap: 5px; }
+.legend-row { display: flex; align-items: center; gap: 7px; font-size: 10px; color: rgba(200,200,190,0.65); }
 .legend-bus { width: 18px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-.map-stats { position: absolute; top: 12px; right: 16px; background: rgba(0,0,0,0.55); padding: 8px 12px; border-radius: var(--border-radius-sm); border: 1px solid rgba(79,209,184,0.15); display: flex; flex-direction: column; gap: 4px; text-align: right; }
-.mstat { font-size: 10px; color: rgba(79,209,184,0.55); }
-.mstat strong { font-size: 13px; color: #4fd1b8; margin-left: 6px; }
+.map-stats { position: absolute; top: 10px; right: 10px; z-index: 1000; background: rgba(14,14,12,0.88); padding: 8px 12px; border-radius: 4px; border: 1px solid #333; display: flex; flex-direction: column; gap: 4px; text-align: right; }
+.mstat { font-size: 10px; color: rgba(200,200,190,0.45); }
+.mstat strong { font-size: 13px; color: #fff; margin-left: 6px; }
 
 /* ===================== TOOLTIP ===================== */
 .tt-wrap { position: relative; display: inline-flex; }
@@ -879,6 +852,45 @@ function renderStatusDots() {
 }
 
 /* ===================== LIVE TRACKING MAP ===================== */
+/* ===================== LIVE TRACKING MAP (Leaflet) ===================== */
+// Rotas fake sobre ruas reais de São Paulo
+const BUS_ROUTES_COORDS = [
+  // Rota 1: Lapa → Consolação → Paulista
+  [[-23.5268,-46.7065],[-23.5285,-46.6900],[-23.5350,-46.6780],[-23.5450,-46.6700],[-23.5530,-46.6600],[-23.5630,-46.6543]],
+  // Rota 2: Santana → Centro → Mooca
+  [[-23.4905,-46.6265],[-23.5050,-46.6280],[-23.5200,-46.6340],[-23.5380,-46.6380],[-23.5538,-46.6003]],
+  // Rota 3: Pinheiros → Vila Madalena → Consolação
+  [[-23.5630,-46.6955],[-23.5553,-46.6970],[-23.5520,-46.6850],[-23.5490,-46.6700],[-23.5492,-46.6518]],
+  // Rota 4: Barra Funda → Brás → Tatuapé
+  [[-23.5260,-46.6646],[-23.5300,-46.6400],[-23.5330,-46.6100],[-23.5330,-46.5765]],
+  // Rota 5: Osasco → Lapa → Centro
+  [[-23.5322,-46.7919],[-23.5290,-46.7600],[-23.5268,-46.7065],[-23.5400,-46.6850],[-23.5505,-46.6333]],
+  // Rota 6: Ibirapuera → Paraíso → Centro
+  [[-23.5874,-46.6576],[-23.5810,-46.6490],[-23.5754,-46.6453],[-23.5680,-46.6400],[-23.5505,-46.6333]],
+];
+
+const SEV_COLORS = { critical:'#E24B4A', high:'#EF9F27', medium:'#378ADD', ok:'#1D9E75' };
+
+let _leafletMap = null;
+let _busIntervals = [];
+
+function _getSeverity(svc) {
+  const ord = {critical:0,high:1,medium:2};
+  return svc.alerts.reduce((m,a) => {
+    return !m || (ord[a.severity]??3) < (ord[m.severity]??3) ? a.severity : m;
+  }, svc.alerts.length ? null : 'ok') || 'ok';
+}
+
+function _interpolateRoute(path, t) {
+  // t ∈ [0,1] → posição [lat,lng] ao longo do caminho
+  const total = path.length - 1;
+  const scaled = t * total;
+  const idx = Math.min(Math.floor(scaled), total - 1);
+  const frac = scaled - idx;
+  const a = path[idx], b = path[idx + 1] || path[idx];
+  return [a[0] + (b[0]-a[0])*frac, a[1] + (b[1]-a[1])*frac];
+}
+
 function openMainLiveTracking() {
   const existing = document.getElementById('map-overlay');
   if(existing) existing.remove();
@@ -893,71 +905,6 @@ function openMainLiveTracking() {
     : state.alertTypeFilter ? state.alertTypeFilter.replace(/_/g,' ')
     : state.selectedMarket.toUpperCase();
 
-  // Cada ônibus tem uma "pista" (top %), direção, duração e delay
-  const lanes = [
-    { top:14, dir:'ltr', dur:18, delay:0,    startPct:5  },
-    { top:28, dir:'rtl', dur:22, delay:4,    startPct:90 },
-    { top:42, dir:'ltr', dur:15, delay:2,    startPct:20 },
-    { top:56, dir:'rtl', dur:25, delay:7,    startPct:70 },
-    { top:70, dir:'ltr', dur:20, delay:1,    startPct:0  },
-    { top:84, dir:'rtl', dur:17, delay:9,    startPct:95 },
-    { top:21, dir:'ltr', dur:28, delay:12,   startPct:40 },
-    { top:63, dir:'ltr', dur:16, delay:5,    startPct:10 },
-  ];
-
-  // Blocos e ruas do mapa mockado
-  const blocksHtml = [
-    {x:5,y:5,w:20,h:6},{x:30,y:5,w:25,h:6},{x:60,y:5,w:18,h:6},{x:82,y:5,w:14,h:6},
-    {x:5,y:19,w:12,h:6},{x:22,y:19,w:20,h:6},{x:48,y:19,w:15,h:6},{x:68,y:19,w:22,h:6},
-    {x:5,y:33,w:18,h:6},{x:28,y:33,w:28,h:6},{x:62,y:33,w:12,h:6},{x:78,y:33,w:18,h:6},
-    {x:5,y:47,w:14,h:6},{x:24,y:47,w:22,h:6},{x:52,y:47,w:18,h:6},{x:75,y:47,w:20,h:6},
-    {x:5,y:61,w:22,h:6},{x:32,y:61,w:16,h:6},{x:53,y:61,w:24,h:6},{x:82,y:61,w:14,h:6},
-    {x:5,y:75,w:16,h:6},{x:26,y:75,w:20,h:6},{x:51,y:75,w:14,h:6},{x:70,y:75,w:25,h:6},
-  ].map(b => `<div class="map-block" style="left:${b.x}%;top:${b.y}%;width:${b.w}%;height:${b.h}%"></div>`).join('');
-
-  // Nomes de ruas mockados
-  const streetLabels = [
-    {x:5,y:12.5,t:'Av. Principal'},
-    {x:40,y:26.5,t:'Rua Operação'},
-    {x:5,y:40.5,t:'Rodovia Central'},
-    {x:55,y:54.5,t:'Av. Industrial'},
-    {x:5,y:68.5,t:'Via Expressa'},
-  ].map(l=>`<div class="map-road-label" style="left:${l.x}%;top:${l.y}%">${l.t}</div>`).join('');
-
-  // Ônibus animados
-  const busesHtml = svcs.map((s, i) => {
-    const lane = lanes[i % lanes.length];
-    const maxSev = s.alerts.reduce((m,a) => {
-      const ord = {critical:0,high:1,medium:2};
-      return !m || (ord[a.severity]??3) < (ord[m.severity]??3) ? a.severity : m;
-    }, s.alerts.length ? null : 'ok');
-    const sevCls = maxSev || 'ok';
-    const sevLabel = {critical:'CRÍTICO',high:'ALTO',medium:'MÉDIO',ok:'OK'}[sevCls];
-    const sevPopupCls = sevCls === 'ok' ? 'bp-ok' : `bp-${sevCls}`;
-    const alertTypes = s.alerts.map(a => a.type.replace(/_/g,' ')).join(', ') || '—';
-    const agent = state.assignedServices[s.id] || s.agent || '—';
-    const dir = lane.dir;
-    const animName = dir === 'ltr' ? `move-ltr-${(i%3)+1}` : `move-rtl-${(i%2)+1}`;
-    const startLeft = dir === 'ltr' ? `${lane.startPct}%` : `${lane.startPct}%`;
-    const code = s.id.replace('svc-','#');
-    const popupSide = lane.startPct > 50 ? 'right:0;left:auto;' : '';
-    return `<div class="bus bus-${sevCls} bus-${dir}"
-      style="top:${lane.top}%;left:${startLeft};animation:${animName} ${lane.dur}s linear ${lane.delay}s infinite;"
-      onclick="closeMap();navigateTo('service-detail','${s.id}')">
-      <div class="bus-icon"><i class="ti ti-bus" style="font-size:8px"></i></div>
-      <div class="bus-label">${code}</div>
-      <div class="bus-popup" style="${popupSide}">
-        <div class="bp-route">${s.route}</div>
-        <div class="bp-row"><span class="bp-key">status</span><span class="${sevPopupCls}">${sevLabel}</span></div>
-        <div class="bp-row"><span class="bp-key">provider</span><span>${s.provider}</span></div>
-        <div class="bp-row"><span class="bp-key">alertas</span><span>${alertTypes}</span></div>
-        <div class="bp-row"><span class="bp-key">pax</span><span>${s.pax}</span></div>
-        <div class="bp-row"><span class="bp-key">agente</span><span>${agent}</span></div>
-        <div class="bp-hint"><i class="ti ti-mouse-2"></i> clique para abrir detalhe</div>
-      </div>
-    </div>`;
-  }).join('');
-
   const el = document.createElement('div');
   el.id = 'map-overlay';
   el.className = 'map-overlay';
@@ -969,11 +916,7 @@ function openMainLiveTracking() {
       <button class="map-close" onclick="closeMap()"><i class="ti ti-x"></i> fechar</button>
     </div>
     <div class="map-body">
-      <div class="map-bg">
-        ${blocksHtml}
-        ${streetLabels}
-        ${busesHtml}
-      </div>
+      <div id="leaflet-map"></div>
       <div class="map-legend">
         <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:rgba(160,200,170,0.4);margin-bottom:3px;letter-spacing:0.5px">status dos ônibus</div>
         <div class="legend-row"><div class="legend-bus" style="background:#E24B4A"></div>crítico</div>
@@ -988,9 +931,96 @@ function openMainLiveTracking() {
       </div>
     </div>`;
   document.body.appendChild(el);
+
+  // Inicializar mapa Leaflet
+  requestAnimationFrame(() => {
+    if(_leafletMap) { _leafletMap.remove(); _leafletMap = null; }
+    _busIntervals.forEach(clearInterval);
+    _busIntervals = [];
+
+    _leafletMap = L.map('leaflet-map', { zoomControl: true, attributionControl: false })
+      .setView([-23.5505, -46.6333], 12);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+    }).addTo(_leafletMap);
+
+    // Desenhar rotas como polylines tracejadas
+    BUS_ROUTES_COORDS.forEach((coords, ri) => {
+      const colors = ['#E24B4A','#EF9F27','#378ADD','#1D9E75','#A855F7','#EC4899'];
+      L.polyline(coords, {
+        color: colors[ri % colors.length],
+        weight: 3,
+        opacity: 0.5,
+        dashArray: '8, 6',
+      }).addTo(_leafletMap);
+    });
+
+    // Criar marcadores de ônibus animados
+    svcs.forEach((svc, i) => {
+      const routeIdx = i % BUS_ROUTES_COORDS.length;
+      const path = BUS_ROUTES_COORDS[routeIdx];
+      const sev = _getSeverity(svc);
+      const color = SEV_COLORS[sev];
+      const code = svc.id.replace('svc-','#');
+      const alertTypes = svc.alerts.map(a => a.type.replace(/_/g,' ')).join(', ') || '—';
+      const agent = state.assignedServices[svc.id] || svc.agent || '—';
+      const sevLabel = {critical:'CRÍTICO',high:'ALTO',medium:'MÉDIO',ok:'OK'}[sev];
+
+      // Offset de início para ônibus na mesma rota não ficarem sobrepostos
+      let progress = (i / svcs.length) % 1;
+
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="
+          background:${color};
+          color:#fff;
+          font-size:9px;
+          font-weight:700;
+          padding:2px 5px;
+          border-radius:3px;
+          white-space:nowrap;
+          box-shadow:0 1px 4px rgba(0,0,0,0.6);
+          display:flex;align-items:center;gap:3px;
+          font-family:monospace;
+          cursor:pointer;
+        "><span style="font-size:10px">🚌</span>${code}</div>`,
+        iconAnchor: [20, 10],
+      });
+
+      const startPos = _interpolateRoute(path, progress);
+      const marker = L.marker(startPos, { icon }).addTo(_leafletMap);
+
+      marker.bindPopup(`
+        <div class="lp-route">${svc.route}</div>
+        <table style="width:100%;font-size:11px;color:#ccc;border-collapse:collapse;margin-top:6px">
+          <tr><td style="padding:2px 0;color:#888">status</td><td style="color:${color};font-weight:700">${sevLabel}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">provider</td><td>${svc.provider}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">alertas</td><td>${alertTypes}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">pax</td><td>${svc.pax}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">agente</td><td>${agent}</td></tr>
+        </table>
+        <button class="lp-btn" onclick="closeMap();navigateTo('service-detail','${svc.id}')">
+          <i class="ti ti-arrow-right" style="font-size:11px"></i> ver detalhe
+        </button>
+      `, { maxWidth: 220 });
+
+      // Velocidade de cada ônibus ligeiramente diferente (realismo)
+      const speed = 0.00018 + (i % 5) * 0.00003;
+      const interval = setInterval(() => {
+        progress = (progress + speed) % 1;
+        const pos = _interpolateRoute(path, progress);
+        marker.setLatLng(pos);
+      }, 200);
+      _busIntervals.push(interval);
+    });
+  });
 }
 
 function closeMap() {
+  _busIntervals.forEach(clearInterval);
+  _busIntervals = [];
+  if(_leafletMap) { _leafletMap.remove(); _leafletMap = null; }
   const el = document.getElementById('map-overlay');
   if(el) el.remove();
 }
