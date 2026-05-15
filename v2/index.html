@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brainer 2.0 — Centro de Operações de Tráfego</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* ===================== RESET & BASE ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
+
+/* ===================== DESIGN TOKENS ===================== */
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f3;
+  --color-background-tertiary: #eeede9;
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: #5f5e5a;
+  --color-text-tertiary: #888780;
+  --color-border-primary: #1a1a18;
+  --color-border-secondary: #b4b2a9;
+  --color-border-tertiary: #d3d1c7;
+  --color-brand: #1D9E75;
+  --color-brand-light: #E1F5EE;
+  --color-brand-dark: #085041;
+  --color-cc-purple: #7F77DD;
+  --color-cc-purple-light: #EEEDFE;
+  --color-critical: #E24B4A;
+  --color-critical-light: #FCEBEB;
+  --color-high: #EF9F27;
+  --color-high-light: #FAEEDA;
+  --color-medium: #378ADD;
+  --color-medium-light: #E6F1FB;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #1c1c1a;
+    --color-background-secondary: #242422;
+    --color-background-tertiary: #2c2c2a;
+    --color-text-primary: #f0efe9;
+    --color-text-secondary: #a8a7a0;
+    --color-text-tertiary: #6e6d68;
+    --color-border-primary: #f0efe9;
+    --color-border-secondary: #444441;
+    --color-border-tertiary: #333331;
+  }
+}
+
+/* ===================== LAYOUT ===================== */
+#app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.view { display: none; flex: 1; overflow: hidden; }
+.view.active { display: flex; flex-direction: column; animation: fadeIn 150ms ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ===================== TOPBAR ===================== */
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 48px; min-height: 48px;
+  background: var(--color-background-primary);
+  border-bottom: 1px solid var(--color-border-tertiary);
+  z-index: 100;
+}
+.topbar-logo { font-weight: 700; font-size: 14px; color: var(--color-text-primary); letter-spacing: -0.3px; }
+.topbar-logo span { color: var(--color-brand); }
+.topbar-modes { display: flex; gap: 4px; background: var(--color-background-secondary); border-radius: var(--border-radius-sm); padding: 3px; }
+.mode-pill {
+  padding: 4px 12px; border-radius: var(--border-radius-sm); font-size: 12px; font-weight: 500;
+  cursor: pointer; border: none; background: transparent; color: var(--color-text-secondary);
+  transition: all 0.15s;
+}
+.mode-pill.active-traffic { background: var(--color-brand); color: #fff; }
+.mode-pill.active-cc { background: var(--color-cc-purple); color: #fff; }
+.live-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--color-text-tertiary);
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-sm); padding: 3px 8px;
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--color-brand);
+  animation: blink 1.4s infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.topbar-spacer { flex: 1; }
+.topbar-back { font-size: 12px; color: var(--color-text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); background: none; }
+.topbar-back:hover { background: var(--color-background-secondary); }
+.agent-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+.avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+.avatar-green { background: var(--color-brand); }
+.avatar-purple { background: var(--color-cc-purple); }
+
+/* ===================== MAIN PAGE — SIDEBAR ===================== */
+.main-body { display: flex; flex: 1; overflow: hidden; }
+.sidebar {
+  width: 210px; min-width: 210px;
+  background: var(--color-background-secondary);
+  border-right: 1px solid var(--color-border-tertiary);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-block { padding: 12px 10px; }
+.sidebar-block + .sidebar-block { border-top: 1px solid var(--color-border-tertiary); }
+.sidebar-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-text-tertiary); margin-bottom: 6px; padding: 0 4px; }
+.sidebar-scroll { flex: 1; overflow-y: auto; }
+.market-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: var(--border-radius-sm);
+  cursor: pointer; font-size: 12px; color: var(--color-text-secondary);
+  border-left: 2px solid transparent; margin-bottom: 2px;
+}
+.market-item:hover { background: var(--color-background-tertiary); }
+.market-item.active { border-left-color: var(--color-brand); color: var(--color-text-primary); font-weight: 500; background: var(--color-background-primary); }
+.market-badge {
+  margin-left: auto; min-width: 18px; height: 18px; border-radius: var(--border-radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; padding: 0 4px;
+}
+.badge-red { background: var(--color-critical-light); color: var(--color-critical); }
+.badge-gray { background: var(--color-background-tertiary); color: var(--color-text-tertiary); }
+.filter-section { margin-bottom: 10px; }
+.filter-title { font-size: 10px; font-weight: 600; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.country-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.country-pill {
+  font-size: 11px; padding: 3px 7px; border-radius: var(--border-radius-sm); cursor: pointer;
+  border: 1px solid var(--color-border-tertiary); background: var(--color-background-primary);
+  color: var(--color-text-secondary);
+}
+.country-pill.selected { background: var(--color-brand-light); border-color: var(--color-brand); color: var(--color-brand-dark); }
+.status-dots { display: flex; flex-wrap: wrap; gap: 4px; }
+.status-dot-item { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; position: relative; }
+.status-dot-item:hover::after { content: attr(data-tip); position: absolute; left: 24px; top: 0; background: #222; color: #fff; font-size: 10px; white-space: nowrap; padding: 2px 6px; border-radius: 4px; z-index: 999; pointer-events: none; }
+.status-dot-item.inactive { opacity: 0.3; }
+.filter-dropdown { width: 100%; margin-top: 4px; font-size: 11px; padding: 4px 6px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; }
+
+/* ===================== CONTENT AREA ===================== */
+.content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.summary-bar {
+  display: flex; gap: 10px; padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+}
+.summary-card {
+  flex: 1; padding: 8px 12px; border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary);
+}
+.summary-card .s-label { font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 2px; }
+.summary-card .s-val { font-size: 18px; font-weight: 700; line-height: 1; }
+.s-val.red { color: var(--color-critical); }
+.s-val.amber { color: var(--color-high); }
+.content-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--color-border-tertiary);
+}
+.content-title { font-size: 14px; font-weight: 600; flex: 1; }
+.sort-group { display: flex; gap: 4px; }
+.sort-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); background: none; cursor: pointer; color: var(--color-text-secondary); }
+.sort-btn.active { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.service-list { flex: 1; overflow-y: auto; }
+
+/* ===================== SERVICE TABLE ===================== */
+.table-header {
+  display: grid; grid-template-columns: 60px 70px 1fr 140px 90px 80px 110px 90px 32px;
+  gap: 0; padding: 0 16px; height: 32px; align-items: center;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary); position: sticky; top: 0; z-index: 10;
+}
+.table-header > div { font-size: 10px; font-weight: 600; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.4px; }
+.provider-divider {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px 4px; font-size: 11px; font-weight: 600; color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border-tertiary); margin-top: 4px;
+}
+.provider-divider .prov-badge { font-size: 10px; background: var(--color-critical-light); color: var(--color-critical); padding: 1px 6px; border-radius: var(--border-radius-sm); font-weight: 700; }
+.service-row {
+  display: grid; grid-template-columns: 60px 70px 1fr 140px 90px 80px 110px 90px 32px;
+  gap: 0; padding: 0 16px; height: 40px; align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.04); cursor: pointer;
+  transition: filter 0.1s;
+}
+.service-row:hover { filter: brightness(0.97); }
+.row-in-progress-issues { background: #FCEBEB; }
+.row-pending-unsolved    { background: #FAEEDA; }
+.row-in-progress         { background: #EAF3DE; }
+.row-planned             { background: #E6F1FB; }
+.row-completed           { background: var(--color-background-secondary); }
+.cell { font-size: 12px; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell-sm { font-size: 11px; color: var(--color-text-secondary); }
+.route-name { font-size: 12px; font-weight: 500; display: block; }
+.route-meta { font-size: 10px; color: var(--color-text-tertiary); display: block; }
+.alerts-cell { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
+.alert-icon-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: var(--border-radius-sm); font-size: 12px;
+}
+.chip-critical { background: var(--color-critical-light); color: var(--color-critical); }
+.chip-high     { background: var(--color-high-light); color: var(--color-high); }
+.chip-medium   { background: var(--color-medium-light); color: var(--color-medium); }
+.chip-cc       { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.sla-cell { display: flex; flex-direction: column; gap: 2px; }
+.sla-val { font-size: 11px; font-weight: 600; }
+.sla-ok { color: var(--color-brand); }
+.sla-warn { color: var(--color-high); }
+.sla-danger { color: var(--color-critical); animation: pulse 1s ease-in-out infinite alternate; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
+.sla-bar { height: 3px; border-radius: 2px; background: var(--color-border-tertiary); width: 60px; }
+.sla-bar-fill { height: 100%; border-radius: 2px; }
+.bar-ok   { background: var(--color-brand); }
+.bar-warn { background: var(--color-high); }
+.bar-danger { background: var(--color-critical); }
+.ai-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 3px 7px; border-radius: var(--border-radius-sm); }
+.ai-ready { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.ai-analyzing { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.assign-btn { font-size: 10px; padding: 3px 8px; border-radius: var(--border-radius-sm); border: 1px dashed var(--color-border-secondary); background: none; cursor: pointer; color: var(--color-text-tertiary); }
+.assign-btn:hover { border-color: var(--color-brand); color: var(--color-brand); }
+.agent-name { font-size: 11px; display: flex; align-items: center; gap: 4px; }
+.agent-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-brand); }
+.arrow-btn { background: none; border: none; cursor: pointer; color: var(--color-text-tertiary); font-size: 14px; }
+.collapse-row { padding: 8px 16px; font-size: 11px; color: var(--color-brand); cursor: pointer; text-align: center; border-top: 1px dashed var(--color-border-tertiary); }
+.collapse-row:hover { background: var(--color-brand-light); }
+
+/* ===================== SERVICE DETAIL ===================== */
+.detail-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.service-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+}
+.service-header-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.service-title { font-size: 18px; font-weight: 700; flex: 1; }
+.service-meta { display: flex; gap: 12px; font-size: 12px; color: var(--color-text-secondary); flex-wrap: wrap; }
+.service-meta span { display: flex; align-items: center; gap: 4px; }
+.status-pill { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: var(--border-radius-sm); }
+.pill-critical { background: var(--color-critical-light); color: var(--color-critical); }
+.pill-high     { background: var(--color-high-light); color: var(--color-high); }
+.pill-medium   { background: var(--color-medium-light); color: var(--color-medium); }
+.pill-ok       { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+.btn-secondary { background: var(--color-background-secondary); border-color: var(--color-border-tertiary); color: var(--color-text-secondary); }
+.btn-secondary:hover { background: var(--color-background-tertiary); }
+.btn-brand { background: var(--color-brand); color: #fff; }
+.btn-brand:hover { background: var(--color-brand-dark); }
+.btn-critical { background: var(--color-critical); color: #fff; }
+.btn-high { background: var(--color-high); color: #fff; }
+.btn-medium { background: var(--color-medium); color: #fff; }
+.detail-extra { display: none; padding: 10px 0 4px; }
+.detail-extra.open { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.extra-field { font-size: 11px; }
+.extra-label { color: var(--color-text-tertiary); margin-bottom: 2px; }
+.extra-val { font-weight: 500; }
+.detail-body { display: flex; flex: 1; overflow: hidden; }
+/* Tabs do detalhe */
+.detail-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--color-border-tertiary); margin-bottom: 14px; }
+.detail-tab { padding: 7px 16px; font-size: 12px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; color: var(--color-text-tertiary); transition: all 0.15s; }
+.detail-tab.active { color: var(--color-brand); border-bottom-color: var(--color-brand); }
+/* Itinerário */
+.itin-wrap { overflow-x: auto; }
+.itin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.itin-table th { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--color-text-tertiary); letter-spacing: 0.4px; padding: 4px 10px; text-align: left; border-bottom: 2px solid var(--color-border-tertiary); white-space: nowrap; }
+.itin-table td { padding: 9px 10px; border-bottom: 1px solid var(--color-border-tertiary); vertical-align: middle; }
+.itin-row.itin-done { opacity: 0.55; }
+.itin-row.itin-current td { background: var(--color-brand-light); }
+.itin-stop-name { font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.stop-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.stop-dot.done { background: var(--color-brand); }
+.stop-dot.current { background: var(--color-brand); animation: blink 1.2s infinite; }
+.stop-dot.pending { background: var(--color-border-secondary); }
+.itin-time { font-family: monospace; font-size: 11px; }
+.itin-eta-late { color: var(--color-critical); font-weight: 700; }
+.itin-eta-ok { color: var(--color-brand); font-weight: 600; }
+.itin-delta-late { color: var(--color-critical); font-size: 10px; font-weight: 700; }
+.itin-delta-ok { color: var(--color-brand); font-size: 10px; }
+.itin-real-done { color: var(--color-brand); font-family: monospace; }
+.itin-pax-chip { font-size: 10px; background: var(--color-background-secondary); padding: 1px 6px; border-radius: 3px; color: var(--color-text-secondary); }
+.live-badge-sm { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--color-brand); margin-left: auto; }
+.live-dot-sm { width: 5px; height: 5px; border-radius: 50%; background: var(--color-brand); animation: blink 1.4s infinite; }
+.detail-left { flex: 1; overflow-y: auto; padding: 16px; }
+.detail-right { width: 268px; min-width: 268px; overflow-y: auto; border-left: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+.section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.section-title { font-size: 13px; font-weight: 600; }
+.section-sub { font-size: 11px; color: var(--color-text-tertiary); }
+.cascade-banner { display: flex; align-items: center; gap: 8px; background: var(--color-brand-light); border: 1px solid var(--color-brand); border-radius: var(--border-radius-md); padding: 8px 12px; margin-bottom: 12px; font-size: 11px; color: var(--color-brand-dark); }
+.cc-banner { display: flex; align-items: center; gap: 8px; background: var(--color-cc-purple-light); border: 1px solid var(--color-cc-purple); border-radius: var(--border-radius-md); padding: 8px 12px; margin-bottom: 12px; font-size: 11px; color: var(--color-cc-purple); }
+.alert-card { border-radius: var(--border-radius-md); border: 1px solid var(--color-border-tertiary); margin-bottom: 10px; overflow: hidden; }
+.alert-card-critical { border-left: 3px solid var(--color-critical); }
+.alert-card-high { border-left: 3px solid var(--color-high); }
+.alert-card-medium { border-left: 3px solid var(--color-medium); }
+.alert-card-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--color-background-primary); flex-wrap: wrap; }
+.alert-type-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: var(--border-radius-sm); text-transform: uppercase; }
+.badge-critical { background: var(--color-critical-light); color: var(--color-critical); }
+.badge-high     { background: var(--color-high-light); color: var(--color-high); }
+.badge-medium   { background: var(--color-medium-light); color: var(--color-medium); }
+.open-pill { font-size: 10px; padding: 2px 6px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-secondary); color: var(--color-text-secondary); }
+.sla-chip { font-size: 11px; font-weight: 600; margin-left: auto; }
+.resolve-btn { padding: 5px 14px; border-radius: var(--border-radius-sm); font-size: 11px; font-weight: 600; color: #fff; border: none; cursor: pointer; margin-left: auto; }
+.alert-desc { padding: 8px 12px 10px; font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); }
+
+/* ===================== COPILOT PANEL ===================== */
+.copilot-header { background: var(--color-brand-dark); color: #fff; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+.copilot-title { font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.copilot-badge { font-size: 10px; background: var(--color-brand); padding: 2px 7px; border-radius: var(--border-radius-sm); }
+.copilot-body { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.ai-rec-card { background: var(--color-brand-light); border-radius: var(--border-radius-md); padding: 12px; border: 1px solid #b6e8d5; }
+.ai-rec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--color-brand-dark); letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.ai-rec-text { font-size: 12px; color: var(--color-brand-dark); line-height: 1.5; margin-bottom: 10px; }
+.ai-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.ai-action-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--border-radius-sm); cursor: pointer; border: 1px solid; font-weight: 500; }
+.aab-green { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.aab-amber { background: var(--color-high-light); color: var(--color-high); border-color: var(--color-high); }
+.ai-feedback { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--color-text-tertiary); }
+.fb-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--color-border-secondary); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.15s; }
+.fb-btn.liked { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.fb-btn.disliked { background: var(--color-critical); color: #fff; border-color: var(--color-critical); }
+.info-card { background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+.info-card-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); margin-bottom: 8px; }
+.driver-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.driver-stat { font-size: 11px; }
+.ds-label { color: var(--color-text-tertiary); }
+.ds-val { font-weight: 600; }
+.push-status { font-size: 11px; display: flex; align-items: center; gap: 6px; }
+.push-sent { color: var(--color-brand); }
+.push-not-read { color: var(--color-high); }
+.today-svc-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-top: 1px solid var(--color-border-tertiary); }
+.today-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.dot-critical { background: var(--color-critical); }
+.dot-risk { background: var(--color-high); }
+.dot-ok { background: var(--color-brand); }
+.today-info { flex: 1; }
+.today-route { font-size: 11px; font-weight: 500; }
+.today-eta { font-size: 10px; color: var(--color-text-tertiary); }
+.today-note { font-size: 10px; color: var(--color-cc-purple); font-style: italic; }
+.log-timeline { padding: 10px 12px; }
+.log-item { display: flex; gap: 8px; padding-bottom: 10px; position: relative; }
+.log-item::before { content: ''; position: absolute; left: 5px; top: 14px; bottom: 0; width: 1px; background: var(--color-border-tertiary); }
+.log-item:last-child::before { display: none; }
+.log-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+.log-dot-action { background: var(--color-brand); }
+.log-dot-alert  { background: var(--color-critical); }
+.log-dot-sla    { background: var(--color-high); }
+.log-dot-cc     { background: var(--color-cc-purple); }
+.log-content { flex: 1; }
+.log-time { font-size: 10px; color: var(--color-text-tertiary); }
+.log-text { font-size: 11px; }
+.log-sub  { font-size: 10px; color: var(--color-text-secondary); font-style: italic; }
+.log-tag  { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: var(--border-radius-sm); text-transform: uppercase; margin-top: 2px; display: inline-block; }
+.tag-action { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.tag-alert  { background: var(--color-critical-light); color: var(--color-critical); }
+.tag-sla    { background: var(--color-high-light); color: var(--color-high); }
+.tag-cc     { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+
+/* ===================== RESOLVE POPUP ===================== */
+/* ===== CHAT RESOLVE POPUP (v2) ===== */
+.popup-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 150ms ease;
+}
+.chat-popup {
+  background: var(--color-background-primary); border-radius: var(--border-radius-lg);
+  width: 620px; max-width: 96vw; height: 82vh; max-height: 720px;
+  display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+.chat-popup-header {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary); flex-shrink: 0;
+}
+.chat-popup-title { font-size: 13px; font-weight: 700; }
+.chat-popup-sub { font-size: 11px; color: var(--color-text-tertiary); }
+.chat-popup-sla { font-size: 11px; font-weight: 700; margin-left: auto; animation: pulse 1s infinite alternate; }
+.popup-close { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--color-text-tertiary); padding: 2px; }
+/* Context bar */
+.chat-ctx { display: flex; gap: 16px; padding: 8px 16px; background: var(--color-background-secondary); border-bottom: 1px solid var(--color-border-tertiary); flex-shrink: 0; flex-wrap: wrap; }
+.chat-ctx-item { font-size: 11px; color: var(--color-text-tertiary); }
+.chat-ctx-item strong { color: var(--color-text-primary); }
+/* Messages */
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.chat-msg { display: flex; gap: 8px; align-items: flex-start; }
+.chat-msg.agent { flex-direction: row-reverse; }
+.chat-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 2px; }
+.chat-avatar.bot { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.chat-avatar.agent { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.chat-bubble { max-width: 82%; }
+.chat-bubble.bot { background: var(--color-background-secondary); border: 1px solid var(--color-border-tertiary); border-radius: 4px 12px 12px 12px; padding: 10px 13px; font-size: 12px; line-height: 1.55; }
+.chat-bubble.agent-bubble { background: var(--color-brand); color: #fff; border-radius: 12px 4px 12px 12px; padding: 10px 13px; font-size: 12px; line-height: 1.55; }
+.chat-bubble-time { font-size: 10px; color: var(--color-text-tertiary); margin-top: 4px; }
+.agent .chat-bubble-time { text-align: right; }
+/* Suggested actions */
+.chat-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chat-action-btn {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+  padding: 5px 12px; border-radius: 20px; border: 1.5px solid; cursor: pointer; transition: all 0.15s;
+}
+.chat-action-btn.primary { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.chat-action-btn.primary:hover { background: var(--color-brand-dark); }
+.chat-action-btn.warning { background: var(--color-high-light); color: var(--color-high); border-color: var(--color-high); }
+.chat-action-btn.danger  { background: var(--color-critical-light); color: var(--color-critical); border-color: var(--color-critical); }
+.chat-action-btn.neutral { background: var(--color-background-secondary); color: var(--color-text-secondary); border-color: var(--color-border-secondary); }
+.chat-action-btn.neutral:hover { border-color: var(--color-border-primary); color: var(--color-text-primary); }
+.chat-action-btn:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+/* Escalate inline */
+.chat-escalate { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.chat-esc-btn { flex: 1; min-width: 140px; padding: 8px 12px; border-radius: var(--border-radius-md); cursor: pointer; border: 1.5px solid; text-align: left; transition: all 0.15s; }
+.chat-esc-btn:hover { opacity: 0.85; }
+.esc-amber { background: var(--color-high-light); border-color: var(--color-high); color: var(--color-high); }
+.esc-red   { background: var(--color-critical-light); border-color: var(--color-critical); color: var(--color-critical); }
+.esc-title { font-size: 12px; font-weight: 600; }
+.esc-sub   { font-size: 10px; opacity: 0.8; }
+/* Status chip inline */
+.chat-status-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+.chip-done { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.chip-sent { background: var(--color-high-light); color: var(--color-high); }
+/* Input area */
+.chat-input-area { padding: 10px 14px; border-top: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+.chat-input { flex: 1; resize: none; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 8px 10px; font-size: 12px; font-family: var(--font-sans); background: var(--color-background-primary); color: var(--color-text-primary); outline: none; max-height: 80px; line-height: 1.5; }
+.chat-input:focus { border-color: var(--color-brand); }
+.chat-send-btn { padding: 8px 14px; background: var(--color-brand); color: #fff; border: none; border-radius: var(--border-radius-md); cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.chat-send-btn:hover { background: var(--color-brand-dark); }
+/* Resolve footer */
+.chat-footer { padding: 8px 14px; border-top: 1px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.res-opt { font-size: 11px; padding: 4px 10px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-secondary); cursor: pointer; background: var(--color-background-primary); color: var(--color-text-secondary); }
+.res-opt.active { background: var(--color-brand); color: #fff; border-color: var(--color-brand); }
+.footer-spacer { flex: 1; }
+.escalate-row { display: flex; gap: 8px; }
+.escalate-btn { flex: 1; padding: 8px 12px; border-radius: var(--border-radius-md); cursor: pointer; border: 1px solid; text-align: left; }
+.popup-footer { padding: 12px 16px; border-top: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); display: flex; align-items: center; gap: 10px; }
+.btn-save { background: var(--color-background-secondary); border: 1px solid var(--color-border-secondary); color: var(--color-text-primary); }
+.btn-close-alert { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+
+/* ===================== CUSTOMER CARE ===================== */
+.cc-layout { display: flex; flex: 1; overflow: hidden; }
+.chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.chat-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--color-border-tertiary); }
+.chat-header-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.chat-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--color-cc-purple); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+.new-chat-btn { margin-left: auto; font-size: 11px; padding: 5px 10px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); background: none; cursor: pointer; color: var(--color-text-secondary); }
+.new-chat-btn:hover { background: var(--color-background-secondary); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.msg { display: flex; gap: 8px; max-width: 90%; }
+.msg.msg-bot { align-self: flex-start; }
+.msg.msg-user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--color-cc-purple); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+.msg-bubble { max-width: 480px; padding: 8px 12px; border-radius: var(--border-radius-lg); font-size: 12px; line-height: 1.5; }
+.msg-bot .msg-bubble { background: var(--color-background-secondary); border-bottom-left-radius: 4px; }
+.msg-user .msg-bubble { background: var(--color-cc-purple); color: #fff; border-bottom-right-radius: 4px; }
+.msg-card { background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); overflow: hidden; margin-top: 8px; font-size: 12px; }
+.card-header-purple { background: var(--color-cc-purple-light); padding: 8px 12px; border-bottom: 1px solid #d5d2f8; }
+.card-name { font-weight: 700; font-size: 13px; color: var(--color-cc-purple); }
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 12px; }
+.card-field { font-size: 11px; }
+.card-field-label { color: var(--color-text-tertiary); }
+.card-field-val { font-weight: 500; }
+.booking-section { padding: 10px 12px; }
+.booking-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 6px; }
+.booking-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--color-border-tertiary); font-size: 11px; }
+.booking-route { flex: 1; font-weight: 500; }
+.booking-time { color: var(--color-text-tertiary); }
+.booking-actions { display: flex; gap: 4px; }
+.booking-btn { font-size: 10px; padding: 2px 8px; border-radius: var(--border-radius-sm); cursor: pointer; border: 1px solid; }
+.bb-view  { background: var(--color-cc-purple-light); border-color: var(--color-cc-purple); color: var(--color-cc-purple); }
+.bb-cancel { background: var(--color-critical-light); border-color: var(--color-critical); color: var(--color-critical); }
+.reading-item { display: flex; align-items: center; gap: 8px; padding: 5px 12px; font-size: 11px; border-top: 1px solid var(--color-border-tertiary); }
+.read-ok  { color: var(--color-brand); font-weight: 600; font-size: 10px; }
+.read-err { color: var(--color-critical); font-weight: 600; font-size: 10px; }
+.report-opts { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.report-opt {
+  padding: 8px 10px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary);
+  cursor: pointer; font-size: 12px; transition: all 0.15s;
+}
+.report-opt.selected { border-color: var(--color-cc-purple); background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.report-textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-sm); font-size: 12px; font-family: var(--font-sans); min-height: 60px; resize: vertical; background: var(--color-background-primary); color: var(--color-text-primary); }
+.send-traffic-btn { background: var(--color-cc-purple); color: #fff; border: none; padding: 7px 16px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.send-traffic-btn:hover { opacity: 0.9; }
+.resolution-card { background: #F0FAF6; border: 1px solid var(--color-brand); border-radius: var(--border-radius-md); padding: 12px; }
+.res-card-title { font-size: 12px; font-weight: 700; color: var(--color-brand-dark); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.res-card-text { font-size: 12px; color: var(--color-brand-dark); margin-bottom: 10px; }
+.uber-btn { background: #000; color: #fff; border: none; padding: 7px 16px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.uber-btn:disabled { opacity: 0.5; cursor: default; }
+.chat-input-area { padding: 12px 16px; border-top: 1px solid var(--color-border-tertiary); display: flex; gap: 8px; }
+.chat-input { flex: 1; padding: 8px 12px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 12px; background: var(--color-background-primary); color: var(--color-text-primary); outline: none; }
+.chat-input:focus { border-color: var(--color-cc-purple); }
+.chat-send-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--color-cc-purple); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.chat-send-btn:hover { opacity: 0.9; }
+.typing-indicator { display: flex; gap: 4px; align-items: center; padding: 8px 12px; }
+.typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-cc-purple); animation: typing 1.2s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+.history-panel { width: 220px; min-width: 220px; border-left: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); overflow-y: auto; }
+.history-header { padding: 12px 14px; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 6px; }
+.history-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--color-text-tertiary); padding: 10px 14px 4px; }
+.history-item { padding: 8px 14px; cursor: pointer; border-bottom: 1px solid var(--color-border-tertiary); transition: background 0.1s; }
+.history-item:hover { background: var(--color-background-tertiary); }
+.history-item.active { background: var(--color-cc-purple-light); }
+.hist-name { font-size: 12px; font-weight: 500; }
+.hist-route { font-size: 10px; color: var(--color-text-tertiary); }
+.hist-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 2px; }
+.hist-time { font-size: 10px; color: var(--color-text-tertiary); }
+.hist-badge { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: var(--border-radius-sm); text-transform: uppercase; }
+.hb-green  { background: var(--color-brand-light); color: var(--color-brand-dark); }
+.hb-purple { background: var(--color-cc-purple-light); color: var(--color-cc-purple); }
+.hb-amber  { background: var(--color-high-light); color: var(--color-high); }
+
+/* ===================== TOAST ===================== */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { padding: 10px 16px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 500; min-width: 200px; max-width: 320px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideUp 0.2s ease; pointer-events: all; display: flex; align-items: center; gap: 8px; }
+.toast-success { background: var(--color-brand); color: #fff; }
+.toast-info    { background: var(--color-cc-purple); color: #fff; }
+.toast-warning { background: var(--color-high); color: #fff; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===================== MODAL (live tracking) ===================== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; }
+.modal-box { background: var(--color-background-primary); border-radius: var(--border-radius-lg); width: 480px; max-width: 96vw; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--color-border-tertiary); }
+.modal-title { font-size: 14px; font-weight: 600; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--color-text-tertiary); }
+.map-placeholder { height: 200px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary); font-size: 12px; margin: 16px; border-radius: var(--border-radius-md); border: 1px dashed var(--color-border-secondary); }
+.modal-footer { padding: 12px 16px; border-top: 1px solid var(--color-border-tertiary); display: flex; justify-content: flex-end; }
+
+/* ===================== PROTOTYPE BADGE ===================== */
+.proto-badge { position: fixed; bottom: 8px; left: 8px; font-size: 10px; color: var(--color-text-tertiary); background: var(--color-background-secondary); padding: 3px 8px; border-radius: var(--border-radius-sm); z-index: 5; border: 1px solid var(--color-border-tertiary); }
+
+/* ===================== SUMMARY CARDS CLICÁVEIS ===================== */
+.summary-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+.summary-card:hover { border-color: var(--color-border-secondary); }
+.summary-card.card-active { border-color: var(--color-brand); box-shadow: 0 0 0 2px var(--color-brand-light); }
+.summary-card.card-active-red { border-color: var(--color-critical); box-shadow: 0 0 0 2px var(--color-critical-light); }
+.summary-card.card-active-amber { border-color: var(--color-high); box-shadow: 0 0 0 2px var(--color-high-light); }
+
+/* ===================== ALERT TYPE FILTER (tabela) ===================== */
+.alert-filter-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-right: 10px; border-right: 1px solid var(--color-border-tertiary); margin-right: 4px; }
+.alert-filter-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 4px 9px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; white-space: nowrap; }
+.alert-filter-chip:hover { border-color: var(--color-border-secondary); background: var(--color-background-tertiary); }
+.alert-filter-chip.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+.alert-filter-chip i { font-size: 12px; }
+.filter-label { font-size: 10px; color: var(--color-text-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; padding-right: 2px; }
+/* Botão live tracking destacado */
+.btn-live { background: var(--color-brand-dark); color: #fff; border-color: var(--color-brand-dark); font-weight: 600; padding: 6px 14px; margin-right: 4px; }
+.btn-live:hover { background: var(--color-brand); border-color: var(--color-brand); }
+.btn-live i { color: #4fd1b8; }
+
+/* ===================== LIVE TRACKING MAP (LEAFLET) ===================== */
+.map-overlay { position: fixed; inset: 0; background: #1a1a18; z-index: 300; display: flex; flex-direction: column; animation: fadeIn 200ms ease; }
+.map-header { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid #fff; flex-shrink: 0; background: #141412; }
+.map-logo { font-size: 13px; font-weight: 700; color: var(--color-brand); letter-spacing: -0.3px; }
+.map-logo span { color: #fff; }
+.map-title { font-size: 12px; color: #fff; }
+.map-live { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #fff; }
+.map-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-brand); animation: blink 1.4s infinite; }
+.map-close { background: none; border: 1.5px solid #fff; color: #fff; padding: 5px 12px; border-radius: var(--border-radius-sm); cursor: pointer; font-size: 11px; margin-left: auto; transition: all 0.15s; }
+.map-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+/* Toolbar de filtros + tema */
+.map-toolbar { display: flex; align-items: center; gap: 6px; padding: 7px 16px; background: #0e0e0c; border-bottom: 1px solid #fff; flex-shrink: 0; overflow-x: auto; }
+.map-toolbar::-webkit-scrollbar { height: 2px; }
+.map-toolbar::-webkit-scrollbar-thumb { background: #fff; }
+.map-tlabel { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #fff; letter-spacing: 0.6px; white-space: nowrap; flex-shrink: 0; }
+.map-tsep { width: 1px; height: 18px; background: #fff; flex-shrink: 0; margin: 0 4px; }
+.map-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 3px; font-size: 10px; font-weight: 600; border: 1.5px solid #fff; color: #fff; background: none; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.12s; font-family: var(--font-sans); }
+.map-chip:hover { background: rgba(255,255,255,0.15); }
+.map-chip.active { color: #fff; }
+.map-chip.c-all.active        { background: rgba(255,255,255,0.2); border-color: #fff; }
+.map-chip.c-issues.active     { background: #E24B4A; border-color: #E24B4A; }
+.map-chip.c-pending.active    { background: #EF9F27; border-color: #EF9F27; }
+.map-chip.c-progress.active   { background: #1D9E75; border-color: #1D9E75; }
+.map-chip.c-planned.active    { background: #378ADD; border-color: #378ADD; }
+.map-chip.c-completed.active  { background: #6b6966; border-color: #6b6966; }
+.map-chip.c-alrt.active { background: var(--color-brand); border-color: var(--color-brand); }
+.map-theme-btn { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; border: 1.5px solid #fff; color: #fff; background: none; cursor: pointer; flex-shrink: 0; transition: all 0.12s; font-family: var(--font-sans); }
+.map-theme-btn:hover { background: rgba(255,255,255,0.15); }
+.map-theme-btn.active { background: var(--color-brand); border-color: var(--color-brand); color: #fff; }
+.map-body { flex: 1; position: relative; overflow: hidden; }
+#leaflet-map { width: 100%; height: 100%; }
+/* Popup Leaflet customizado */
+.leaflet-popup-content-wrapper { background: #1c1c1a !important; border: 1px solid #fff !important; border-radius: 6px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important; }
+.leaflet-popup-tip { background: #1c1c1a !important; }
+.leaflet-popup-content { margin: 12px 14px !important; color: #fff; font-size: 12px; min-width: 200px; font-family: var(--font-sans); }
+.lp-route { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #fff; }
+.lp-btn { display: block; margin-top: 10px; text-align: center; background: var(--color-brand); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%; }
+.lp-btn:hover { background: var(--color-brand-dark); }
+/* Stats overlay */
+.map-stats { position: absolute; bottom: 16px; right: 10px; z-index: 1000; background: rgba(14,14,12,0.88); padding: 8px 12px; border-radius: 4px; border: 1.5px solid #fff; display: flex; gap: 16px; }
+.mstat { font-size: 10px; color: #fff; }
+.mstat strong { font-size: 13px; color: #fff; margin-left: 4px; }
+
+/* ===================== TOOLTIP ===================== */
+.tt-wrap { position: relative; display: inline-flex; }
+.tt-icon { width: 16px; height: 16px; border-radius: 50%; background: var(--color-cc-purple-light); color: var(--color-cc-purple); font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: help; }
+.tt-box { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 6px; background: #222; color: #fff; font-size: 10px; padding: 5px 8px; border-radius: var(--border-radius-sm); white-space: nowrap; max-width: 220px; white-space: normal; text-align: center; z-index: 500; pointer-events: none; }
+.tt-wrap:hover .tt-box { display: block; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- VIEW: MAIN PAGE -->
+  <div class="view active" id="view-main-page">
+    <div class="topbar">
+      <div class="topbar-logo">BUSUP <span>brainer</span></div>
+      <div class="topbar-modes">
+        <button class="mode-pill active-traffic" onclick="switchMode('traffic')">tráfego</button>
+        <button class="mode-pill" onclick="switchMode('cc')">customer care</button>
+      </div>
+      <div class="live-badge" id="live-badge-main"><div class="live-dot" id="live-dot-main"></div>live · atualização automática</div>
+      <button id="auto-update-toggle" onclick="toggleAutoUpdate()" style="display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);" title="Ativar/desativar atualização automática">
+        <i class="ti ti-refresh" id="auto-update-icon"></i><span id="auto-update-label">auto</span>
+      </button>
+      <div class="topbar-spacer"></div>
+      <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
+    </div>
+    <div class="main-body">
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="sidebar-block">
+          <div class="sidebar-label">mercados ativos</div>
+          <div id="market-nav"></div>
+        </div>
+        <div class="sidebar-block sidebar-scroll">
+          <div class="filter-section">
+            <div class="filter-title">países</div>
+            <div class="country-pills" id="country-pills"></div>
+          </div>
+          <div class="filter-section">
+            <div class="filter-title">status do serviço</div>
+            <div class="status-dots" id="status-dots"></div>
+          </div>
+          <div class="filter-section">
+            <select class="filter-dropdown"><option>business unit</option></select>
+            <select class="filter-dropdown"><option>site / cliente</option></select>
+            <select class="filter-dropdown"><option>provider</option></select>
+            <select class="filter-dropdown"><option>tipo de rota</option></select>
+            <select class="filter-dropdown"><option>nome da rota</option></select>
+            <select class="filter-dropdown"><option>prioridade</option></select>
+          </div>
+        </div>
+      </div>
+      <!-- CONTENT -->
+      <div class="content-area">
+        <div class="summary-bar" id="summary-bar"></div>
+        <div class="content-header">
+          <div class="content-title" id="market-title">brasil · 5 serviços</div>
+          <div class="alert-filter-bar" id="alert-filter-bar"></div>
+          <div class="sort-group">
+            <button class="sort-btn active" onclick="setSort('provider')">por provider</button>
+            <button class="sort-btn" onclick="setSort('priority')">por prioridade</button>
+          </div>
+          <button class="btn btn-live" onclick="openMainLiveTracking()"><i class="ti ti-map-2"></i> live tracking</button>
+        </div>
+        <div class="service-list" id="service-list-container">
+          <div class="table-header">
+            <div>hora local</div><div>hora serviço</div><div>rota</div><div>site · cliente</div>
+            <div>alertas</div><div>SLA</div><div>IA brainer</div><div>agente</div><div></div>
+          </div>
+          <div id="service-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: SERVICE DETAIL -->
+  <div class="view" id="view-service-detail">
+    <div class="topbar">
+      <button class="topbar-back" onclick="navigateTo('main-page')"><i class="ti ti-arrow-left"></i> brasil</button>
+      <div class="topbar-logo">BUSUP <span>brainer</span></div>
+      <div class="live-badge"><div class="live-dot"></div>live</div>
+      <div class="topbar-spacer"></div>
+      <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
+    </div>
+    <div class="detail-layout" id="detail-layout"></div>
+  </div>
+
+  <!-- VIEW: CC CHATBOT -->
+  <div class="view" id="view-cc-chatbot">
+    <div class="topbar">
+      <div class="topbar-logo">BUSUP <span>brainer</span></div>
+      <div class="topbar-modes">
+        <button class="mode-pill" onclick="switchMode('traffic')">tráfego</button>
+        <button class="mode-pill active-cc" onclick="switchMode('cc')">customer care</button>
+      </div>
+      <div class="live-badge"><div class="live-dot"></div>live</div>
+      <div class="topbar-spacer"></div>
+      <div class="agent-chip">Ana Lima · CC Global <div class="avatar avatar-purple">AL</div></div>
+    </div>
+    <div class="cc-layout">
+      <div class="chat-area">
+        <div class="chat-header">
+          <div class="chat-icon"><i class="ti ti-robot"></i></div>
+          <div class="chat-header-title">assistente CC · brainer</div>
+          <button class="new-chat-btn" onclick="newChat()"><i class="ti ti-plus"></i> nova conversa</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <input class="chat-input" id="chat-input" placeholder="Digite um nome, ID ou describe o problema..." onkeydown="if(event.key==='Enter')sendChatMessage()" />
+          <button class="chat-send-btn" onclick="sendChatMessage()"><i class="ti ti-send"></i></button>
+        </div>
+      </div>
+      <div class="history-panel">
+        <div class="history-header"><i class="ti ti-clock"></i> histórico</div>
+        <div class="history-group-label">hoje</div>
+        <div class="history-item active">
+          <div class="hist-name">Maria da Silva</div>
+          <div class="hist-route">Guru 9 — Entrada</div>
+          <div class="hist-meta"><span class="hist-time">05:52</span><span class="hist-badge hb-green">resolvido</span></div>
+        </div>
+        <div class="history-item">
+          <div class="hist-name">João Santos</div>
+          <div class="hist-route">95 — Cotia - E</div>
+          <div class="hist-meta"><span class="hist-time">06:10</span><span class="hist-badge hb-purple">reportado</span></div>
+        </div>
+        <div class="history-item">
+          <div class="hist-name">Ana Costa</div>
+          <div class="hist-route">07 — Itapecerica</div>
+          <div class="hist-meta"><span class="hist-time">06:31</span><span class="hist-badge hb-amber">aguardando</span></div>
+        </div>
+        <div class="history-group-label">ontem</div>
+        <div class="history-item">
+          <div class="hist-name">Pedro Alves</div>
+          <div class="hist-route">Rota LX-3 — Entrada</div>
+          <div class="hist-meta"><span class="hist-time">07:18</span><span class="hist-badge hb-green">resolvido</span></div>
+        </div>
+        <div class="history-item">
+          <div class="hist-name">Carla Lima</div>
+          <div class="hist-route">Guru 5 — Entrada</div>
+          <div class="hist-meta"><span class="hist-time">05:55</span><span class="hist-badge hb-green">resolvido</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTOTYPE BADGE -->
+  <div class="proto-badge">protótipo · dados mockados</div>
+</div>
+
+<script>
+/* ===================== DADOS MOCKADOS ===================== */
+const SERVICES = [
+  { id:'svc-001', route:'Guru 9 — Entrada', client:'Amazon Guru', site:'Betim MG 02', provider:'AB Turismo', market:'brasil', localTime:'05:42', serviceTime:'05:42 BR', pax:46, capacity:52, vehicle:'BUS-4821', driverName:'Carlos Mendes', driverId:'DRV-2281', lastReading:'05:41', status:'in-progress-issues', alerts:[{id:'alt-001',type:'no_play',severity:'critical',slaMin:8,alertStatus:'open',resolutionStatus:'pending',fromCC:true},{id:'alt-002',type:'major_delay',severity:'high',slaMin:31,alertStatus:'open',resolutionStatus:'pending',fromCC:false,dependsOn:'alt-001'}], agent:'Eriqueson M.', aiReady:true },
+  { id:'svc-002', route:'Guru 5 — Entrada', client:'Amazon Guru', site:'Barueri SP 07', provider:'AB Turismo', market:'brasil', localTime:'05:50', serviceTime:'05:50 BR', pax:38, capacity:45, vehicle:'BUS-3317', driverName:'José Ferreira', driverId:'DRV-1190', lastReading:'05:49', status:'pending-unsolved', alerts:[{id:'alt-003',type:'no_stop',severity:'high',slaMin:31,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:true },
+  { id:'svc-003', route:'95 — Cotia via Itapevi - E', client:'Mercado Livre', site:'Barueri SP 07', provider:'AB Turismo', market:'brasil', localTime:'06:00', serviceTime:'06:00 BR', pax:22, capacity:44, vehicle:'BUS-2208', driverName:'Marcos Silva', driverId:'DRV-4403', lastReading:'05:58', status:'in-progress', alerts:[{id:'alt-004',type:'minor_delay',severity:'medium',slaMin:52,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:false },
+  { id:'svc-004', route:'07 — Itapecerica - S', client:'Boticário', site:'MWM Motores SP', provider:'Expresso Palmares', market:'brasil', localTime:'06:10', serviceTime:'06:10 BR', pax:51, capacity:55, vehicle:'BUS-7741', driverName:'Roberto Costa', driverId:'DRV-8821', lastReading:'06:08', status:'in-progress-issues', alerts:[{id:'alt-005',type:'no_play',severity:'critical',slaMin:6,alertStatus:'open',resolutionStatus:'pending',fromCC:false},{id:'alt-006',type:'driver_alert',severity:'critical',slaMin:6,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:'Eriqueson M.', aiReady:true },
+  { id:'svc-005', route:'15 — Contagem - E', client:'Volkswagen', site:'Betim MG 02', provider:'Expresso Palmares', market:'brasil', localTime:'06:15', serviceTime:'06:15 BR', pax:18, capacity:50, vehicle:'BUS-5530', driverName:'Antônio Lima', driverId:'DRV-3312', lastReading:null, status:'planned', alerts:[{id:'alt-007',type:'no_readings',severity:'medium',slaMin:null,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:false },
+  { id:'svc-006', route:'Rota LX-3 — Entrada', client:'Accenture PT', site:'Lisboa Norte', provider:'Carris Metropolitana', market:'portugal', localTime:'07:15', serviceTime:'08:15 PT', pax:34, capacity:40, vehicle:'CAR-LX09', driverName:'João Santos', driverId:'DRV-PT-091', lastReading:'07:12', status:'in-progress-issues', alerts:[{id:'alt-008',type:'major_delay',severity:'critical',slaMin:12,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:true },
+];
+
+const ITINERARY_DATA = {
+  'svc-001': [
+    { stop:'Terminal Lapa', scheduled:'05:20', eta:'05:20', real:'05:20', paxBoarded:8,  status:'done' },
+    { stop:'Av. Francisco Morato', scheduled:'05:28', eta:'05:29', real:'05:29', paxBoarded:14, status:'done' },
+    { stop:'Pça. Ernesto Igel',    scheduled:'05:35', eta:'05:38', real:'05:38', paxBoarded:12, status:'done' },
+    { stop:'Rod. Anhanguera km 22',scheduled:'05:44', eta:'05:52', real:null,   paxBoarded:null, status:'current' },
+    { stop:'Betim MG 02 (Destino)',scheduled:'05:55', eta:'06:08', real:null,   paxBoarded:null, status:'pending' },
+  ],
+  'svc-002': [
+    { stop:'Terminal Barra Funda', scheduled:'05:38', eta:'05:38', real:'05:38', paxBoarded:10, status:'done' },
+    { stop:'Av. Ermano Marchetti', scheduled:'05:45', eta:'05:46', real:'05:46', paxBoarded:16, status:'done' },
+    { stop:'Alphaville Acesso',    scheduled:'05:52', eta:'05:54', real:null,   paxBoarded:null, status:'current' },
+    { stop:'Barueri SP 07 (Destino)', scheduled:'06:00', eta:'06:03', real:null, paxBoarded:null, status:'pending' },
+  ],
+  'svc-003': [
+    { stop:'Terminal Leopoldina',  scheduled:'05:45', eta:'05:45', real:'05:45', paxBoarded:6,  status:'done' },
+    { stop:'Cotia Centro',         scheduled:'05:55', eta:'05:57', real:'05:57', paxBoarded:8,  status:'done' },
+    { stop:'Itapevi BR-374',       scheduled:'06:05', eta:'06:09', real:null,   paxBoarded:null, status:'current' },
+    { stop:'Barueri SP 07 (Destino)', scheduled:'06:15', eta:'06:20', real:null, paxBoarded:null, status:'pending' },
+  ],
+  'svc-004': [
+    { stop:'Pça. da República',    scheduled:'05:55', eta:'05:55', real:'05:55', paxBoarded:20, status:'done' },
+    { stop:'Itapecerica da Serra', scheduled:'06:10', eta:'06:10', real:null,   paxBoarded:null, status:'current' },
+    { stop:'MWM Motores SP (Destino)', scheduled:'06:20', eta:'06:20', real:null, paxBoarded:null, status:'pending' },
+  ],
+  'svc-005': [
+    { stop:'BH — Terminal Calafate', scheduled:'06:05', eta:'06:05', real:null, paxBoarded:null, status:'pending' },
+    { stop:'Contagem Centro',        scheduled:'06:12', eta:'06:12', real:null, paxBoarded:null, status:'pending' },
+    { stop:'Betim MG 02 (Destino)', scheduled:'06:22', eta:'06:22', real:null, paxBoarded:null, status:'pending' },
+  ],
+  'svc-006': [
+    { stop:'Marquês de Pombal',    scheduled:'07:05', eta:'07:05', real:'07:06', paxBoarded:12, status:'done' },
+    { stop:'Entrecampos',          scheduled:'07:12', eta:'07:14', real:'07:15', paxBoarded:10, status:'done' },
+    { stop:'Campo Grande',         scheduled:'07:22', eta:'07:30', real:null,   paxBoarded:null, status:'current' },
+    { stop:'Lisboa Norte (Destino)', scheduled:'07:35', eta:'07:48', real:null, paxBoarded:null, status:'pending' },
+  ],
+};
+
+const PROCEDURES = {
+  no_play:{ title:'No Play', client:'Amazon BR', steps:[{text:'Verificar tracking — confirmar posição do veículo',cta:null},{text:'Contatar operador e identificar o motivo da não iniciação',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se sem resposta em 20 min → comunicar passageiros sobre o atraso',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Se motorista não localizado em 30 min → solicitar veículo substituto',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
+  major_delay:{ title:'Major Delay', client:'Amazon BR', steps:[{text:'Verificar live tracking — confirmar se há trânsito real na rota',cta:null},{text:'Contatar operador para identificar causa do atraso',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Enviar push informando atraso aos passageiros',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Se atraso superior a 30 min → avaliar substituição',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
+  no_stop:{ title:'No Stop', client:'Mercado Livre BR', steps:[{text:'Verificar tracking — confirmar se ponto foi de fato pulado',cta:null},{text:'Contatar motorista via operador para entender o motivo',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se ponto pulado confirmado → verificar passageiros impactados',cta:{label:'ver passageiros',icon:'ti-users',color:'secondary'}},{text:'Autorizar transporte alternativo se necessário',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
+  driver_alert:{ title:'Driver Alert', client:'Boticário BR', steps:[{text:'Verificar categoria do alerta enviado pelo motorista',cta:null},{text:'Contatar motorista diretamente via operador',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Avaliar gravidade e comunicar passageiros se necessário',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Registrar ocorrência e classificar incidente',cta:null}] },
+  minor_delay:{ title:'Minor Delay', client:'Mercado Livre BR', steps:[{text:'Verificar ETA atual no tracking',cta:null},{text:'Monitorar por 5 minutos — atraso pode se resolver sozinho',cta:null},{text:'Se persistir, enviar push preventivo aos passageiros',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}}] },
+  no_readings:{ title:'No Readings', client:'Volkswagen BR', steps:[{text:'Verificar se rota exige leitura de QR obrigatoriamente',cta:null},{text:'Contatar operador para confirmar embarque dos passageiros',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se embarque confirmado sem leitura → fechar como não incidente',cta:null}] },
+};
+
+const DRIVER_CONTEXT = {
+  name:'Carlos Mendes', delaysLast30:0, incidentsLast30:0, pushSent:true, pushRead:false,
+  todayServices:[
+    {route:'Guru 9 — Entrada',time:'05:42',status:'critical',eta:'em curso · atrasado',aiNote:'serviço atual com alerta ativo'},
+    {route:'Guru 9 — Saída',time:'07:30',status:'risk',eta:'ETA em risco',aiNote:'impactado se atraso não resolver até 06:45'},
+    {route:'Amazon ML-2 — Entrada',time:'09:00',status:'ok',eta:'ETA no prazo',aiNote:'sem impacto previsto'},
+  ],
+};
+
+const SERVICE_LOG = [
+  {time:'05:30',text:'serviço atribuído · Eriqueson M.',tag:'assign',tagColor:'action'},
+  {time:'05:39',text:'CC recebeu reporte de passageiro',sub:'ônibus não apareceu no ponto',tag:'cc report',tagColor:'cc'},
+  {time:'05:42',text:'alerta disparado: no play',tag:'crítico · SLA 60 min',tagColor:'alert'},
+  {time:'05:43',text:'alerta disparado: major delay',tag:'alto',tagColor:'sla'},
+  {time:'05:50',text:'SLA atingiu 50% · aviso ativado',tag:'30 min restantes',tagColor:'sla'},
+  {time:'06:02',text:'agente contatou AB Turismo',tag:'ação registrada',tagColor:'action'},
+];
+
+const ALERT_ICONS = {
+  no_play:'ti-player-play', major_delay:'ti-clock-exclamation', minor_delay:'ti-clock',
+  no_stop:'ti-map-pin-pause', no_readings:'ti-qrcode-off', driver_alert:'ti-user-exclamation',
+  skipped_stop:'ti-map-pin-off',
+};
+
+/* ===================== ESTADO ===================== */
+const state = {
+  currentMode: 'traffic',
+  currentView: 'main-page',
+  selectedService: null,
+  selectedAlert: null,
+  resolvePopupOpen: false,
+  selectedMarket: 'brasil',
+  activeCountries: ['brasil','portugal'],
+  sortBy: 'provider',
+  stepsDone: {},
+  incidentFlagged: true,
+  resolutionStatus: 'resolved',
+  aiLike: null,
+  chatMessages: [],
+  ccFlowStep: 0,
+  uberVoucherUsed: false,
+  assignedServices: {},
+  dashFilter: null,        // null | 'alerts' | 'unassigned' | 'sla-critical'
+  alertTypeFilter: null,   // null | alert type key
+  statusFilter: null,      // null | service status key
+  autoUpdate: true,        // flag de atualização automática
+};
+
+/* ===================== NAVEGAÇÃO ===================== */
+function navigateTo(view, svcId=null) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  if(svcId) state.selectedService = svcId;
+  state.currentView = view;
+  const el = document.getElementById('view-' + view);
+  if(el) { el.classList.add('active'); }
+  if(view === 'service-detail') renderDetail();
+  if(view === 'main-page') renderMainPage();
+  if(view === 'cc-chatbot') renderCC();
+}
+
+function switchMode(mode) {
+  state.currentMode = mode;
+  if(mode === 'cc') navigateTo('cc-chatbot');
+  else navigateTo('main-page');
+}
+
+/* ===================== MAIN PAGE ===================== */
+function renderMainPage() {
+  renderMarketNav();
+  renderCountryPills();
+  renderStatusDots();
+  renderSummaryBar();
+  renderAlertFilterBar();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+function renderMarketNav() {
+  const markets = ['brasil','portugal'];
+  const flags = {brasil:'🇧🇷', portugal:'🇵🇹'};
+  const extra = [{label:'pós-operação',badge:4}];
+  let html = '';
+  markets.forEach(m => {
+    if(state.activeCountries.includes(m)) {
+      const cnt = SERVICES.filter(s => s.market === m && s.alerts.length > 0).length;
+      const active = state.selectedMarket===m ? 'active' : '';
+      html += `<div class="market-item ${active}" onclick="selectMarket('${m}')">
+        <span>${flags[m]} ${m}</span>
+        <span class="market-badge ${cnt>0?'badge-red':'badge-gray'}">${cnt}</span>
+      </div>`;
+    }
+  });
+  extra.forEach(e => {
+    html += `<div class="market-item" onclick="">
+      <span>${e.label}</span>
+      <span class="market-badge badge-red">${e.badge}</span>
+    </div>`;
+  });
+  document.getElementById('market-nav').innerHTML = html;
+}
+
+function renderCountryPills() {
+  const countries = [{code:'brasil',flag:'🇧🇷'},{code:'portugal',flag:'🇵🇹'},{code:'espanha',flag:'🇪🇸'},{code:'méxico',flag:'🇲🇽'},{code:'usa',flag:'🇺🇸'}];
+  let html = '';
+  countries.forEach(c => {
+    const sel = state.activeCountries.includes(c.code)?'selected':'';
+    html += `<span class="country-pill ${sel}" onclick="toggleCountry('${c.code}')">${c.flag} ${c.code.toUpperCase()}</span>`;
+  });
+  document.getElementById('country-pills').innerHTML = html;
+}
+
+/* ===================== AUTO UPDATE TOGGLE ===================== */
+function toggleAutoUpdate() {
+  state.autoUpdate = !state.autoUpdate;
+  const dot = document.getElementById('live-dot-main');
+  const badge = document.getElementById('live-badge-main');
+  const icon = document.getElementById('auto-update-icon');
+  const label = document.getElementById('auto-update-label');
+  const toggle = document.getElementById('auto-update-toggle');
+  if(state.autoUpdate) {
+    if(dot) dot.style.animationPlayState = 'running';
+    if(badge) badge.style.opacity = '1';
+    if(icon) icon.className = 'ti ti-refresh';
+    if(label) label.textContent = 'auto';
+    if(toggle) { toggle.style.color = 'var(--color-text-secondary)'; toggle.style.borderColor = 'var(--color-border-tertiary)'; }
+    showToast('Atualização automática ativada', 'success');
+  } else {
+    if(dot) dot.style.animationPlayState = 'paused';
+    if(badge) badge.style.opacity = '0.4';
+    if(icon) icon.className = 'ti ti-refresh-off';
+    if(label) label.textContent = 'paused';
+    if(toggle) { toggle.style.color = 'var(--color-high)'; toggle.style.borderColor = 'var(--color-high)'; }
+    showToast('Atualização automática pausada', 'warning');
+  }
+}
+
+function renderStatusDots() {
+  const dots = [
+    { key:'in-progress-issues', color:'#E24B4A', tip:'Issues ativos' },
+    { key:'pending-unsolved',   color:'#EF9F27', tip:'Pendente não resolvido' },
+    { key:'in-progress',        color:'#1D9E75', tip:'Em progresso' },
+    { key:'planned',            color:'#378ADD', tip:'Planejado' },
+    { key:'completed',          color:'#b4b2a9', tip:'Concluído' },
+  ];
+  let html = '';
+  dots.forEach(d => {
+    const active = state.statusFilter === d.key ? 'active' : '';
+    html += `<div class="status-dot-item ${active}" style="background:${d.color};${active?'border-color:#333;transform:scale(1.2)':''}" data-tip="${d.tip}" title="${d.tip}" onclick="toggleStatusFilter('${d.key}')"></div>`;
+  });
+  document.getElementById('status-dots').innerHTML = html;
+}
+
+function toggleStatusFilter(key) {
+  state.statusFilter = state.statusFilter === key ? null : key;
+  renderStatusDots();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+/* ===================== LIVE TRACKING MAP ===================== */
+/* ===================== LIVE TRACKING MAP (Leaflet) ===================== */
+const BUS_ROUTES_COORDS = [
+  [[-23.5268,-46.7065],[-23.5285,-46.6900],[-23.5350,-46.6780],[-23.5450,-46.6700],[-23.5530,-46.6600],[-23.5630,-46.6543]],
+  [[-23.4905,-46.6265],[-23.5050,-46.6280],[-23.5200,-46.6340],[-23.5380,-46.6380],[-23.5538,-46.6003]],
+  [[-23.5630,-46.6955],[-23.5553,-46.6970],[-23.5520,-46.6850],[-23.5490,-46.6700],[-23.5492,-46.6518]],
+  [[-23.5260,-46.6646],[-23.5300,-46.6400],[-23.5330,-46.6100],[-23.5330,-46.5765]],
+  [[-23.5322,-46.7919],[-23.5290,-46.7600],[-23.5268,-46.7065],[-23.5400,-46.6850],[-23.5505,-46.6333]],
+  [[-23.5874,-46.6576],[-23.5810,-46.6490],[-23.5754,-46.6453],[-23.5680,-46.6400],[-23.5505,-46.6333]],
+];
+const SEV_COLORS = { critical:'#E24B4A', high:'#EF9F27', medium:'#378ADD', ok:'#1D9E75' };
+const MAP_TILES = {
+  dark:  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  color: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+};
+
+let _leafletMap = null;
+let _busIntervals = [];
+let _busMarkers = [];
+let _mapTileLayer = null;
+let _mapSevFilter = null;
+let _mapAlertFilter = null;
+
+function _getSeverity(svc) {
+  const ord = {critical:0,high:1,medium:2};
+  return svc.alerts.reduce((m,a) => {
+    return !m || (ord[a.severity]??3) < (ord[m.severity]??3) ? a.severity : m;
+  }, svc.alerts.length ? null : 'ok') || 'ok';
+}
+
+function _interpolateRoute(path, t) {
+  const total = path.length - 1;
+  const scaled = t * total;
+  const idx = Math.min(Math.floor(scaled), total - 1);
+  const frac = scaled - idx;
+  const a = path[idx], b = path[idx + 1] || path[idx];
+  return [a[0] + (b[0]-a[0])*frac, a[1] + (b[1]-a[1])*frac];
+}
+
+function _applyMapFilters() {
+  if (!_leafletMap) return;
+  _busMarkers.forEach(({marker, status, alertTypes}) => {
+    const statusOk = !_mapSevFilter || status === _mapSevFilter;
+    const alertOk = !_mapAlertFilter || alertTypes.includes(_mapAlertFilter);
+    if (statusOk && alertOk) {
+      if (!_leafletMap.hasLayer(marker)) marker.addTo(_leafletMap);
+    } else {
+      if (_leafletMap.hasLayer(marker)) _leafletMap.removeLayer(marker);
+    }
+  });
+}
+
+function switchMapTheme(t) {
+  if (!_leafletMap) return;
+  if (_mapTileLayer) _leafletMap.removeLayer(_mapTileLayer);
+  _mapTileLayer = L.tileLayer(MAP_TILES[t], { maxZoom: 19, attribution: '' }).addTo(_leafletMap);
+  _mapTileLayer.bringToBack();
+  ['dark','light','color'].forEach(th => {
+    const btn = document.getElementById('mtheme-' + th);
+    if (btn) btn.classList.toggle('active', th === t);
+  });
+}
+
+function setMapStatusFilter(s) {
+  _mapSevFilter = s;
+  ['all','issues','pending','progress','planned','completed'].forEach(k => {
+    const el = document.getElementById('mfst-' + k);
+    if (el) el.classList.remove('active');
+  });
+  const keyMap = { 'null':'all', 'in-progress-issues':'issues', 'pending-unsolved':'pending', 'in-progress':'progress', 'planned':'planned', 'completed':'completed' };
+  const activeKey = keyMap[String(s)] || 'all';
+  const el = document.getElementById('mfst-' + activeKey);
+  if (el) el.classList.add('active');
+  _applyMapFilters();
+}
+
+function setMapAlertFilter(t) {
+  _mapAlertFilter = t;
+  document.querySelectorAll('.mf-alert-chip').forEach(el => el.classList.remove('active'));
+  const activeId = t ? 'mfalert-' + t : 'mfalert-all';
+  const el = document.getElementById(activeId);
+  if (el) el.classList.add('active');
+  _applyMapFilters();
+}
+
+function openMainLiveTracking() {
+  const existing = document.getElementById('map-overlay');
+  if (existing) existing.remove();
+  _mapSevFilter = null;
+  _mapAlertFilter = null;
+
+  const svcs = getFilteredServices();
+  const total = svcs.length;
+  const critical = svcs.filter(s => s.alerts.some(a => a.severity === 'critical')).length;
+  const withAlerts = svcs.filter(s => s.alerts.length > 0).length;
+  const alertTypes = [...new Set(svcs.flatMap(s => s.alerts.map(a => a.type)))];
+
+  const filterLabel = state.dashFilter
+    ? { alerts:'alertas abertos', unassigned:'sem agente', 'sla-critical':'SLA crítica' }[state.dashFilter]
+    : state.alertTypeFilter ? state.alertTypeFilter.replace(/_/g,' ')
+    : state.selectedMarket.toUpperCase();
+
+  const alertChips = alertTypes.length ? `
+    <div class="map-tsep"></div>
+    <span class="map-tlabel">alertas</span>
+    <button class="map-chip c-alrt active mf-alert-chip" id="mfalert-all" onclick="setMapAlertFilter(null)">todos</button>
+    ${alertTypes.map(t => `<button class="map-chip c-alrt mf-alert-chip" id="mfalert-${t}" onclick="setMapAlertFilter('${t}')">${t.replace(/_/g,' ')}</button>`).join('')}
+  ` : '';
+
+  const el = document.createElement('div');
+  el.id = 'map-overlay';
+  el.className = 'map-overlay';
+  el.innerHTML = `
+    <div class="map-header">
+      <div class="map-logo">BUSUP <span>brainer</span></div>
+      <div class="map-title"><i class="ti ti-map-2" style="font-size:12px;margin-right:4px"></i>live tracking · ${filterLabel} · ${total} serviços</div>
+      <div class="map-live"><div class="map-live-dot"></div>em tempo real</div>
+      <button class="map-close" onclick="closeMap()"><i class="ti ti-x"></i> fechar</button>
+    </div>
+    <div class="map-toolbar">
+      <span class="map-tlabel">tema</span>
+      <button class="map-theme-btn active" id="mtheme-dark" onclick="switchMapTheme('dark')">🌙 dark</button>
+      <button class="map-theme-btn" id="mtheme-light" onclick="switchMapTheme('light')">☀️ light</button>
+      <button class="map-theme-btn" id="mtheme-color" onclick="switchMapTheme('color')">🗺️ color</button>
+      <div class="map-tsep"></div>
+      <span class="map-tlabel">status</span>
+      <button class="map-chip c-all active" id="mfst-all" onclick="setMapStatusFilter(null)">todos</button>
+      <button class="map-chip c-issues"    id="mfst-issues"    onclick="setMapStatusFilter('in-progress-issues')"><span style="color:#E24B4A">●</span> issues ativos</button>
+      <button class="map-chip c-pending"   id="mfst-pending"   onclick="setMapStatusFilter('pending-unsolved')"><span style="color:#EF9F27">●</span> pendente</button>
+      <button class="map-chip c-progress"  id="mfst-progress"  onclick="setMapStatusFilter('in-progress')"><span style="color:#1D9E75">●</span> em progresso</button>
+      <button class="map-chip c-planned"   id="mfst-planned"   onclick="setMapStatusFilter('planned')"><span style="color:#378ADD">●</span> planejado</button>
+      <button class="map-chip c-completed" id="mfst-completed" onclick="setMapStatusFilter('completed')"><span style="color:#b4b2a9">●</span> concluído</button>
+      ${alertChips}
+    </div>
+    <div class="map-body">
+      <div id="leaflet-map"></div>
+      <div class="map-stats">
+        <div class="mstat">monitorados<strong>${total}</strong></div>
+        <div class="mstat">críticos<strong style="color:#E24B4A">${critical}</strong></div>
+        <div class="mstat">com alerta<strong>${withAlerts}</strong></div>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+
+  requestAnimationFrame(() => {
+    if (_leafletMap) { _leafletMap.remove(); _leafletMap = null; }
+    _busIntervals.forEach(clearInterval);
+    _busIntervals = [];
+    _busMarkers = [];
+
+    _leafletMap = L.map('leaflet-map', { zoomControl: true, attributionControl: false })
+      .setView([-23.5505, -46.6333], 12);
+
+    _mapTileLayer = L.tileLayer(MAP_TILES.dark, { maxZoom: 19, attribution: '' }).addTo(_leafletMap);
+
+    BUS_ROUTES_COORDS.forEach((coords, ri) => {
+      const colors = ['#E24B4A','#EF9F27','#378ADD','#1D9E75','#A855F7','#EC4899'];
+      L.polyline(coords, { color: colors[ri % colors.length], weight: 3, opacity: 0.45, dashArray: '8, 6' }).addTo(_leafletMap);
+    });
+
+    svcs.forEach((svc, i) => {
+      const routeIdx = i % BUS_ROUTES_COORDS.length;
+      const path = BUS_ROUTES_COORDS[routeIdx];
+      const STATUS_COLORS = { 'in-progress-issues':'#E24B4A', 'pending-unsolved':'#EF9F27', 'in-progress':'#1D9E75', 'planned':'#378ADD', 'completed':'#b4b2a9' };
+      const STATUS_LABELS = { 'in-progress-issues':'ISSUES ATIVOS', 'pending-unsolved':'PENDENTE', 'in-progress':'EM PROGRESSO', 'planned':'PLANEJADO', 'completed':'CONCLUÍDO' };
+      const color = STATUS_COLORS[svc.status] || '#b4b2a9';
+      const statusLabel = STATUS_LABELS[svc.status] || svc.status;
+      const code = svc.id.replace('svc-','#');
+      const alertTypesList = svc.alerts.map(a => a.type);
+      const alertTypesStr = alertTypesList.map(t => t.replace(/_/g,' ')).join(', ') || '—';
+      const agent = state.assignedServices[svc.id] || svc.agent || '—';
+
+      let progress = (i / svcs.length) % 1;
+
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="background:${color};color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.6);display:flex;align-items:center;gap:3px;font-family:monospace;cursor:pointer;"><span style="font-size:10px">🚌</span>${code}</div>`,
+        iconAnchor: [20, 10],
+      });
+
+      const startPos = _interpolateRoute(path, progress);
+      const marker = L.marker(startPos, { icon }).addTo(_leafletMap);
+
+      marker.bindPopup(`
+        <div class="lp-route">${svc.route}</div>
+        <table style="width:100%;font-size:11px;color:#ccc;border-collapse:collapse;margin-top:6px">
+          <tr><td style="padding:2px 0;color:#888">status</td><td style="color:${color};font-weight:700">${statusLabel}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">provider</td><td>${svc.provider}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">alertas</td><td>${alertTypesStr}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">pax</td><td>${svc.pax}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">agente</td><td>${agent}</td></tr>
+        </table>
+        <button class="lp-btn" onclick="closeMap();navigateTo('service-detail','${svc.id}')">
+          <i class="ti ti-arrow-right" style="font-size:11px"></i> ver detalhe
+        </button>
+      `, { maxWidth: 220 });
+
+      _busMarkers.push({ marker, status: svc.status, alertTypes: alertTypesList });
+
+      const speed = 0.00018 + (i % 5) * 0.00003;
+      const interval = setInterval(() => {
+        progress = (progress + speed) % 1;
+        marker.setLatLng(_interpolateRoute(path, progress));
+      }, 200);
+      _busIntervals.push(interval);
+    });
+  });
+}
+
+function closeMap() {
+  _busIntervals.forEach(clearInterval);
+  _busIntervals = [];
+  _busMarkers = [];
+  if (_leafletMap) { _leafletMap.remove(); _leafletMap = null; }
+  _mapTileLayer = null;
+  const el = document.getElementById('map-overlay');
+  if (el) el.remove();
+}
+
+function updateMarketTitle() {
+  const svcs = getFilteredServices();
+  const marketLabel = state.activeCountries.length === 1
+    ? state.activeCountries[0].toUpperCase()
+    : state.activeCountries.map(c => c.toUpperCase()).join(' + ');
+  document.getElementById('market-title').textContent = `${marketLabel} · ${svcs.length} serviços`;
+}
+
+function getBaseServices() {
+  return SERVICES.filter(s => state.activeCountries.includes(s.market));
+}
+
+function getFilteredServices() {
+  let svcs = getBaseServices();
+  // Filtro dos cards do dashboard
+  if(state.dashFilter === 'alerts') svcs = svcs.filter(s => s.alerts.length > 0);
+  if(state.dashFilter === 'unassigned') svcs = svcs.filter(s => !state.assignedServices[s.id] && !s.agent);
+  if(state.dashFilter === 'sla-critical') svcs = svcs.filter(s => s.alerts.some(a => a.slaMin !== null && a.slaMin < 15));
+  // Filtro de tipo de alerta
+  if(state.alertTypeFilter) svcs = svcs.filter(s => s.alerts.some(a => a.type === state.alertTypeFilter));
+  if(state.statusFilter) svcs = svcs.filter(s => s.status === state.statusFilter);
+  return svcs;
+}
+
+/* ===================== SUMMARY BAR CLICÁVEL ===================== */
+function renderSummaryBar() {
+  const base = getBaseServices();
+  const withAlerts = base.filter(s => s.alerts.length > 0).length;
+  const unassigned = base.filter(s => !state.assignedServices[s.id] && !s.agent).length;
+  const slaCrit = base.filter(s => s.alerts.some(a => a.slaMin !== null && a.slaMin < 15)).length;
+
+  const cards = [
+    { key: null,           label: 'serviços ativos', val: base.length, cls: '', valCls: '', hint: 'ver todos' },
+    { key: 'alerts',       label: 'alertas abertos', val: withAlerts,  cls: 'card-active-red',   valCls: 'red', hint: 'filtrar por alertas' },
+    { key: 'unassigned',   label: 'sem dono',         val: unassigned, cls: 'card-active-amber', valCls: 'amber', hint: 'filtrar sem agente' },
+    { key: 'sla-critical', label: 'SLA crítica <15min', val: slaCrit,  cls: 'card-active-red',   valCls: 'red', hint: 'filtrar SLA crítica' },
+  ];
+
+  let html = '';
+  cards.forEach(c => {
+    const isActive = state.dashFilter === c.key;
+    const activeCls = isActive ? c.cls : '';
+    html += `<div class="summary-card ${activeCls}" onclick="setDashFilter('${c.key}')">
+      <div class="s-label">${c.label}</div>
+      <div class="s-val ${c.valCls}">${c.val}</div>
+    </div>`;
+  });
+  document.getElementById('summary-bar').innerHTML = html;
+}
+
+function setDashFilter(key) {
+  // Toggle: clicar no mesmo card remove o filtro
+  state.dashFilter = (state.dashFilter === key) ? null : key;
+  renderSummaryBar();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+/* ===================== ALERT TYPE FILTER BAR ===================== */
+function renderAlertFilterBar() {
+  const types = Object.entries(ALERT_ICONS);
+  let html = `<span class="filter-label">alerta:</span>`;
+  types.forEach(([k, icon]) => {
+    const active = state.alertTypeFilter === k ? 'active' : '';
+    html += `<button class="alert-filter-chip ${active}" onclick="setAlertTypeFilter('${k}')">
+      <i class="ti ${icon}"></i>${k.replace(/_/g,' ')}
+    </button>`;
+  });
+  document.getElementById('alert-filter-bar').innerHTML = html;
+}
+
+function setAlertTypeFilter(type) {
+  state.alertTypeFilter = (state.alertTypeFilter === type) ? null : type;
+  renderAlertFilterBar();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+function renderServiceList() {
+  const svcs = getFilteredServices();
+  let html = '';
+  if(svcs.length === 0) {
+    document.getElementById('service-list').innerHTML = `<div style="padding:40px;text-align:center;color:var(--color-text-tertiary);font-size:13px;"><i class="ti ti-search-off" style="font-size:28px;display:block;margin-bottom:10px;opacity:0.4"></i>Nenhum serviço foi encontrado de acordo com os filtros.</div>`;
+    return;
+  }
+  if(state.sortBy === 'provider') {
+    const byProvider = {};
+    svcs.forEach(s => {
+      if(!byProvider[s.provider]) byProvider[s.provider] = [];
+      byProvider[s.provider].push(s);
+    });
+    Object.entries(byProvider).forEach(([prov,list]) => {
+      const alertCount = list.reduce((a,s)=>a+s.alerts.length,0);
+      html += `<div class="provider-divider"><i class="ti ti-building"></i>${prov}<span class="prov-badge">${alertCount} alertas</span></div>`;
+      list.forEach(s => { html += renderServiceRow(s); });
+    });
+  } else {
+    const sorted = [...svcs].sort((a,b) => {
+      const order = {critical:0,high:1,medium:2};
+      const aMax = Math.min(...a.alerts.map(al=>order[al.severity]??3));
+      const bMax = Math.min(...b.alerts.map(al=>order[al.severity]??3));
+      return aMax - bMax;
+    });
+    sorted.forEach(s => { html += renderServiceRow(s); });
+  }
+  html += `<div class="collapse-row" onclick="showToast('Expandindo serviços sem alerta...','info')">+ 7 serviços sem alerta ativo — clique para expandir</div>`;
+  document.getElementById('service-list').innerHTML = html;
+}
+
+function renderServiceRow(s) {
+  const agent = state.assignedServices[s.id] || s.agent;
+  const alertsHtml = s.alerts.map(a => {
+    const icon = ALERT_ICONS[a.type] || 'ti-alert-circle';
+    const cls = a.severity==='critical'?'chip-critical':a.severity==='high'?'chip-high':'chip-medium';
+    let html = `<span class="alert-icon-chip ${cls}" title="${a.type.replace(/_/g,' ')}"><i class="ti ${icon}"></i></span>`;
+    if(a.fromCC) html += `<span class="alert-icon-chip chip-cc" title="originado no CC"><i class="ti ti-headset"></i></span>`;
+    return html;
+  }).join('');
+  const critSla = s.alerts.reduce((m,a)=>a.slaMin!==null&&(m===null||a.slaMin<m)?a.slaMin:m, null);
+  const slaHtml = critSla !== null ? renderSlaCell(critSla, 60) : '<span style="color:var(--color-text-tertiary);font-size:11px;">—</span>';
+  const aiHtml = s.aiReady
+    ? `<span class="ai-badge ai-ready"><i class="ti ti-sparkles"></i>análise pronta</span>`
+    : `<span class="ai-badge ai-analyzing"><i class="ti ti-loader"></i>analisando</span>`;
+  const agentHtml = agent
+    ? `<span class="agent-name"><span class="agent-dot"></span>${agent.split(' ')[0]}</span>`
+    : `<button class="assign-btn" onclick="event.stopPropagation();assignService('${s.id}')">assign</button>`;
+  return `<div class="service-row row-${s.status}" onclick="navigateTo('service-detail','${s.id}')">
+    <div class="cell cell-sm">${s.localTime}</div>
+    <div class="cell cell-sm">${s.serviceTime}</div>
+    <div class="cell"><span class="route-name">${s.route}</span><span class="route-meta">${s.provider}</span></div>
+    <div class="cell"><span class="route-name" style="font-size:11px">${s.site.toUpperCase()}</span><span class="route-meta">${s.client}</span></div>
+    <div class="cell"><div class="alerts-cell">${alertsHtml}</div></div>
+    <div class="cell">${slaHtml}</div>
+    <div class="cell">${aiHtml}</div>
+    <div class="cell">${agentHtml}</div>
+    <div class="cell"><button class="arrow-btn" onclick="navigateTo('service-detail','${s.id}')"><i class="ti ti-chevron-right"></i></button></div>
+  </div>`;
+}
+
+function renderSlaCell(min, total) {
+  const pct = Math.min(100, ((total-min)/total)*100);
+  let cls = 'sla-ok', barCls = 'bar-ok';
+  if(min < 15) { cls='sla-danger'; barCls='bar-danger'; }
+  else if(min < total*0.5) { cls='sla-warn'; barCls='bar-warn'; }
+  return `<div class="sla-cell">
+    <span class="sla-val ${cls}">${min} min</span>
+    <div class="sla-bar"><div class="sla-bar-fill ${barCls}" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function assignService(id) {
+  state.assignedServices[id] = 'Eriqueson M.';
+  showToast('Serviço atribuído para Eriqueson M.', 'success');
+  renderServiceList();
+}
+
+function selectMarket(m) {
+  state.selectedMarket = m;
+  state.dashFilter = null;
+  state.alertTypeFilter = null;
+  state.statusFilter = null;
+  renderMarketNav();
+  renderSummaryBar();
+  renderAlertFilterBar();
+  renderStatusDots();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+function toggleCountry(c) {
+  if(state.activeCountries.includes(c)) {
+    state.activeCountries = state.activeCountries.filter(x => x !== c);
+  } else {
+    state.activeCountries.push(c);
+  }
+  state.statusFilter = null;
+  renderCountryPills();
+  renderMarketNav();
+  renderStatusDots();
+  renderServiceList();
+  updateMarketTitle();
+}
+
+function setSort(s) {
+  state.sortBy = s;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderServiceList();
+}
+
+/* ===================== SERVICE DETAIL ===================== */
+function renderDetail() {
+  const svc = SERVICES.find(s=>s.id===state.selectedService);
+  if(!svc) return;
+  const agent = state.assignedServices[svc.id] || svc.agent;
+  const critAlert = svc.alerts.reduce((m,a) => {
+    const ord = {critical:0,high:1,medium:2};
+    return !m || (ord[a.severity]??3) < (ord[m.severity]??3) ? a : m;
+  }, null);
+
+  const hasCascade = svc.alerts.some(a => a.dependsOn);
+  const hasCC = svc.alerts.some(a => a.fromCC);
+
+  let alertsHtml = '';
+  if(hasCascade) alertsHtml += `<div class="cascade-banner"><i class="ti ti-link"></i> Alerta em cascata: resolva o No Play primeiro para desbloquear o Major Delay</div>`;
+  if(hasCC) alertsHtml += `<div class="cc-banner"><i class="ti ti-headset"></i> Alerta originado no Customer Care — passageiro relatou ocorrência às 05:39</div>`;
+
+  svc.alerts.forEach(a => {
+    const proc = PROCEDURES[a.type];
+    const clsBorder = `alert-card-${a.severity}`;
+    const clsBadge = `badge-${a.severity}`;
+    const clsResolve = a.severity==='critical'?'btn-critical':a.severity==='high'?'btn-high':'btn-medium';
+    const slaHtml = a.slaMin !== null ? renderSlaCell(a.slaMin, 60) : '—';
+    alertsHtml += `<div class="alert-card ${clsBorder}">
+      <div class="alert-card-header">
+        <span class="alert-type-badge ${clsBadge}">${(proc?.title||a.type).toUpperCase()}</span>
+        <span class="open-pill">aberto</span>
+        <span class="open-pill">pendente</span>
+        ${a.slaMin!==null?`<span class="sla-chip ${a.slaMin<15?'sla-danger':a.slaMin<30?'sla-warn':'sla-ok'}">${a.slaMin} min</span>`:''}
+        <button class="resolve-btn ${clsResolve}" onclick="openResolvePopup('${a.id}','${svc.id}')">resolver</button>
+      </div>
+      <div class="alert-desc"><i class="ti ${ALERT_ICONS[a.type]||'ti-alert'}"></i> ${a.type.replace(/_/g,' ')} · severidade ${a.severity} · ${a.fromCC?'originado no CC':'detecção automática'}</div>
+    </div>`;
+  });
+
+  const dotClass = {critical:'dot-critical',risk:'dot-risk',ok:'dot-ok'};
+  const todaySvcs = DRIVER_CONTEXT.todayServices.map(ts => `
+    <div class="today-svc-item">
+      <span class="today-dot ${dotClass[ts.status]||'dot-ok'}"></span>
+      <div class="today-info">
+        <div class="today-route">${ts.route} · ${ts.time}</div>
+        <div class="today-eta">${ts.eta}</div>
+        <div class="today-note">${ts.aiNote}</div>
+      </div>
+    </div>`).join('');
+
+  const logHtml = SERVICE_LOG.map(l => `
+    <div class="log-item">
+      <div class="log-dot log-dot-${l.tagColor}"></div>
+      <div class="log-content">
+        <div class="log-time">${l.time}</div>
+        <div class="log-text">${l.text}</div>
+        ${l.sub?`<div class="log-sub">"${l.sub}"</div>`:''}
+        <span class="log-tag tag-${l.tagColor}">${l.tag}</span>
+      </div>
+    </div>`).join('');
+
+  const statusLabel = svc.status.replace(/-/g,' ');
+  const statusPillClass = svc.status==='in-progress-issues'?'pill-critical':svc.status==='pending-unsolved'?'pill-high':svc.status==='in-progress'?'pill-ok':'pill-medium';
+
+  const aiText = critAlert?.type === 'no_play'
+    ? 'Veículo não iniciou rota. Carlos Mendes tem histórico limpo (0 atrasos/30d). Recomendação: ligue imediatamente para o operador AB Turismo. Se sem resposta em 15 min, autorize Uber para os 46 passageiros. Push preventivo já enviado.'
+    : 'Monitorar a situação. Verificar se há tráfego intenso na rota via live tracking. Se atraso persistir por mais 10 min, enviar push informativo para passageiros.';
+
+  if(_itinInterval) { clearInterval(_itinInterval); _itinInterval = null; }
+  document.getElementById('detail-layout').innerHTML = `
+    <div class="service-header">
+      <div class="service-header-top">
+        <div class="service-title">${svc.route}</div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="toggleExtraFields()"><i class="ti ti-plus"></i> detalhes</button>
+          <button class="btn btn-brand" onclick="openLiveTracking('${svc.route}')"><i class="ti ti-map-pin"></i> live tracking</button>
+        </div>
+      </div>
+      <div class="service-meta">
+        <span><i class="ti ti-clock"></i>${svc.localTime}</span>
+        <span><i class="ti ti-building"></i>${svc.provider}</span>
+        <span><i class="ti ti-users"></i>${svc.pax} pax</span>
+        <span><i class="ti ti-map"></i>${svc.site.toUpperCase()}</span>
+        <span class="status-pill ${statusPillClass}">${statusLabel}</span>
+        ${agent?`<span style="display:flex;align-items:center;gap:4px;font-size:11px;background:var(--color-brand-light);padding:3px 8px;border-radius:4px;color:var(--color-brand-dark)"><i class="ti ti-user-check"></i>${agent}</span>`:''}
+      </div>
+      <div class="detail-extra" id="detail-extra-fields">
+        <div class="extra-field"><div class="extra-label">cliente</div><div class="extra-val">${svc.client}</div></div>
+        <div class="extra-field"><div class="extra-label">mercado</div><div class="extra-val">${svc.market.toUpperCase()}</div></div>
+        <div class="extra-field"><div class="extra-label">hora serviço</div><div class="extra-val">${svc.serviceTime}</div></div>
+        <div class="extra-field"><div class="extra-label">ID serviço</div><div class="extra-val">${svc.id}</div></div>
+        <div class="extra-field"><div class="extra-label">veículo</div><div class="extra-val">${svc.vehicle}</div></div>
+        <div class="extra-field"><div class="extra-label">motorista</div><div class="extra-val">${svc.driverName}</div></div>
+        <div class="extra-field"><div class="extra-label">ID motorista</div><div class="extra-val">${svc.driverId}</div></div>
+        <div class="extra-field"><div class="extra-label">capacidade</div><div class="extra-val">${svc.capacity} lugares</div></div>
+        <div class="extra-field"><div class="extra-label">ocupação</div><div class="extra-val" style="color:${svc.pax/svc.capacity>0.9?'var(--color-critical)':'var(--color-brand)'};font-weight:700">${Math.round(svc.pax/svc.capacity*100)}% (${svc.pax}/${svc.capacity})</div></div>
+        <div class="extra-field"><div class="extra-label">última leitura</div><div class="extra-val" style="color:${svc.lastReading?'var(--color-text-primary)':'var(--color-critical)'}">${svc.lastReading?svc.lastReading+'  ✓':'sem leitura ⚠'}</div></div>
+        <div class="extra-field"><div class="extra-label">tipo rota</div><div class="extra-val">${svc.route.includes('Entrada')||svc.route.includes('- E')?'Entrada':'Saída'}</div></div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-left">
+        <div class="detail-tabs">
+          <div class="detail-tab active" id="tab-alerts" onclick="switchDetailTab('alerts')">Alertas (${svc.alerts.length})</div>
+          <div class="detail-tab" id="tab-itin" onclick="switchDetailTab('itin')">Itinerário</div>
+          <span class="live-badge-sm"><div class="live-dot-sm"></div>tempo real</span>
+        </div>
+        <div id="detail-tab-alerts">
+          <div class="section-header">
+            <span class="section-title">alertas deste serviço (${svc.alerts.length})</span>
+            <span class="section-sub">ordenado por criticidade</span>
+            <div class="tt-wrap"><span class="tt-icon">?</span><div class="tt-box">Alertas ordenados do mais crítico para o menos crítico. SLA mostra tempo restante para resolução conforme SLA do cliente.</div></div>
+          </div>
+          ${alertsHtml}
+        </div>
+        <div id="detail-tab-itin" style="display:none">
+          ${renderItinerary(svc.id)}
+        </div>
+      </div>
+      <div class="detail-right">
+        <div class="copilot-header">
+          <div class="copilot-title"><i class="ti ti-sparkles"></i> brainer · copilot</div>
+          ${svc.aiReady?'<span class="copilot-badge">análise pronta</span>':''}
+        </div>
+        <div class="copilot-body">
+          <div class="ai-rec-card">
+            <div class="ai-rec-label"><i class="ti ti-sparkles"></i> recomendação</div>
+            <div class="ai-rec-text">${aiText}</div>
+            <div class="ai-actions">
+              <button class="ai-action-btn aab-green" onclick="showToast('Ligação iniciada para AB Turismo · +55 11 3333-4444','success')"><i class="ti ti-phone"></i> ligar agora</button>
+              <button class="ai-action-btn aab-amber" onclick="showToast('Push enviado para ${svc.pax} passageiros','success')"><i class="ti ti-message"></i> push pax</button>
+            </div>
+            <div class="ai-feedback">
+              <span>útil?</span>
+              <button class="fb-btn ${state.aiLike==='like'?'liked':''}" id="fb-like" onclick="setAiFeedback('like')"><i class="ti ti-thumb-up"></i></button>
+              <button class="fb-btn ${state.aiLike==='dislike'?'disliked':''}" id="fb-dislike" onclick="setAiFeedback('dislike')"><i class="ti ti-thumb-down"></i></button>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">contexto do motorista</div>
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px;">${DRIVER_CONTEXT.name}</div>
+            <div class="driver-stats">
+              <div class="driver-stat"><div class="ds-label">atrasos/30d</div><div class="ds-val">${DRIVER_CONTEXT.delaysLast30}</div></div>
+              <div class="driver-stat"><div class="ds-label">incidentes/30d</div><div class="ds-val">${DRIVER_CONTEXT.incidentsLast30}</div></div>
+            </div>
+            <div class="push-status">
+              <span class="${DRIVER_CONTEXT.pushSent?'push-sent':''}"><i class="ti ti-send"></i> push ${DRIVER_CONTEXT.pushSent?'enviado':'não enviado'}</span>
+              ${DRIVER_CONTEXT.pushSent?`<span class="push-not-read"><i class="ti ti-eye-off"></i> não lido</span>`:''}
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">serviços assignados hoje</div>
+            ${todaySvcs}
+          </div>
+          <div style="border-top:1px solid var(--color-border-tertiary);padding-top:10px;">
+            <div class="info-card-title" style="padding:0 12px 6px;">log do serviço</div>
+            <div class="log-timeline">${logHtml}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleExtraFields() {
+  const el = document.getElementById('detail-extra-fields');
+  el.classList.toggle('open');
+  const btn = el.previousElementSibling?.querySelector('.ti-plus, .ti-minus');
+  if(btn) btn.className = el.classList.contains('open') ? 'ti ti-minus' : 'ti ti-plus';
+}
+
+function switchDetailTab(tab) {
+  document.getElementById('detail-tab-alerts').style.display = tab === 'alerts' ? '' : 'none';
+  document.getElementById('detail-tab-itin').style.display   = tab === 'itin'   ? '' : 'none';
+  document.getElementById('tab-alerts').classList.toggle('active', tab === 'alerts');
+  document.getElementById('tab-itin').classList.toggle('active', tab === 'itin');
+}
+
+let _itinInterval = null;
+
+function renderItinerary(svcId) {
+  const stops = (ITINERARY_DATA[svcId] || []).map((s, i) => ({ ...s, _idx: i }));
+  if(!stops.length) return '<p style="color:var(--color-text-tertiary);font-size:12px;padding:20px">Sem itinerário disponível para este serviço.</p>';
+
+  const rows = stops.map(s => {
+    const isDone    = s.status === 'done';
+    const isCurrent = s.status === 'current';
+    const dotCls    = isDone ? 'done' : isCurrent ? 'current' : 'pending';
+    const rowCls    = isDone ? 'itin-done' : isCurrent ? 'itin-current' : '';
+
+    const etaDelay  = _calcDelay(s.scheduled, s.eta);
+    const etaCls    = etaDelay > 0 ? 'itin-eta-late' : 'itin-eta-ok';
+    const etaDisplay = `<span class="${etaCls}" id="itin-eta-${svcId}-${s._idx}">${s.eta}</span>`;
+
+    const deltaTxt  = etaDelay > 0 ? `<span class="itin-delta-late" id="itin-delta-${svcId}-${s._idx}">+${etaDelay} min</span>`
+                    : etaDelay < 0 ? `<span class="itin-delta-ok" id="itin-delta-${svcId}-${s._idx}">${etaDelay} min</span>`
+                    : `<span class="itin-delta-ok" id="itin-delta-${svcId}-${s._idx}">no prazo</span>`;
+
+    const realTd    = isDone
+      ? `<span class="itin-real-done">${s.real}</span>`
+      : isCurrent
+        ? `<span style="color:var(--color-text-tertiary);font-size:10px">em curso…</span>`
+        : `<span style="color:var(--color-text-tertiary)">—</span>`;
+
+    const paxTd     = s.paxBoarded != null
+      ? `<span class="itin-pax-chip"><i class="ti ti-users" style="font-size:10px"></i> ${s.paxBoarded}</span>`
+      : `<span style="color:var(--color-text-tertiary)">—</span>`;
+
+    return `<tr class="itin-row ${rowCls}" id="itin-row-${svcId}-${s._idx}">
+      <td><div class="itin-stop-name"><span class="stop-dot ${dotCls}"></span>${s.stop}</div></td>
+      <td class="itin-time">${s.scheduled}</td>
+      <td>${etaDisplay}</td>
+      <td>${realTd}</td>
+      <td>${deltaTxt}</td>
+      <td>${paxTd}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="itin-wrap">
+    <table class="itin-table">
+      <thead>
+        <tr>
+          <th>Parada</th>
+          <th>Previsto</th>
+          <th>ETA</th>
+          <th>Tempo Real</th>
+          <th>Δ Atraso</th>
+          <th>Pax</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+  _startItinRealtime(svc.id);
+}
+
+function _calcDelay(scheduled, eta) {
+  if(!eta) return 0;
+  const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+  return toMin(eta) - toMin(scheduled);
+}
+
+function _startItinRealtime(svcId) {
+  if(_itinInterval) clearInterval(_itinInterval);
+  const stops = ITINERARY_DATA[svcId];
+  if(!stops) return;
+  _itinInterval = setInterval(() => {
+    stops.forEach((s, i) => {
+      if(s.status === 'pending' || s.status === 'current') {
+        // simula ETA variando ±1 min a cada tick para parecer vivo
+        const [h, m] = s.eta.split(':').map(Number);
+        const variation = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+        const newMin = Math.max(0, m + variation);
+        const newH = h + Math.floor(newMin / 60);
+        const newM = newMin % 60;
+        s.eta = `${String(newH).padStart(2,'0')}:${String(newM).padStart(2,'0')}`;
+
+        const etaEl    = document.getElementById(`itin-eta-${svcId}-${i}`);
+        const deltaEl  = document.getElementById(`itin-delta-${svcId}-${i}`);
+        if(!etaEl) return;
+        const delay = _calcDelay(s.scheduled, s.eta);
+        etaEl.textContent = s.eta;
+        etaEl.className   = delay > 0 ? 'itin-eta-late' : 'itin-eta-ok';
+        if(deltaEl) {
+          deltaEl.textContent = delay > 0 ? `+${delay} min` : delay < 0 ? `${delay} min` : 'no prazo';
+          deltaEl.className   = delay > 0 ? 'itin-delta-late' : 'itin-delta-ok';
+        }
+      }
+    });
+  }, 8000); // atualiza a cada 8 segundos
+}
+
+function setAiFeedback(type) {
+  state.aiLike = state.aiLike === type ? null : type;
+  const likeBtn = document.getElementById('fb-like');
+  const dislikeBtn = document.getElementById('fb-dislike');
+  if(likeBtn) { likeBtn.className = 'fb-btn' + (state.aiLike==='like'?' liked':''); }
+  if(dislikeBtn) { dislikeBtn.className = 'fb-btn' + (state.aiLike==='dislike'?' disliked':''); }
+  if(state.aiLike) showToast(state.aiLike==='like'?'Obrigado pelo feedback positivo!':'Feedback registrado. Vamos melhorar!', state.aiLike==='like'?'success':'warning');
+}
+
+/* ===================== CHAT RESOLVE (v2) ===================== */
+function openResolvePopup(alertId, svcId) {
+  state.selectedAlert = alertId;
+  state.selectedService = svcId;
+  openChatResolve(alertId, svcId);
+}
+
+/* ===================== CHAT SCRIPTS ===================== */
+const RESOLVE_CHAT_SCRIPTS = {
+  no_play: {
+    title: 'Serviço Não Iniciado',
+    start: {
+      bot: '⚠️ O serviço <strong>{{route}}</strong> não iniciou no horário previsto. Como você quer proceder?',
+      actions: [
+        { label: 'Ligar para motorista', style: 'primary', icon: 'ti-phone', next: 'called_driver', toast: 'Ligação iniciada para o motorista' },
+        { label: 'Verificar veículo reserva', style: 'neutral', icon: 'ti-bus', next: 'check_vehicle' },
+        { label: 'Cancelar serviço', style: 'danger', icon: 'ti-x', next: 'cancel_confirm' },
+      ]
+    },
+    called_driver: {
+      bot: '📞 Ligação iniciada para o motorista <strong>{{driverName}}</strong>. Qual foi o retorno?',
+      actions: [
+        { label: 'A caminho — previsão 10 min', style: 'primary', icon: 'ti-clock', next: 'driver_coming' },
+        { label: 'Motorista não atende', style: 'warning', icon: 'ti-phone-off', next: 'driver_unavailable' },
+        { label: 'Problema mecânico relatado', style: 'warning', icon: 'ti-tool', next: 'mechanical' },
+      ]
+    },
+    driver_coming: {
+      bot: '✅ Ótimo! Motorista confirmado a caminho. Deseja enviar push de atualização aos passageiros?',
+      actions: [
+        { label: 'Enviar push aos passageiros', style: 'primary', icon: 'ti-send', next: 'push_sent', toast: 'Push enviado aos passageiros' },
+        { label: 'Aguardar sem notificar', style: 'neutral', icon: 'ti-clock', next: 'wait' },
+      ]
+    },
+    push_sent: {
+      bot: '📲 Push enviado com sucesso. Passageiros informados do atraso. Quer fechar o alerta ou manter monitorando?',
+      actions: [
+        { label: 'Fechar alerta', style: 'primary', icon: 'ti-check', next: '_close' },
+        { label: 'Escalar — supervisor', style: 'warning', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+    wait: {
+      bot: '⏳ Ok. O sistema vai alertar novamente se o serviço não iniciar nos próximos 5 minutos.',
+      actions: [
+        { label: 'Manter monitoramento', style: 'neutral', icon: 'ti-eye', next: '_close' },
+        { label: 'Escalar para supervisor', style: 'warning', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+    driver_unavailable: {
+      bot: '📵 Motorista não disponível. Recomendo buscar substituto ou alternativa de transporte. Como proceder?',
+      actions: [
+        { label: 'Buscar motorista substituto', style: 'primary', icon: 'ti-user-search', next: 'find_substitute' },
+        { label: 'Autorizar táxi/Uber', style: 'warning', icon: 'ti-car', next: 'uber_authorized', toast: 'Uber autorizado — custo imputado ao operador' },
+        { label: 'Cancelar e notificar', style: 'danger', icon: 'ti-x', next: 'cancel_confirm' },
+      ]
+    },
+    mechanical: {
+      bot: '🔧 Problema mecânico confirmado. Verificando disponibilidade de veículo reserva no pool...',
+      actions: [
+        { label: 'Alocar veículo reserva', style: 'primary', icon: 'ti-bus', next: 'vehicle_allocated', toast: 'Veículo reserva alocado' },
+        { label: 'Sem veículo — escalar L3', style: 'danger', icon: 'ti-alert-triangle', next: '_escalate3' },
+      ]
+    },
+    find_substitute: {
+      bot: '🔍 Buscando motoristas disponíveis... Encontrei 2 opções na região. Alocando o mais próximo.',
+      actions: [
+        { label: 'Confirmar alocação + notificar', style: 'primary', icon: 'ti-check', next: 'push_sent', toast: 'Motorista substituto alocado' },
+      ]
+    },
+    uber_authorized: {
+      bot: '🚕 Táxi/Uber autorizado. Custo será imputado ao operador. Enviando código aos passageiros.',
+      actions: [
+        { label: 'Fechar alerta', style: 'primary', icon: 'ti-check', next: '_close', toast: 'Passageiros notificados' },
+      ]
+    },
+    vehicle_allocated: {
+      bot: '🚌 Veículo reserva alocado com sucesso. ETA recalculado. Enviar atualização aos passageiros?',
+      actions: [
+        { label: 'Enviar push e fechar', style: 'primary', icon: 'ti-send', next: '_close', toast: 'Passageiros notificados sobre veículo reserva' },
+      ]
+    },
+    check_vehicle: {
+      bot: '🔍 Verificando pool de veículos disponíveis para a rota <strong>{{route}}</strong>...',
+      actions: [
+        { label: 'Veículo encontrado — alocar', style: 'primary', icon: 'ti-bus', next: 'vehicle_allocated', toast: 'Veículo alocado' },
+        { label: 'Sem veículo disponível', style: 'danger', icon: 'ti-alert-triangle', next: '_escalate3' },
+      ]
+    },
+    cancel_confirm: {
+      bot: '⚠️ Confirmando cancelamento do serviço <strong>{{route}}</strong>? Todos os passageiros serão notificados e o evento será registrado como incidente.',
+      actions: [
+        { label: 'Confirmar cancelamento', style: 'danger', icon: 'ti-x', next: 'cancelled', toast: 'Serviço cancelado — passageiros notificados' },
+        { label: 'Voltar — tentar resolver', style: 'neutral', icon: 'ti-arrow-left', next: 'start' },
+      ]
+    },
+    cancelled: {
+      bot: '❌ Serviço cancelado. Passageiros notificados. Registrando como incidente e encerrando alerta.',
+      actions: [
+        { label: 'Fechar alerta', style: 'neutral', icon: 'ti-check', next: '_close' },
+      ]
+    },
+  },
+  major_delay: {
+    title: 'Atraso Crítico',
+    start: {
+      bot: '🚨 Atraso crítico detectado em <strong>{{route}}</strong>. O serviço está <strong>{{delay}} minutos</strong> acima do SLA. Qual a ação imediata?',
+      actions: [
+        { label: 'Verificar causa com motorista', style: 'primary', icon: 'ti-phone', next: 'called_driver', toast: 'Ligando para motorista' },
+        { label: 'Notificar passageiros agora', style: 'warning', icon: 'ti-send', next: 'passengers_notified', toast: 'Push de atraso enviado' },
+        { label: 'Escalar — supervisor', style: 'danger', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+    called_driver: {
+      bot: '📞 Ligando para <strong>{{driverName}}</strong>. Qual foi a resposta?',
+      actions: [
+        { label: 'Trânsito intenso — sem desvio', style: 'warning', icon: 'ti-traffic-lights', next: 'traffic' },
+        { label: 'Acidente na rota', style: 'danger', icon: 'ti-alert-triangle', next: 'accident' },
+        { label: 'Problema mecânico', style: 'danger', icon: 'ti-tool', next: 'mechanical' },
+        { label: 'Sem resposta do motorista', style: 'warning', icon: 'ti-phone-off', next: 'no_response' },
+      ]
+    },
+    traffic: {
+      bot: '🚦 Trânsito intenso confirmado. Posso sugerir rota alternativa e atualizar ETA dos passageiros.',
+      actions: [
+        { label: 'Ativar rota alternativa + notificar', style: 'primary', icon: 'ti-route', next: 'route_changed', toast: 'Rota alternativa ativada' },
+        { label: 'Manter rota + notificar atraso', style: 'neutral', icon: 'ti-send', next: 'passengers_notified', toast: 'Passageiros notificados sobre atraso' },
+      ]
+    },
+    accident: {
+      bot: '🚑 Acidente relatado. Situação crítica. Recomendo escalamento imediato e notificação de passageiros.',
+      actions: [
+        { label: 'Escalar L2 + notificar passageiros', style: 'danger', icon: 'ti-alert-triangle', next: 'escalated_accident', toast: 'Supervisor notificado' },
+      ]
+    },
+    escalated_accident: {
+      bot: '🔴 Supervisor notificado. Passageiros receberam push de emergência. Deseja registrar como incidente crítico?',
+      actions: [
+        { label: 'Registrar incidente + fechar', style: 'danger', icon: 'ti-file-alert', next: '_close', toast: 'Incidente registrado' },
+        { label: 'Escalar L3 — notificar cliente', style: 'danger', icon: 'ti-arrow-up', next: '_escalate3' },
+      ]
+    },
+    mechanical: {
+      bot: '🔧 Problema mecânico no trânsito. Preciso acionar guincho e veículo reserva urgentemente.',
+      actions: [
+        { label: 'Acionar guincho + veículo reserva', style: 'danger', icon: 'ti-bus', next: 'rescue_sent', toast: 'Guincho e veículo reserva acionados' },
+      ]
+    },
+    rescue_sent: {
+      bot: '🚌 Equipe de apoio acionada. ETA do veículo reserva: 20 min. Notificando passageiros sobre a situação.',
+      actions: [
+        { label: 'Enviar push e escalar L2', style: 'warning', icon: 'ti-send', next: '_escalate2', toast: 'Passageiros notificados' },
+        { label: 'Só notificar — não escalar', style: 'neutral', icon: 'ti-send', next: 'passengers_notified', toast: 'Passageiros notificados' },
+      ]
+    },
+    no_response: {
+      bot: '📵 Motorista não responde. Situação preocupante. Recomendo acionar supervisor e verificar localização do veículo.',
+      actions: [
+        { label: 'Escalar L2 urgente', style: 'danger', icon: 'ti-arrow-up', next: '_escalate2' },
+        { label: 'Tentar novo contato em 5 min', style: 'neutral', icon: 'ti-clock', next: '_close' },
+      ]
+    },
+    route_changed: {
+      bot: '✅ Rota alternativa ativada e passageiros notificados com novo ETA. Monitorando progresso.',
+      actions: [
+        { label: 'Fechar alerta — monitorando', style: 'primary', icon: 'ti-eye', next: '_close' },
+      ]
+    },
+    passengers_notified: {
+      bot: '📲 Passageiros notificados com atualização de ETA. Deseja manter o alerta ou fechá-lo?',
+      actions: [
+        { label: 'Fechar alerta', style: 'primary', icon: 'ti-check', next: '_close' },
+        { label: 'Escalar — supervisor', style: 'warning', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+  },
+  no_stop: {
+    title: 'Parada Ignorada',
+    start: {
+      bot: '🚏 O serviço <strong>{{route}}</strong> não realizou parada prevista. Passageiros podem ter ficado para trás. Como proceder?',
+      actions: [
+        { label: 'Verificar com motorista', style: 'primary', icon: 'ti-phone', next: 'called_driver', toast: 'Contatando motorista' },
+        { label: 'Confirmar passageiros afetados', style: 'neutral', icon: 'ti-users', next: 'check_pax' },
+        { label: 'Reportar e escalar', style: 'danger', icon: 'ti-alert-triangle', next: '_escalate2' },
+      ]
+    },
+    called_driver: {
+      bot: '📞 Ligando para <strong>{{driverName}}</strong>. O que ele disse?',
+      actions: [
+        { label: 'Não viu passageiros no ponto', style: 'neutral', icon: 'ti-map-pin', next: 'no_pax_at_stop' },
+        { label: 'Ponto com obras — impossível parar', style: 'warning', icon: 'ti-crane', next: 'blocked_stop' },
+        { label: 'Erro do motorista — retornando', style: 'warning', icon: 'ti-arrow-back', next: 'driver_returning' },
+        { label: 'Motorista não atende', style: 'danger', icon: 'ti-phone-off', next: '_escalate2' },
+      ]
+    },
+    no_pax_at_stop: {
+      bot: '✅ Motorista confirma que o ponto estava vazio. Verificando se há passageiros com check-in registrado nessa parada.',
+      actions: [
+        { label: 'Nenhum check-in — fechar alerta', style: 'primary', icon: 'ti-check', next: '_close' },
+        { label: 'Há check-in — notificar passageiro', style: 'warning', icon: 'ti-send', next: 'pax_contacted', toast: 'Passageiro contactado' },
+      ]
+    },
+    blocked_stop: {
+      bot: '🚧 Ponto com impedimento físico. Registrando ocorrência para atualizar mapa de paradas. Passageiros afetados?',
+      actions: [
+        { label: 'Notificar passageiros + registrar', style: 'warning', icon: 'ti-send', next: 'pax_contacted', toast: 'Passageiros notificados e ocorrência registrada' },
+        { label: 'Só registrar', style: 'neutral', icon: 'ti-file', next: '_close', toast: 'Ocorrência registrada' },
+      ]
+    },
+    driver_returning: {
+      bot: '🔄 Motorista ciente do erro e avaliando retorno. Verificar se o retorno ao ponto é viável no trajeto.',
+      actions: [
+        { label: 'Autorizar retorno ao ponto', style: 'primary', icon: 'ti-arrow-back', next: 'driver_returning_2', toast: 'Retorno autorizado' },
+        { label: 'Não é viável — oferecer alternativa', style: 'warning', icon: 'ti-car', next: 'uber_authorized', toast: 'Táxi autorizado para passageiro' },
+      ]
+    },
+    driver_returning_2: {
+      bot: '✅ Motorista retornando ao ponto. Passageiro sendo notificado. Monitorando situação.',
+      actions: [
+        { label: 'Fechar alerta — monitorando', style: 'primary', icon: 'ti-eye', next: '_close' },
+      ]
+    },
+    check_pax: {
+      bot: '👥 Verificando lista de passageiros com embarque previsto nessa parada... Encontrados: 2 passageiros com check-in.',
+      actions: [
+        { label: 'Contatar passageiros + oferecer alternativa', style: 'primary', icon: 'ti-send', next: 'pax_contacted', toast: 'Passageiros contactados' },
+        { label: 'Escalar para supervisor', style: 'warning', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+    pax_contacted: {
+      bot: '📱 Passageiros contactados. Alternativa de transporte oferecida. Deseja escalar para o cliente ou fechar?',
+      actions: [
+        { label: 'Fechar alerta', style: 'primary', icon: 'ti-check', next: '_close' },
+        { label: 'Notificar cliente — L3', style: 'warning', icon: 'ti-building', next: '_escalate3' },
+      ]
+    },
+    uber_authorized: {
+      bot: '🚕 Táxi autorizado para o passageiro afetado. Custo registrado como ocorrência operacional.',
+      actions: [
+        { label: 'Fechar alerta', style: 'primary', icon: 'ti-check', next: '_close' },
+      ]
+    },
+  },
+  driver_alert: {
+    title: 'Alerta de Motorista',
+    start: {
+      bot: '🚨 Alerta de comportamento do motorista em <strong>{{route}}</strong>. O que foi identificado?',
+      actions: [
+        { label: 'Velocidade acima do limite', style: 'warning', icon: 'ti-gauge', next: 'speed' },
+        { label: 'Frenagem brusca detectada', style: 'warning', icon: 'ti-brake', next: 'braking' },
+        { label: 'Rota desviada sem autorização', style: 'danger', icon: 'ti-route-off', next: 'route_deviated' },
+        { label: 'Parada não autorizada prolongada', style: 'neutral', icon: 'ti-map-pin-pause', next: 'unauthorized_stop' },
+      ]
+    },
+    speed: {
+      bot: '⚡ Velocidade excessiva detectada. Enviando alerta in-app ao motorista agora. Deseja ligar também?',
+      actions: [
+        { label: 'Enviar alerta in-app', style: 'warning', icon: 'ti-bell', next: 'alert_sent', toast: 'Alerta in-app enviado ao motorista' },
+        { label: 'Enviar alerta + ligar', style: 'danger', icon: 'ti-phone', next: 'called_after_alert', toast: 'Alerta enviado — iniciando ligação' },
+      ]
+    },
+    braking: {
+      bot: '⚠️ Frenagem brusca registrada. Pode indicar risco à segurança dos passageiros. Como proceder?',
+      actions: [
+        { label: 'Ligar e orientar motorista', style: 'primary', icon: 'ti-phone', next: 'called_driver', toast: 'Ligando para motorista' },
+        { label: 'Registrar e monitorar', style: 'neutral', icon: 'ti-file', next: '_close', toast: 'Ocorrência registrada' },
+      ]
+    },
+    route_deviated: {
+      bot: '🗺️ Rota desviada! O veículo está fora do trajeto planejado. Isso é crítico. Ação imediata recomendada.',
+      actions: [
+        { label: 'Ligar urgente para motorista', style: 'danger', icon: 'ti-phone', next: 'called_driver', toast: 'Ligação urgente iniciada' },
+        { label: 'Escalar L2 imediatamente', style: 'danger', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+    unauthorized_stop: {
+      bot: '🅿️ Parada não autorizada há mais de 10 minutos. Pode ser pausa irregular ou problema.',
+      actions: [
+        { label: 'Ligar para motorista', style: 'primary', icon: 'ti-phone', next: 'called_driver', toast: 'Ligando para motorista' },
+        { label: 'Aguardar mais 5 min', style: 'neutral', icon: 'ti-clock', next: '_close' },
+      ]
+    },
+    alert_sent: {
+      bot: '✅ Alerta enviado ao motorista. Aguardando confirmação de leitura. Deseja registrar a ocorrência no histórico?',
+      actions: [
+        { label: 'Registrar + fechar alerta', style: 'primary', icon: 'ti-check', next: '_close', toast: 'Ocorrência registrada' },
+        { label: 'Monitorar e escalar se persistir', style: 'neutral', icon: 'ti-eye', next: '_close' },
+      ]
+    },
+    called_after_alert: {
+      bot: '📞 Alerta enviado e ligação em andamento. Motorista orientado. Registrando evento.',
+      actions: [
+        { label: 'Fechar alerta', style: 'primary', icon: 'ti-check', next: '_close', toast: 'Ocorrência registrada' },
+        { label: 'Escalar — comportamento recorrente', style: 'warning', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+    called_driver: {
+      bot: '📞 Ligação em andamento com <strong>{{driverName}}</strong>. Motorista ciente e corrigindo comportamento.',
+      actions: [
+        { label: 'Confirmado — fechar alerta', style: 'primary', icon: 'ti-check', next: '_close', toast: 'Ocorrência registrada' },
+        { label: 'Não respondeu — escalar L2', style: 'danger', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+  },
+  minor_delay: {
+    title: 'Atraso Moderado',
+    start: {
+      bot: '🕐 Atraso moderado em <strong>{{route}}</strong>. O serviço está dentro do SLA mas acima do esperado. Deseja agir preventivamente?',
+      actions: [
+        { label: 'Monitorar — dentro do SLA', style: 'neutral', icon: 'ti-eye', next: '_close' },
+        { label: 'Notificar passageiros', style: 'primary', icon: 'ti-send', next: 'passengers_notified', toast: 'Push de atualização enviado' },
+        { label: 'Ligar para motorista', style: 'neutral', icon: 'ti-phone', next: 'called_driver', toast: 'Ligando para motorista' },
+      ]
+    },
+    passengers_notified: {
+      bot: '📲 Passageiros notificados com ETA atualizado. Situação sob controle. Fechar alerta?',
+      actions: [
+        { label: 'Fechar alerta', style: 'primary', icon: 'ti-check', next: '_close' },
+        { label: 'Manter monitoramento', style: 'neutral', icon: 'ti-eye', next: '_close' },
+      ]
+    },
+    called_driver: {
+      bot: '📞 Ligando para <strong>{{driverName}}</strong>. Situação confirmada — trânsito leve na área. ETA deve normalizar.',
+      actions: [
+        { label: 'Ok — fechar alerta', style: 'primary', icon: 'ti-check', next: '_close' },
+        { label: 'Notificar passageiros também', style: 'neutral', icon: 'ti-send', next: 'passengers_notified', toast: 'Passageiros notificados' },
+      ]
+    },
+  },
+  no_readings: {
+    title: 'Sem Leituras GPS',
+    start: {
+      bot: '📡 Serviço <strong>{{route}}</strong> sem transmissão GPS há mais de 10 minutos. Não consigo confirmar posição ou status. Como proceder?',
+      actions: [
+        { label: 'Ligar para motorista', style: 'primary', icon: 'ti-phone', next: 'called_driver', toast: 'Ligando para motorista' },
+        { label: 'Verificar falha no dispositivo', style: 'neutral', icon: 'ti-device-mobile', next: 'check_device' },
+        { label: 'Escalar — risco desconhecido', style: 'warning', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+    called_driver: {
+      bot: '📞 Ligando para <strong>{{driverName}}</strong>. O que foi relatado?',
+      actions: [
+        { label: 'Serviço normal — problema no GPS', style: 'primary', icon: 'ti-device-mobile-off', next: 'device_issue' },
+        { label: 'Sem sinal na região', style: 'neutral', icon: 'ti-wifi-off', next: 'no_signal' },
+        { label: 'Motorista não atende', style: 'danger', icon: 'ti-phone-off', next: '_escalate2' },
+      ]
+    },
+    device_issue: {
+      bot: '📱 Problema no dispositivo GPS confirmado pelo motorista. Serviço em operação normal. Vou registrar para manutenção.',
+      actions: [
+        { label: 'Registrar manutenção + fechar', style: 'primary', icon: 'ti-tool', next: '_close', toast: 'Manutenção registrada — alerta fechado' },
+      ]
+    },
+    no_signal: {
+      bot: '📶 Área sem cobertura. Situação temporária. O GPS deve voltar automaticamente ao sair da zona sem sinal.',
+      actions: [
+        { label: 'Aguardar reconexão — fechar', style: 'neutral', icon: 'ti-clock', next: '_close' },
+        { label: 'Manter alerta ativo', style: 'primary', icon: 'ti-eye', next: '_close' },
+      ]
+    },
+    check_device: {
+      bot: '🔍 Verificando status do dispositivo... Última leitura às <strong>{{lastReading}}</strong>. Dispositivo pode estar com bateria baixa ou reiniciando.',
+      actions: [
+        { label: 'Ligar para motorista checar', style: 'primary', icon: 'ti-phone', next: 'called_driver', toast: 'Ligando para verificar' },
+        { label: 'Aguardar 5 min e reavalilar', style: 'neutral', icon: 'ti-clock', next: '_close' },
+        { label: 'Escalar — situação desconhecida', style: 'warning', icon: 'ti-arrow-up', next: '_escalate2' },
+      ]
+    },
+  },
+};
+
+/* ===================== CHAT RESOLVE FUNCTIONS ===================== */
+let _chatState = { alertId: null, svcId: null, currentStep: null };
+
+function openChatResolve(alertId, svcId) {
+  const existing = document.getElementById('resolve-popup');
+  if(existing) existing.remove();
+
+  const svc = SERVICES.find(s=>s.id===svcId);
+  const alert = svc?.alerts.find(a=>a.id===alertId);
+  if(!svc||!alert) return;
+
+  _chatState = { alertId, svcId, currentStep: 'start' };
+
+  const script = RESOLVE_CHAT_SCRIPTS[alert.type] || RESOLVE_CHAT_SCRIPTS.minor_delay;
+  const slaDisplay = alert.slaMin !== null ? `${alert.slaMin} min` : '—';
+  const slaColorCls = alert.slaMin !== null && alert.slaMin < 15 ? 'sla-danger' : alert.slaMin !== null && alert.slaMin < 30 ? 'sla-warn' : 'sla-ok';
+  const now = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+
+  const popup = document.createElement('div');
+  popup.className = 'popup-overlay';
+  popup.id = 'resolve-popup';
+  popup.innerHTML = `
+    <div class="chat-popup" onclick="event.stopPropagation()">
+      <div class="chat-popup-header">
+        <div class="chat-avatar bot" style="flex-shrink:0"><i class="ti ti-robot"></i></div>
+        <div>
+          <div class="chat-popup-title">Brainer Assistant · ${script.title}</div>
+          <div class="chat-popup-sub">${svc.route} · Agente: ${svc.assignedAgent||'não atribuído'}</div>
+        </div>
+        ${alert.slaMin !== null ? `<span class="chat-popup-sla ${slaColorCls}" style="margin-left:auto"><i class="ti ti-clock"></i> ${slaDisplay} SLA</span>` : ''}
+        <button class="popup-close" onclick="closeChatResolve()" style="margin-left:${alert.slaMin===null?'auto':'8px'}"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="chat-ctx">
+        <span class="chat-ctx-item"><strong>Rota:</strong> ${svc.route}</span>
+        <span class="chat-ctx-item"><strong>Operador:</strong> ${svc.provider}</span>
+        <span class="chat-ctx-item"><strong>Motorista:</strong> ${svc.driverName||'—'}</span>
+        <span class="chat-ctx-item"><strong>Veículo:</strong> ${svc.vehicle||'—'}</span>
+        <span class="chat-ctx-item"><strong>Cliente:</strong> ${svc.client}</span>
+      </div>
+      <div class="chat-messages" id="chat-messages-area"></div>
+      <div class="chat-escalate" style="padding:0 14px 8px;gap:8px;display:flex;flex-shrink:0;">
+        <button class="chat-esc-btn esc-amber" onclick="_chatEscalate(2,'${svc.client}')">
+          <div class="esc-title"><i class="ti ti-arrow-up"></i> Escalar L2</div>
+          <div class="esc-sub">Supervisor de tráfego</div>
+        </button>
+        <button class="chat-esc-btn esc-red" onclick="_chatEscalate(3,'${svc.client}')">
+          <div class="esc-title"><i class="ti ti-alert-triangle"></i> Escalar L3</div>
+          <div class="esc-sub">Notificar cliente ${svc.client}</div>
+        </button>
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" id="chat-input-field" rows="1" placeholder="Adicionar comentário ou observação..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSendMessage();}"></textarea>
+        <button class="chat-send-btn" onclick="chatSendMessage()"><i class="ti ti-send"></i> Enviar</button>
+      </div>
+      <div class="chat-footer">
+        <span style="font-size:11px;font-weight:600;color:var(--color-text-secondary)">resolução:</span>
+        <span class="res-opt" id="res-resolved" onclick="chatSetResolution('resolved')">resolvido</span>
+        <span class="res-opt" id="res-unresolved" onclick="chatSetResolution('unresolved')">não resolvido</span>
+        <div class="footer-spacer"></div>
+        <button class="btn btn-save" onclick="closeChatResolve()">salvar e sair</button>
+        <button class="btn btn-close-alert" onclick="closeAlert('${alert.id}','${svc.id}')">fechar alerta</button>
+      </div>
+    </div>`;
+  popup.addEventListener('click', e => { if(e.target===popup) closeChatResolve(); });
+  document.body.appendChild(popup);
+
+  // Renderizar primeiro passo do script
+  const step = script[_chatState.currentStep];
+  if(step) _chatRenderBotStep(step, alert.type);
+}
+
+function _chatReplaceVars(text, svc, alert) {
+  if(!text) return text;
+  return text
+    .replace(/{{route}}/g, svc.route)
+    .replace(/{{driverName}}/g, svc.driverName||'motorista')
+    .replace(/{{client}}/g, svc.client)
+    .replace(/{{delay}}/g, alert.slaMin||'?')
+    .replace(/{{lastReading}}/g, svc.lastReading||'desconhecido');
+}
+
+function _chatRenderBotStep(step, alertType) {
+  const svc = SERVICES.find(s=>s.id===_chatState.svcId);
+  const alert = svc?.alerts.find(a=>a.id===_chatState.alertId);
+  if(!svc||!alert) return;
+
+  const text = _chatReplaceVars(step.bot, svc, alert);
+  const actionsHtml = (step.actions||[]).map((a,i)=>
+    `<button class="chat-action-btn ${a.style}" onclick="chatHandleAction(${i},'${alertType}')">
+      <i class="ti ${a.icon}"></i> ${a.label}
+    </button>`
+  ).join('');
+
+  const msgId = 'bot-' + Date.now();
+  _chatAppendMessage('bot', text, actionsHtml, msgId);
+}
+
+function _chatAppendMessage(role, text, actionsHtml, msgId) {
+  const area = document.getElementById('chat-messages-area');
+  if(!area) return;
+  const now = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  const avatarCls = role==='bot' ? 'bot' : 'agent';
+  const bubbleCls = role==='bot' ? 'bot' : 'agent-bubble';
+  const dirCls   = role==='bot' ? '' : 'agent';
+  const avatarIcon = role==='bot' ? '<i class="ti ti-robot"></i>' : '<i class="ti ti-headset"></i>';
+
+  const div = document.createElement('div');
+  div.className = `chat-msg ${dirCls}`;
+  div.id = msgId||'';
+  div.innerHTML = `
+    <div class="chat-avatar ${avatarCls}">${avatarIcon}</div>
+    <div class="chat-bubble ${bubbleCls}">
+      ${text}
+      ${actionsHtml ? `<div class="chat-actions" id="actions-${msgId}">${actionsHtml}</div>` : ''}
+      <div class="chat-bubble-time">${now}</div>
+    </div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function chatHandleAction(actionIdx, alertType) {
+  const msgArea = document.getElementById('chat-messages-area');
+  if(!msgArea) return;
+
+  // Encontrar botões do último conjunto de ações e desabilitar todos
+  const allActionGroups = msgArea.querySelectorAll('.chat-actions');
+  const lastGroup = allActionGroups[allActionGroups.length - 1];
+  const btns = lastGroup ? lastGroup.querySelectorAll('.chat-action-btn') : [];
+  const chosenBtn = btns[actionIdx];
+  const label = chosenBtn ? chosenBtn.textContent.trim() : '';
+
+  btns.forEach(b => b.disabled = true);
+  if(chosenBtn) { chosenBtn.style.opacity = '1'; chosenBtn.style.outline = '2px solid currentColor'; }
+
+  const script = RESOLVE_CHAT_SCRIPTS[alertType] || {};
+  const step = script[_chatState.currentStep];
+  const action = step?.actions?.[actionIdx];
+  if(!action) return;
+
+  // Mostrar mensagem do agente
+  setTimeout(() => {
+    _chatAppendMessage('agent', `<strong>${label}</strong>`, '', 'agent-' + Date.now());
+
+    if(action.toast) showToast(action.toast, 'success');
+
+    const next = action.next;
+
+    setTimeout(() => {
+      if(next === '_close') {
+        _chatAppendMessage('bot', '✅ Ótimo! Ação registrada. Você pode fechar o alerta ou continuar adicionando observações.', '', 'bot-close-' + Date.now());
+      } else if(next === '_escalate2') {
+        _chatEscalate(2);
+      } else if(next === '_escalate3') {
+        _chatEscalate(3);
+      } else if(script[next]) {
+        _chatState.currentStep = next;
+        _chatRenderBotStep(script[next], alertType);
+      }
+    }, 500);
+  }, 200);
+}
+
+function chatSendMessage() {
+  const input = document.getElementById('chat-input-field');
+  const text = input?.value?.trim();
+  if(!text) return;
+  _chatAppendMessage('agent', text, '', 'agent-' + Date.now());
+  input.value = '';
+  setTimeout(() => {
+    _chatAppendMessage('bot', '📝 Comentário registrado no histórico do alerta.', '', 'bot-' + Date.now());
+  }, 600);
+}
+
+function chatSetResolution(val) {
+  document.getElementById('res-resolved')?.classList.toggle('active', val==='resolved');
+  document.getElementById('res-unresolved')?.classList.toggle('active', val==='unresolved');
+}
+
+function _chatEscalate(level, client) {
+  const svc = SERVICES.find(s=>s.id===_chatState.svcId);
+  const cl = client || svc?.client || '';
+  const msg = level===2 ? 'Escalado para supervisor · Eriqueson M. notificado' : `Nível 3 acionado · ${cl} notificado`;
+  showToast(msg, level===3?'warning':'info');
+  const botMsg = level===2
+    ? '📢 <strong>Escalamento L2 realizado.</strong> Supervisor de tráfego (Eriqueson M.) foi notificado e está assumindo o caso.'
+    : `🔴 <strong>Escalamento L3 realizado.</strong> O cliente <strong>${cl}</strong> foi notificado sobre a ocorrência.`;
+  setTimeout(() => {
+    _chatAppendMessage('bot', botMsg, '', 'bot-esc-' + Date.now());
+  }, 300);
+}
+
+function closeChatResolve() {
+  const popup = document.getElementById('resolve-popup');
+  if(popup) popup.remove();
+}
+
+function closeAlert(alertId, svcId) {
+  const svc = SERVICES.find(s=>s.id===svcId);
+  if(svc) {
+    svc.alerts = svc.alerts.filter(a=>a.id!==alertId);
+    if(svc.alerts.length===0) svc.status = 'in-progress';
+  }
+  closeChatResolve();
+  showToast('Alerta fechado · resolvido', 'success');
+  renderDetail();
+}
+
+/* ===================== LIVE TRACKING MODAL ===================== */
+function openLiveTracking(route) {
+  const existing = document.getElementById('live-modal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'live-modal';
+  modal.innerHTML = `
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title"><i class="ti ti-map-pin"></i> Live Tracking — ${route}</span>
+        <button class="modal-close" onclick="document.getElementById('live-modal').remove()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="map-placeholder"><i class="ti ti-map" style="font-size:32px;margin-right:10px;"></i>Mapa em tempo real — integração pendente</div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="document.getElementById('live-modal').remove()">fechar</button></div>
+    </div>`;
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+/* ===================== CUSTOMER CARE ===================== */
+function renderCC() {
+  if(state.ccFlowStep === 0) {
+    state.ccFlowStep = 1;
+    loadInitialChat();
+  }
+}
+
+function loadInitialChat() {
+  const container = document.getElementById('chat-messages');
+  container.innerHTML = '';
+  const msgs = buildInitialMessages();
+  msgs.forEach(m => appendMessage(m, false));
+  setTimeout(() => container.scrollTop = container.scrollHeight, 100);
+}
+
+function buildInitialMessages() {
+  return [
+    { from:'bot', text:'Olá! Sou o assistente Brainer CC. Busque um passageiro pelo nome, ID ou booking para começar.' },
+    { from:'user', text:'Maria da Silva' },
+    { from:'bot', html: buildProfileCard() },
+    { from:'user', text:'ela disse que o ônibus não chegou hoje de manhã' },
+    { from:'bot', html: buildReportCard() },
+  ];
+}
+
+function buildProfileCard() {
+  return `<div>Encontrei o perfil de <strong>Maria da Silva</strong>. Veja os dados abaixo:</div>
+  <div class="msg-card">
+    <div class="card-header-purple"><div class="card-name">Maria da Silva</div><div style="font-size:11px;color:var(--color-text-secondary)">ID: PAX-88421 · Amazon Guru</div></div>
+    <div class="card-grid">
+      <div class="card-field"><div class="card-field-label">telefone</div><div class="card-field-val">+55 11 9 8821-4432</div></div>
+      <div class="card-field"><div class="card-field-label">e-mail</div><div class="card-field-val">maria.silva@amazon.com</div></div>
+      <div class="card-field"><div class="card-field-label">site</div><div class="card-field-val">Betim MG 02</div></div>
+      <div class="card-field"><div class="card-field-label">rota habitual</div><div class="card-field-val">Guru 9 — Entrada</div></div>
+    </div>
+    <div class="booking-section">
+      <div class="booking-section-label">hoje</div>
+      <div class="booking-item"><span class="booking-route">Guru 9 — Entrada</span><span class="booking-time">05:42</span><div class="booking-actions"><button class="booking-btn bb-view" onclick="showToast('Abrindo serviço Guru 9 no dashboard...','info')">ver serviço</button><button class="booking-btn bb-cancel" onclick="showToast('Booking BSP-88421 cancelado','warning')">cancelar</button></div></div>
+      <div class="booking-section-label" style="margin-top:8px">próximos</div>
+      <div class="booking-item"><span class="booking-route">Guru 9 — Saída</span><span class="booking-time">amanhã 07:30</span><div class="booking-actions"><button class="booking-btn bb-view" onclick="showToast('Abrindo serviço...','info')">ver</button></div></div>
+    </div>
+    <div class="booking-section" style="border-top:1px solid var(--color-border-tertiary)">
+      <div class="booking-section-label">últimas leituras (7 dias)</div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 13/05</span><span class="read-ok">✓ Leitura correta</span></div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 12/05</span><span class="read-ok">✓ Leitura correta</span></div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 09/05</span><span class="read-err">✗ ERRO</span></div>
+    </div>
+  </div>`;
+}
+
+function buildReportCard() {
+  return `<div>Entendido. Com base no contexto, o serviço Guru 9 — Entrada (05:42) está com alerta ativo de <strong>No Play</strong>. Selecione o tipo de ocorrência para reportar ao tráfego:</div>
+  <div class="msg-card" style="padding:12px">
+    <div class="report-opts" id="report-opts">
+      <div class="report-opt selected" onclick="toggleReportOpt(this)"><i class="ti ti-player-play"></i> Ônibus não saiu (No Play)</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-clock-exclamation"></i> Atraso significativo</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-map-pin-pause"></i> Ponto pulado</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-user-exclamation"></i> Problema com motorista</div>
+    </div>
+    <textarea class="report-textarea" placeholder="Comentário adicional (opcional)..."></textarea>
+    <button class="send-traffic-btn" id="btn-send-traffic" onclick="sendToTraffic()"><i class="ti ti-send"></i> enviar para tráfego</button>
+  </div>`;
+}
+
+function toggleReportOpt(el) {
+  document.querySelectorAll('#report-opts .report-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function sendToTraffic() {
+  const btn = document.getElementById('btn-send-traffic');
+  if(btn) { btn.disabled = true; btn.textContent = 'enviando...'; }
+  appendMessage({from:'user', text:'enviado'});
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    appendMessage({from:'bot', text:'✓ Reporte enviado para o time de tráfego às 05:53. Protocolo #RPT-00892 gerado.'});
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      appendMessage({from:'bot', html: buildResolutionCard()});
+    }, 1800);
+  }, 900);
+}
+
+function buildResolutionCard() {
+  return `<div>Atualização do tráfego recebida:</div>
+  <div class="resolution-card">
+    <div class="res-card-title"><i class="ti ti-check"></i> Resposta do tráfego</div>
+    <div class="res-card-text">Operador AB Turismo contatado. Motorista Carlos Mendes localizou atraso por congestionamento na Via Anhanguera. ETA atualizado para 06:20. Passageiros estão sendo comunicados via push.</div>
+    <button class="uber-btn" id="btn-uber" onclick="generateVoucher()"><i class="ti ti-car"></i> gerar voucher Uber</button>
+  </div>`;
+}
+
+function generateVoucher() {
+  const btn = document.getElementById('btn-uber');
+  if(btn) { btn.disabled = true; }
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    appendMessage({from:'bot', text:'Voucher gerado · código BRAINER-X923. Chamado #RPT-00892 finalizado automaticamente. ✓ resolvido'});
+    showToast('Voucher Uber gerado · BRAINER-X923', 'success');
+  }, 800);
+}
+
+function appendMessage(msg, scroll=true) {
+  const container = document.getElementById('chat-messages');
+  if(!container) return;
+  const div = document.createElement('div');
+  div.className = `msg msg-${msg.from}`;
+  const avatar = msg.from === 'bot'
+    ? `<div class="msg-avatar" style="background:var(--color-cc-purple)"><i class="ti ti-robot" style="font-size:13px"></i></div>`
+    : `<div class="msg-avatar" style="background:var(--color-text-secondary)">AL</div>`;
+  const content = msg.html
+    ? `<div class="msg-bubble">${msg.html}</div>`
+    : `<div class="msg-bubble">${msg.text}</div>`;
+  div.innerHTML = avatar + content;
+  container.appendChild(div);
+  if(scroll) setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+}
+
+function showTyping() {
+  const container = document.getElementById('chat-messages');
+  if(!container) return;
+  const div = document.createElement('div');
+  div.className = 'msg msg-bot';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-avatar" style="background:var(--color-cc-purple)"><i class="ti ti-robot" style="font-size:13px"></i></div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  container.appendChild(div);
+  setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-indicator');
+  if(el) el.remove();
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  if(!input || !input.value.trim()) return;
+  const text = input.value.trim();
+  input.value = '';
+  appendMessage({from:'user', text});
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    appendMessage({from:'bot', text:'Entendido. Posso buscar outro passageiro ou ajudar com mais alguma coisa?'});
+  }, 800);
+}
+
+function newChat() {
+  state.ccFlowStep = 0;
+  state.uberVoucherUsed = false;
+  document.getElementById('chat-messages').innerHTML = '';
+  setTimeout(() => {
+    appendMessage({from:'bot', text:'Nova conversa iniciada. Como posso ajudar?'});
+  }, 100);
+}
+
+/* ===================== TOAST ===================== */
+function showToast(message, type='success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icon = type==='success'?'ti-check':type==='warning'?'ti-alert-triangle':'ti-info-circle';
+  toast.innerHTML = `<i class="ti ${icon}"></i>${message}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(()=>toast.remove(),300); }, 3000);
+}
+
+/* ===================== INIT ===================== */
+renderMainPage();
+</script>
+</body>
+</html>
