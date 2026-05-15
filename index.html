@@ -128,15 +128,17 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 .country-pills { display: flex; flex-wrap: wrap; gap: 4px; }
 .country-pill {
   font-size: 11px; padding: 3px 7px; border-radius: var(--border-radius-sm); cursor: pointer;
-  border: 1px solid var(--color-border-tertiary); background: var(--color-background-primary);
+  border: 2px solid #555; background: var(--color-background-primary);
   color: var(--color-text-secondary);
 }
 .country-pill.selected { background: var(--color-brand-light); border-color: var(--color-brand); color: var(--color-brand-dark); }
-.status-dots { display: flex; flex-wrap: wrap; gap: 4px; }
+.status-dots { display: flex; flex-wrap: wrap; gap: 6px; }
 .status-dot-item { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; position: relative; }
-.status-dot-item:hover::after { content: attr(data-tip); position: absolute; left: 24px; top: 0; background: #222; color: #fff; font-size: 10px; white-space: nowrap; padding: 2px 6px; border-radius: 4px; z-index: 999; pointer-events: none; }
+.status-dot-item:hover { transform: scale(1.15); }
+.status-dot-item.active { border: 2.5px solid #333; box-shadow: 0 0 0 2px rgba(0,0,0,0.15); transform: scale(1.15); }
+.status-dot-item:hover::after { content: attr(data-tip); position: absolute; left: 26px; top: 0; background: #222; color: #fff; font-size: 10px; white-space: nowrap; padding: 2px 6px; border-radius: 4px; z-index: 999; pointer-events: none; }
 .status-dot-item.inactive { opacity: 0.3; }
-.filter-dropdown { width: 100%; margin-top: 4px; font-size: 11px; padding: 4px 6px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; }
+.filter-dropdown { width: 100%; margin-top: 4px; font-size: 11px; padding: 5px 8px; border: 2px solid #555; border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; }
 
 /* ===================== CONTENT AREA ===================== */
 .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -482,7 +484,7 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 
 /* ===================== ALERT TYPE FILTER (tabela) ===================== */
 .alert-filter-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-right: 10px; border-right: 1px solid var(--color-border-tertiary); margin-right: 4px; }
-.alert-filter-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 4px 9px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; white-space: nowrap; }
+.alert-filter-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 4px 9px; border-radius: var(--border-radius-sm); border: 2px solid #555; cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; white-space: nowrap; }
 .alert-filter-chip:hover { border-color: var(--color-border-secondary); background: var(--color-background-tertiary); }
 .alert-filter-chip.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
 .alert-filter-chip i { font-size: 12px; }
@@ -748,6 +750,7 @@ const state = {
   assignedServices: {},
   dashFilter: null,        // null | 'alerts' | 'unassigned' | 'sla-critical'
   alertTypeFilter: null,   // null | alert type key
+  statusFilter: null,      // null | 'in-progress-issues' | 'pending-unsolved' | 'in-progress' | 'planned' | 'completed'
   autoUpdate: true,        // flag de atualização automática
 };
 
@@ -842,22 +845,24 @@ function toggleAutoUpdate() {
 
 function renderStatusDots() {
   const dots = [
-    {color:'#E24B4A',tip:'critical issues'},
-    {color:'#EF9F27',tip:'pending unsolved'},
-    {color:'#1D9E75',tip:'in progress'},
-    {color:'#378ADD',tip:'planned'},
-    {color:'#b4b2a9',tip:'completed'},
-    {color:'#7F77DD',tip:'cc flagged'},
-    {color:'#085041',tip:'on time'},
-    {color:'#FCEBEB',tip:'delayed'},
-    {color:'#EAF3DE',tip:'early'},
-    {color:'#1a1a18',tip:'outros'},
+    { key:'in-progress-issues', color:'#E24B4A', tip:'Issues ativos' },
+    { key:'pending-unsolved',   color:'#EF9F27', tip:'Pendente não resolvido' },
+    { key:'in-progress',        color:'#1D9E75', tip:'Em progresso' },
+    { key:'planned',            color:'#378ADD', tip:'Planejado' },
+    { key:'completed',          color:'#b4b2a9', tip:'Concluído' },
   ];
   let html = '';
   dots.forEach(d => {
-    html += `<div class="status-dot-item" style="background:${d.color}" data-tip="${d.tip}" title="${d.tip}"></div>`;
+    const active = state.statusFilter === d.key ? 'active' : '';
+    html += `<div class="status-dot-item ${active}" style="background:${d.color}" data-tip="${d.tip}" title="${d.tip}" onclick="toggleStatusFilter('${d.key}')"></div>`;
   });
   document.getElementById('status-dots').innerHTML = html;
+}
+
+function toggleStatusFilter(key) {
+  state.statusFilter = (state.statusFilter === key) ? null : key;
+  renderStatusDots();
+  renderServiceList();
 }
 
 /* ===================== LIVE TRACKING MAP ===================== */
@@ -1095,6 +1100,8 @@ function getFilteredServices() {
   if(state.dashFilter === 'sla-critical') svcs = svcs.filter(s => s.alerts.some(a => a.slaMin !== null && a.slaMin < 15));
   // Filtro de tipo de alerta
   if(state.alertTypeFilter) svcs = svcs.filter(s => s.alerts.some(a => a.type === state.alertTypeFilter));
+  // Filtro de status do serviço
+  if(state.statusFilter) svcs = svcs.filter(s => s.status === state.statusFilter);
   return svcs;
 }
 
@@ -1230,9 +1237,11 @@ function selectMarket(m) {
   state.selectedMarket = m;
   state.dashFilter = null;
   state.alertTypeFilter = null;
+  state.statusFilter = null;
   renderMarketNav();
   renderSummaryBar();
   renderAlertFilterBar();
+  renderStatusDots();
   renderServiceList();
   updateMarketTitle();
 }
