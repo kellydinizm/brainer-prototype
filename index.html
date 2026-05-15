@@ -248,12 +248,37 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 .btn-critical { background: var(--color-critical); color: #fff; }
 .btn-high { background: var(--color-high); color: #fff; }
 .btn-medium { background: var(--color-medium); color: #fff; }
-.detail-extra { display: none; padding: 10px 0; }
+.detail-extra { display: none; padding: 10px 0 4px; }
 .detail-extra.open { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .extra-field { font-size: 11px; }
 .extra-label { color: var(--color-text-tertiary); margin-bottom: 2px; }
 .extra-val { font-weight: 500; }
 .detail-body { display: flex; flex: 1; overflow: hidden; }
+/* Tabs do detalhe */
+.detail-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--color-border-tertiary); margin-bottom: 14px; }
+.detail-tab { padding: 7px 16px; font-size: 12px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; color: var(--color-text-tertiary); transition: all 0.15s; }
+.detail-tab.active { color: var(--color-brand); border-bottom-color: var(--color-brand); }
+/* Itinerário */
+.itin-wrap { overflow-x: auto; }
+.itin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.itin-table th { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--color-text-tertiary); letter-spacing: 0.4px; padding: 4px 10px; text-align: left; border-bottom: 2px solid var(--color-border-tertiary); white-space: nowrap; }
+.itin-table td { padding: 9px 10px; border-bottom: 1px solid var(--color-border-tertiary); vertical-align: middle; }
+.itin-row.itin-done { opacity: 0.55; }
+.itin-row.itin-current td { background: var(--color-brand-light); }
+.itin-stop-name { font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.stop-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.stop-dot.done { background: var(--color-brand); }
+.stop-dot.current { background: var(--color-brand); animation: blink 1.2s infinite; }
+.stop-dot.pending { background: var(--color-border-secondary); }
+.itin-time { font-family: monospace; font-size: 11px; }
+.itin-eta-late { color: var(--color-critical); font-weight: 700; }
+.itin-eta-ok { color: var(--color-brand); font-weight: 600; }
+.itin-delta-late { color: var(--color-critical); font-size: 10px; font-weight: 700; }
+.itin-delta-ok { color: var(--color-brand); font-size: 10px; }
+.itin-real-done { color: var(--color-brand); font-family: monospace; }
+.itin-pax-chip { font-size: 10px; background: var(--color-background-secondary); padding: 1px 6px; border-radius: 3px; color: var(--color-text-secondary); }
+.live-badge-sm { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--color-brand); margin-left: auto; }
+.live-dot-sm { width: 5px; height: 5px; border-radius: 50%; background: var(--color-brand); animation: blink 1.4s infinite; }
 .detail-left { flex: 1; overflow-y: auto; padding: 16px; }
 .detail-right { width: 268px; min-width: 268px; overflow-y: auto; border-left: 1px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
 .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -688,13 +713,51 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 <script>
 /* ===================== DADOS MOCKADOS ===================== */
 const SERVICES = [
-  { id:'svc-001', route:'Guru 9 — Entrada', client:'Amazon Guru', site:'Betim MG 02', provider:'AB Turismo', market:'brasil', localTime:'05:42', serviceTime:'05:42 BR', pax:46, status:'in-progress-issues', alerts:[{id:'alt-001',type:'no_play',severity:'critical',slaMin:8,alertStatus:'open',resolutionStatus:'pending',fromCC:true},{id:'alt-002',type:'major_delay',severity:'high',slaMin:31,alertStatus:'open',resolutionStatus:'pending',fromCC:false,dependsOn:'alt-001'}], agent:'Eriqueson M.', aiReady:true },
-  { id:'svc-002', route:'Guru 5 — Entrada', client:'Amazon Guru', site:'Barueri SP 07', provider:'AB Turismo', market:'brasil', localTime:'05:50', serviceTime:'05:50 BR', pax:38, status:'pending-unsolved', alerts:[{id:'alt-003',type:'no_stop',severity:'high',slaMin:31,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:true },
-  { id:'svc-003', route:'95 — Cotia via Itapevi - E', client:'Mercado Livre', site:'Barueri SP 07', provider:'AB Turismo', market:'brasil', localTime:'06:00', serviceTime:'06:00 BR', pax:22, status:'in-progress', alerts:[{id:'alt-004',type:'minor_delay',severity:'medium',slaMin:52,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:false },
-  { id:'svc-004', route:'07 — Itapecerica - S', client:'Boticário', site:'MWM Motores SP', provider:'Expresso Palmares', market:'brasil', localTime:'06:10', serviceTime:'06:10 BR', pax:51, status:'in-progress-issues', alerts:[{id:'alt-005',type:'no_play',severity:'critical',slaMin:6,alertStatus:'open',resolutionStatus:'pending',fromCC:false},{id:'alt-006',type:'driver_alert',severity:'critical',slaMin:6,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:'Eriqueson M.', aiReady:true },
-  { id:'svc-005', route:'15 — Contagem - E', client:'Volkswagen', site:'Betim MG 02', provider:'Expresso Palmares', market:'brasil', localTime:'06:15', serviceTime:'06:15 BR', pax:18, status:'planned', alerts:[{id:'alt-007',type:'no_readings',severity:'medium',slaMin:null,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:false },
-  { id:'svc-006', route:'Rota LX-3 — Entrada', client:'Accenture PT', site:'Lisboa Norte', provider:'Carris Metropolitana', market:'portugal', localTime:'07:15', serviceTime:'08:15 PT', pax:34, status:'in-progress-issues', alerts:[{id:'alt-008',type:'major_delay',severity:'critical',slaMin:12,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:true },
+  { id:'svc-001', route:'Guru 9 — Entrada', client:'Amazon Guru', site:'Betim MG 02', provider:'AB Turismo', market:'brasil', localTime:'05:42', serviceTime:'05:42 BR', pax:46, capacity:52, vehicle:'BUS-4821', driverName:'Carlos Mendes', driverId:'DRV-2281', lastReading:'05:41', status:'in-progress-issues', alerts:[{id:'alt-001',type:'no_play',severity:'critical',slaMin:8,alertStatus:'open',resolutionStatus:'pending',fromCC:true},{id:'alt-002',type:'major_delay',severity:'high',slaMin:31,alertStatus:'open',resolutionStatus:'pending',fromCC:false,dependsOn:'alt-001'}], agent:'Eriqueson M.', aiReady:true },
+  { id:'svc-002', route:'Guru 5 — Entrada', client:'Amazon Guru', site:'Barueri SP 07', provider:'AB Turismo', market:'brasil', localTime:'05:50', serviceTime:'05:50 BR', pax:38, capacity:45, vehicle:'BUS-3317', driverName:'José Ferreira', driverId:'DRV-1190', lastReading:'05:49', status:'pending-unsolved', alerts:[{id:'alt-003',type:'no_stop',severity:'high',slaMin:31,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:true },
+  { id:'svc-003', route:'95 — Cotia via Itapevi - E', client:'Mercado Livre', site:'Barueri SP 07', provider:'AB Turismo', market:'brasil', localTime:'06:00', serviceTime:'06:00 BR', pax:22, capacity:44, vehicle:'BUS-2208', driverName:'Marcos Silva', driverId:'DRV-4403', lastReading:'05:58', status:'in-progress', alerts:[{id:'alt-004',type:'minor_delay',severity:'medium',slaMin:52,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:false },
+  { id:'svc-004', route:'07 — Itapecerica - S', client:'Boticário', site:'MWM Motores SP', provider:'Expresso Palmares', market:'brasil', localTime:'06:10', serviceTime:'06:10 BR', pax:51, capacity:55, vehicle:'BUS-7741', driverName:'Roberto Costa', driverId:'DRV-8821', lastReading:'06:08', status:'in-progress-issues', alerts:[{id:'alt-005',type:'no_play',severity:'critical',slaMin:6,alertStatus:'open',resolutionStatus:'pending',fromCC:false},{id:'alt-006',type:'driver_alert',severity:'critical',slaMin:6,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:'Eriqueson M.', aiReady:true },
+  { id:'svc-005', route:'15 — Contagem - E', client:'Volkswagen', site:'Betim MG 02', provider:'Expresso Palmares', market:'brasil', localTime:'06:15', serviceTime:'06:15 BR', pax:18, capacity:50, vehicle:'BUS-5530', driverName:'Antônio Lima', driverId:'DRV-3312', lastReading:null, status:'planned', alerts:[{id:'alt-007',type:'no_readings',severity:'medium',slaMin:null,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:false },
+  { id:'svc-006', route:'Rota LX-3 — Entrada', client:'Accenture PT', site:'Lisboa Norte', provider:'Carris Metropolitana', market:'portugal', localTime:'07:15', serviceTime:'08:15 PT', pax:34, capacity:40, vehicle:'CAR-LX09', driverName:'João Santos', driverId:'DRV-PT-091', lastReading:'07:12', status:'in-progress-issues', alerts:[{id:'alt-008',type:'major_delay',severity:'critical',slaMin:12,alertStatus:'open',resolutionStatus:'pending',fromCC:false}], agent:null, aiReady:true },
 ];
+
+const ITINERARY_DATA = {
+  'svc-001': [
+    { stop:'Terminal Lapa', scheduled:'05:20', eta:'05:20', real:'05:20', paxBoarded:8,  status:'done' },
+    { stop:'Av. Francisco Morato', scheduled:'05:28', eta:'05:29', real:'05:29', paxBoarded:14, status:'done' },
+    { stop:'Pça. Ernesto Igel',    scheduled:'05:35', eta:'05:38', real:'05:38', paxBoarded:12, status:'done' },
+    { stop:'Rod. Anhanguera km 22',scheduled:'05:44', eta:'05:52', real:null,   paxBoarded:null, status:'current' },
+    { stop:'Betim MG 02 (Destino)',scheduled:'05:55', eta:'06:08', real:null,   paxBoarded:null, status:'pending' },
+  ],
+  'svc-002': [
+    { stop:'Terminal Barra Funda', scheduled:'05:38', eta:'05:38', real:'05:38', paxBoarded:10, status:'done' },
+    { stop:'Av. Ermano Marchetti', scheduled:'05:45', eta:'05:46', real:'05:46', paxBoarded:16, status:'done' },
+    { stop:'Alphaville Acesso',    scheduled:'05:52', eta:'05:54', real:null,   paxBoarded:null, status:'current' },
+    { stop:'Barueri SP 07 (Destino)', scheduled:'06:00', eta:'06:03', real:null, paxBoarded:null, status:'pending' },
+  ],
+  'svc-003': [
+    { stop:'Terminal Leopoldina',  scheduled:'05:45', eta:'05:45', real:'05:45', paxBoarded:6,  status:'done' },
+    { stop:'Cotia Centro',         scheduled:'05:55', eta:'05:57', real:'05:57', paxBoarded:8,  status:'done' },
+    { stop:'Itapevi BR-374',       scheduled:'06:05', eta:'06:09', real:null,   paxBoarded:null, status:'current' },
+    { stop:'Barueri SP 07 (Destino)', scheduled:'06:15', eta:'06:20', real:null, paxBoarded:null, status:'pending' },
+  ],
+  'svc-004': [
+    { stop:'Pça. da República',    scheduled:'05:55', eta:'05:55', real:'05:55', paxBoarded:20, status:'done' },
+    { stop:'Itapecerica da Serra', scheduled:'06:10', eta:'06:10', real:null,   paxBoarded:null, status:'current' },
+    { stop:'MWM Motores SP (Destino)', scheduled:'06:20', eta:'06:20', real:null, paxBoarded:null, status:'pending' },
+  ],
+  'svc-005': [
+    { stop:'BH — Terminal Calafate', scheduled:'06:05', eta:'06:05', real:null, paxBoarded:null, status:'pending' },
+    { stop:'Contagem Centro',        scheduled:'06:12', eta:'06:12', real:null, paxBoarded:null, status:'pending' },
+    { stop:'Betim MG 02 (Destino)', scheduled:'06:22', eta:'06:22', real:null, paxBoarded:null, status:'pending' },
+  ],
+  'svc-006': [
+    { stop:'Marquês de Pombal',    scheduled:'07:05', eta:'07:05', real:'07:06', paxBoarded:12, status:'done' },
+    { stop:'Entrecampos',          scheduled:'07:12', eta:'07:14', real:'07:15', paxBoarded:10, status:'done' },
+    { stop:'Campo Grande',         scheduled:'07:22', eta:'07:30', real:null,   paxBoarded:null, status:'current' },
+    { stop:'Lisboa Norte (Destino)', scheduled:'07:35', eta:'07:48', real:null, paxBoarded:null, status:'pending' },
+  ],
+};
 
 const PROCEDURES = {
   no_play:{ title:'No Play', client:'Amazon BR', steps:[{text:'Verificar tracking — confirmar posição do veículo',cta:null},{text:'Contatar operador e identificar o motivo da não iniciação',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se sem resposta em 20 min → comunicar passageiros sobre o atraso',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Se motorista não localizado em 30 min → solicitar veículo substituto',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
@@ -1330,6 +1393,7 @@ function renderDetail() {
     ? 'Veículo não iniciou rota. Carlos Mendes tem histórico limpo (0 atrasos/30d). Recomendação: ligue imediatamente para o operador AB Turismo. Se sem resposta em 15 min, autorize Uber para os 46 passageiros. Push preventivo já enviado.'
     : 'Monitorar a situação. Verificar se há tráfego intenso na rota via live tracking. Se atraso persistir por mais 10 min, enviar push informativo para passageiros.';
 
+  if(_itinInterval) { clearInterval(_itinInterval); _itinInterval = null; }
   document.getElementById('detail-layout').innerHTML = `
     <div class="service-header">
       <div class="service-header-top">
@@ -1349,23 +1413,36 @@ function renderDetail() {
       </div>
       <div class="detail-extra" id="detail-extra-fields">
         <div class="extra-field"><div class="extra-label">cliente</div><div class="extra-val">${svc.client}</div></div>
-        <div class="extra-field"><div class="extra-label">mercado</div><div class="extra-val">${svc.market}</div></div>
+        <div class="extra-field"><div class="extra-label">mercado</div><div class="extra-val">${svc.market.toUpperCase()}</div></div>
         <div class="extra-field"><div class="extra-label">hora serviço</div><div class="extra-val">${svc.serviceTime}</div></div>
         <div class="extra-field"><div class="extra-label">ID serviço</div><div class="extra-val">${svc.id}</div></div>
-        <div class="extra-field"><div class="extra-label">tipo rota</div><div class="extra-val">Entrada</div></div>
-        <div class="extra-field"><div class="extra-label">veículo</div><div class="extra-val">Ônibus 42</div></div>
-        <div class="extra-field"><div class="extra-label">motorista ID</div><div class="extra-val">DRV-2281</div></div>
-        <div class="extra-field"><div class="extra-label">passageiros confirmados</div><div class="extra-val">${svc.pax}</div></div>
+        <div class="extra-field"><div class="extra-label">veículo</div><div class="extra-val">${svc.vehicle}</div></div>
+        <div class="extra-field"><div class="extra-label">motorista</div><div class="extra-val">${svc.driverName}</div></div>
+        <div class="extra-field"><div class="extra-label">ID motorista</div><div class="extra-val">${svc.driverId}</div></div>
+        <div class="extra-field"><div class="extra-label">capacidade</div><div class="extra-val">${svc.capacity} lugares</div></div>
+        <div class="extra-field"><div class="extra-label">ocupação</div><div class="extra-val" style="color:${svc.pax/svc.capacity>0.9?'var(--color-critical)':'var(--color-brand)'};font-weight:700">${Math.round(svc.pax/svc.capacity*100)}% (${svc.pax}/${svc.capacity})</div></div>
+        <div class="extra-field"><div class="extra-label">última leitura</div><div class="extra-val" style="color:${svc.lastReading?'var(--color-text-primary)':'var(--color-critical)'}">${svc.lastReading?svc.lastReading+'  ✓':'sem leitura ⚠'}</div></div>
+        <div class="extra-field"><div class="extra-label">tipo rota</div><div class="extra-val">${svc.route.includes('Entrada')||svc.route.includes('- E')?'Entrada':'Saída'}</div></div>
       </div>
     </div>
     <div class="detail-body">
       <div class="detail-left">
-        <div class="section-header">
-          <span class="section-title">alertas deste serviço (${svc.alerts.length})</span>
-          <span class="section-sub">ordenado por criticidade</span>
-          <div class="tt-wrap"><span class="tt-icon">?</span><div class="tt-box">Alertas ordenados do mais crítico para o menos crítico. SLA mostra tempo restante para resolução conforme SLA do cliente.</div></div>
+        <div class="detail-tabs">
+          <div class="detail-tab active" id="tab-alerts" onclick="switchDetailTab('alerts')">Alertas (${svc.alerts.length})</div>
+          <div class="detail-tab" id="tab-itin" onclick="switchDetailTab('itin')">Itinerário</div>
+          <span class="live-badge-sm"><div class="live-dot-sm"></div>tempo real</span>
         </div>
-        ${alertsHtml}
+        <div id="detail-tab-alerts">
+          <div class="section-header">
+            <span class="section-title">alertas deste serviço (${svc.alerts.length})</span>
+            <span class="section-sub">ordenado por criticidade</span>
+            <div class="tt-wrap"><span class="tt-icon">?</span><div class="tt-box">Alertas ordenados do mais crítico para o menos crítico. SLA mostra tempo restante para resolução conforme SLA do cliente.</div></div>
+          </div>
+          ${alertsHtml}
+        </div>
+        <div id="detail-tab-itin" style="display:none">
+          ${renderItinerary(svc.id)}
+        </div>
       </div>
       <div class="detail-right">
         <div class="copilot-header">
@@ -1414,6 +1491,109 @@ function renderDetail() {
 function toggleExtraFields() {
   const el = document.getElementById('detail-extra-fields');
   el.classList.toggle('open');
+  const btn = el.previousElementSibling?.querySelector('.ti-plus, .ti-minus');
+  if(btn) btn.className = el.classList.contains('open') ? 'ti ti-minus' : 'ti ti-plus';
+}
+
+function switchDetailTab(tab) {
+  document.getElementById('detail-tab-alerts').style.display = tab === 'alerts' ? '' : 'none';
+  document.getElementById('detail-tab-itin').style.display   = tab === 'itin'   ? '' : 'none';
+  document.getElementById('tab-alerts').classList.toggle('active', tab === 'alerts');
+  document.getElementById('tab-itin').classList.toggle('active', tab === 'itin');
+}
+
+let _itinInterval = null;
+
+function renderItinerary(svcId) {
+  const stops = (ITINERARY_DATA[svcId] || []).map((s, i) => ({ ...s, _idx: i }));
+  if(!stops.length) return '<p style="color:var(--color-text-tertiary);font-size:12px;padding:20px">Sem itinerário disponível para este serviço.</p>';
+
+  const rows = stops.map(s => {
+    const isDone    = s.status === 'done';
+    const isCurrent = s.status === 'current';
+    const dotCls    = isDone ? 'done' : isCurrent ? 'current' : 'pending';
+    const rowCls    = isDone ? 'itin-done' : isCurrent ? 'itin-current' : '';
+
+    const etaDelay  = _calcDelay(s.scheduled, s.eta);
+    const etaCls    = etaDelay > 0 ? 'itin-eta-late' : 'itin-eta-ok';
+    const etaDisplay = `<span class="${etaCls}" id="itin-eta-${svcId}-${s._idx}">${s.eta}</span>`;
+
+    const deltaTxt  = etaDelay > 0 ? `<span class="itin-delta-late" id="itin-delta-${svcId}-${s._idx}">+${etaDelay} min</span>`
+                    : etaDelay < 0 ? `<span class="itin-delta-ok" id="itin-delta-${svcId}-${s._idx}">${etaDelay} min</span>`
+                    : `<span class="itin-delta-ok" id="itin-delta-${svcId}-${s._idx}">no prazo</span>`;
+
+    const realTd    = isDone
+      ? `<span class="itin-real-done">${s.real}</span>`
+      : isCurrent
+        ? `<span style="color:var(--color-text-tertiary);font-size:10px">em curso…</span>`
+        : `<span style="color:var(--color-text-tertiary)">—</span>`;
+
+    const paxTd     = s.paxBoarded != null
+      ? `<span class="itin-pax-chip"><i class="ti ti-users" style="font-size:10px"></i> ${s.paxBoarded}</span>`
+      : `<span style="color:var(--color-text-tertiary)">—</span>`;
+
+    return `<tr class="itin-row ${rowCls}" id="itin-row-${svcId}-${s._idx}">
+      <td><div class="itin-stop-name"><span class="stop-dot ${dotCls}"></span>${s.stop}</div></td>
+      <td class="itin-time">${s.scheduled}</td>
+      <td>${etaDisplay}</td>
+      <td>${realTd}</td>
+      <td>${deltaTxt}</td>
+      <td>${paxTd}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="itin-wrap">
+    <table class="itin-table">
+      <thead>
+        <tr>
+          <th>Parada</th>
+          <th>Previsto</th>
+          <th>ETA</th>
+          <th>Tempo Real</th>
+          <th>Δ Atraso</th>
+          <th>Pax</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+  _startItinRealtime(svc.id);
+}
+
+function _calcDelay(scheduled, eta) {
+  if(!eta) return 0;
+  const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+  return toMin(eta) - toMin(scheduled);
+}
+
+function _startItinRealtime(svcId) {
+  if(_itinInterval) clearInterval(_itinInterval);
+  const stops = ITINERARY_DATA[svcId];
+  if(!stops) return;
+  _itinInterval = setInterval(() => {
+    stops.forEach((s, i) => {
+      if(s.status === 'pending' || s.status === 'current') {
+        // simula ETA variando ±1 min a cada tick para parecer vivo
+        const [h, m] = s.eta.split(':').map(Number);
+        const variation = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+        const newMin = Math.max(0, m + variation);
+        const newH = h + Math.floor(newMin / 60);
+        const newM = newMin % 60;
+        s.eta = `${String(newH).padStart(2,'0')}:${String(newM).padStart(2,'0')}`;
+
+        const etaEl    = document.getElementById(`itin-eta-${svcId}-${i}`);
+        const deltaEl  = document.getElementById(`itin-delta-${svcId}-${i}`);
+        if(!etaEl) return;
+        const delay = _calcDelay(s.scheduled, s.eta);
+        etaEl.textContent = s.eta;
+        etaEl.className   = delay > 0 ? 'itin-eta-late' : 'itin-eta-ok';
+        if(deltaEl) {
+          deltaEl.textContent = delay > 0 ? `+${delay} min` : delay < 0 ? `${delay} min` : 'no prazo';
+          deltaEl.className   = delay > 0 ? 'itin-delta-late' : 'itin-delta-ok';
+        }
+      }
+    });
+  }, 8000); // atualiza a cada 8 segundos
 }
 
 function setAiFeedback(type) {
