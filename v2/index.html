@@ -2053,11 +2053,11 @@ function openChatResolve(alertId, svcId) {
       </div>
       <div class="chat-messages" id="chat-messages-area"></div>
       <div class="chat-escalate" style="padding:0 14px 8px;gap:8px;display:flex;flex-shrink:0;">
-        <button class="chat-esc-btn esc-amber" onclick="_chatEscalate(2,'${svc.client}')">
+        <button class="chat-esc-btn esc-amber" onclick="_chatEscalate(2,'${svc.client}','${alert.type}')">
           <div class="esc-title"><i class="ti ti-arrow-up"></i> Escalar L2</div>
           <div class="esc-sub">Supervisor de tráfego</div>
         </button>
-        <button class="chat-esc-btn esc-red" onclick="_chatEscalate(3,'${svc.client}')">
+        <button class="chat-esc-btn esc-red" onclick="_chatEscalate(3,'${svc.client}','${alert.type}')">
           <div class="esc-title"><i class="ti ti-alert-triangle"></i> Escalar L3</div>
           <div class="esc-sub">Notificar cliente ${svc.client}</div>
         </button>
@@ -2161,14 +2161,18 @@ function chatHandleAction(actionIdx, alertType) {
 
     setTimeout(() => {
       if(next === '_close') {
-        _chatAppendMessage('bot', '✅ Ótimo! Ação registrada. Você pode fechar o alerta ou continuar adicionando observações.', '', 'bot-close-' + Date.now());
+        _chatAppendMessage('bot', '✅ Ação registrada. Posso ajudar com mais alguma coisa nesse alerta?', '', 'bot-close-' + Date.now());
+        setTimeout(() => _chatShowFinalActions(alertType), 400);
       } else if(next === '_escalate2') {
-        _chatEscalate(2);
+        _chatEscalate(2, null, alertType);
       } else if(next === '_escalate3') {
-        _chatEscalate(3);
+        _chatEscalate(3, null, alertType);
       } else if(script[next]) {
         _chatState.currentStep = next;
         _chatRenderBotStep(script[next], alertType);
+      } else {
+        // fallback: passo não encontrado, mostrar ações finais
+        setTimeout(() => _chatShowFinalActions(alertType), 400);
       }
     }, 500);
   }, 200);
@@ -2190,7 +2194,7 @@ function chatSetResolution(val) {
   document.getElementById('res-unresolved')?.classList.toggle('active', val==='unresolved');
 }
 
-function _chatEscalate(level, client) {
+function _chatEscalate(level, client, alertType) {
   const svc = SERVICES.find(s=>s.id===_chatState.svcId);
   const cl = client || svc?.client || '';
   const msg = level===2 ? 'Escalado para supervisor · Eriqueson M. notificado' : `Nível 3 acionado · ${cl} notificado`;
@@ -2200,7 +2204,46 @@ function _chatEscalate(level, client) {
     : `🔴 <strong>Escalamento L3 realizado.</strong> O cliente <strong>${cl}</strong> foi notificado sobre a ocorrência.`;
   setTimeout(() => {
     _chatAppendMessage('bot', botMsg, '', 'bot-esc-' + Date.now());
+    if(alertType) setTimeout(() => _chatShowFinalActions(alertType), 400);
   }, 300);
+}
+
+function _chatShowFinalActions(alertType) {
+  const svc = SERVICES.find(s=>s.id===_chatState.svcId);
+  const alert = svc?.alerts.find(a=>a.id===_chatState.alertId);
+  if(!svc||!alert) return;
+  const script = RESOLVE_CHAT_SCRIPTS[alertType] || {};
+  const msgId = 'bot-final-' + Date.now();
+  const actionsHtml = `
+    <button class="chat-action-btn primary" onclick="chatHandleFinal('close','${alertType}')"><i class="ti ti-check"></i> Fechar alerta</button>
+    <button class="chat-action-btn warning" onclick="chatHandleFinal('esc2','${alertType}')"><i class="ti ti-arrow-up"></i> Escalar L2 — supervisor</button>
+    <button class="chat-action-btn danger"  onclick="chatHandleFinal('esc3','${alertType}')"><i class="ti ti-alert-triangle"></i> Escalar L3 — cliente</button>
+    <button class="chat-action-btn neutral" onclick="chatHandleFinal('restart','${alertType}')"><i class="ti ti-refresh"></i> Recomeçar fluxo</button>
+  `;
+  _chatAppendMessage('bot', 'O que deseja fazer agora?', actionsHtml, msgId);
+}
+
+function chatHandleFinal(action, alertType) {
+  // Desabilitar botões do grupo clicado
+  const msgArea = document.getElementById('chat-messages-area');
+  const allGroups = msgArea?.querySelectorAll('.chat-actions');
+  const lastGroup = allGroups?.[allGroups.length - 1];
+  lastGroup?.querySelectorAll('.chat-action-btn').forEach(b => b.disabled = true);
+
+  if(action === 'close') {
+    closeAlert(_chatState.alertId, _chatState.svcId);
+  } else if(action === 'esc2') {
+    _chatAppendMessage('agent', '<strong>Escalar L2 — supervisor</strong>', '', 'agent-' + Date.now());
+    setTimeout(() => _chatEscalate(2, null, alertType), 200);
+  } else if(action === 'esc3') {
+    _chatAppendMessage('agent', '<strong>Escalar L3 — cliente</strong>', '', 'agent-' + Date.now());
+    setTimeout(() => _chatEscalate(3, null, alertType), 200);
+  } else if(action === 'restart') {
+    _chatAppendMessage('agent', '<strong>Recomeçar fluxo</strong>', '', 'agent-' + Date.now());
+    const script = RESOLVE_CHAT_SCRIPTS[alertType] || {};
+    _chatState.currentStep = 'start';
+    setTimeout(() => _chatRenderBotStep(script['start'], alertType), 400);
+  }
 }
 
 function closeChatResolve() {
