@@ -846,16 +846,15 @@ function renderMainPage() {
 
 function renderMarketNav() {
   const markets = ['brasil','portugal'];
-  const counts = {brasil:7, portugal:2};
+  const flags = {brasil:'🇧🇷', portugal:'🇵🇹'};
   const extra = [{label:'pós-operação',badge:4}];
   let html = '';
   markets.forEach(m => {
     if(state.activeCountries.includes(m)) {
-      const flag = m==='brasil'?'🇧🇷':'🇵🇹';
-      const cnt = counts[m]||0;
+      const cnt = SERVICES.filter(s => s.market === m && s.alerts.length > 0).length;
       const active = state.selectedMarket===m ? 'active' : '';
       html += `<div class="market-item ${active}" onclick="selectMarket('${m}')">
-        <span>${flag} ${m}</span>
+        <span>${flags[m]} ${m}</span>
         <span class="market-badge ${cnt>0?'badge-red':'badge-gray'}">${cnt}</span>
       </div>`;
     }
@@ -1146,14 +1145,14 @@ function closeMap() {
 
 function updateMarketTitle() {
   const svcs = getFilteredServices();
-  document.getElementById('market-title').textContent = `${state.selectedMarket.toUpperCase()} · ${svcs.length} serviços`;
+  const marketLabel = state.activeCountries.length === 1
+    ? state.activeCountries[0].toUpperCase()
+    : state.activeCountries.map(c => c.toUpperCase()).join(' + ');
+  document.getElementById('market-title').textContent = `${marketLabel} · ${svcs.length} serviços`;
 }
 
 function getBaseServices() {
-  return SERVICES.filter(s =>
-    (s.market === state.selectedMarket || state.selectedMarket === 'all') &&
-    state.activeCountries.includes(s.market)
-  );
+  return SERVICES.filter(s => state.activeCountries.includes(s.market));
 }
 
 function getFilteredServices() {
