@@ -128,17 +128,15 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 .country-pills { display: flex; flex-wrap: wrap; gap: 4px; }
 .country-pill {
   font-size: 11px; padding: 3px 7px; border-radius: var(--border-radius-sm); cursor: pointer;
-  border: 2px solid #555; background: var(--color-background-primary);
+  border: 1px solid var(--color-border-tertiary); background: var(--color-background-primary);
   color: var(--color-text-secondary);
 }
 .country-pill.selected { background: var(--color-brand-light); border-color: var(--color-brand); color: var(--color-brand-dark); }
-.status-dots { display: flex; flex-wrap: wrap; gap: 6px; }
+.status-dots { display: flex; flex-wrap: wrap; gap: 4px; }
 .status-dot-item { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; position: relative; }
-.status-dot-item:hover { transform: scale(1.15); }
-.status-dot-item.active { border: 2.5px solid #333; box-shadow: 0 0 0 2px rgba(0,0,0,0.15); transform: scale(1.15); }
-.status-dot-item:hover::after { content: attr(data-tip); position: absolute; left: 26px; top: 0; background: #222; color: #fff; font-size: 10px; white-space: nowrap; padding: 2px 6px; border-radius: 4px; z-index: 999; pointer-events: none; }
+.status-dot-item:hover::after { content: attr(data-tip); position: absolute; left: 24px; top: 0; background: #222; color: #fff; font-size: 10px; white-space: nowrap; padding: 2px 6px; border-radius: 4px; z-index: 999; pointer-events: none; }
 .status-dot-item.inactive { opacity: 0.3; }
-.filter-dropdown { width: 100%; margin-top: 4px; font-size: 11px; padding: 5px 8px; border: 2px solid #555; border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; }
+.filter-dropdown { width: 100%; margin-top: 4px; font-size: 11px; padding: 4px 6px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-sm); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; }
 
 /* ===================== CONTENT AREA ===================== */
 .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -484,7 +482,7 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 
 /* ===================== ALERT TYPE FILTER (tabela) ===================== */
 .alert-filter-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-right: 10px; border-right: 1px solid var(--color-border-tertiary); margin-right: 4px; }
-.alert-filter-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 4px 9px; border-radius: var(--border-radius-sm); border: 2px solid #555; cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; white-space: nowrap; }
+.alert-filter-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 4px 9px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-tertiary); cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; white-space: nowrap; }
 .alert-filter-chip:hover { border-color: var(--color-border-secondary); background: var(--color-background-tertiary); }
 .alert-filter-chip.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
 .alert-filter-chip i { font-size: 12px; }
@@ -510,14 +508,15 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 .map-toolbar::-webkit-scrollbar-thumb { background: #333; }
 .map-tlabel { font-size: 9px; font-weight: 700; text-transform: uppercase; color: rgba(200,200,190,0.3); letter-spacing: 0.6px; white-space: nowrap; flex-shrink: 0; }
 .map-tsep { width: 1px; height: 18px; background: #2a2a28; flex-shrink: 0; margin: 0 4px; }
-.map-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; border: 1px solid #2e2e2c; color: rgba(200,200,190,0.5); background: none; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.12s; font-family: var(--font-sans); }
-.map-chip:hover { border-color: #555; color: rgba(200,200,190,0.85); }
+.map-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 3px; font-size: 10px; font-weight: 600; border: 1.5px solid #555; color: rgba(200,200,190,0.6); background: none; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.12s; font-family: var(--font-sans); }
+.map-chip:hover { border-color: #999; color: rgba(200,200,190,0.95); }
 .map-chip.active { border-color: transparent; color: #fff; }
-.map-chip.c-all.active  { background: #2e2e2c; color: rgba(200,200,190,0.9); border-color: #444; }
-.map-chip.c-crit.active { background: #E24B4A; }
-.map-chip.c-high.active { background: #EF9F27; }
-.map-chip.c-med.active  { background: #378ADD; }
-.map-chip.c-ok.active   { background: #1D9E75; }
+.map-chip.c-all.active        { background: #3a3a38; color: rgba(200,200,190,0.95); border-color: #666; }
+.map-chip.c-issues.active     { background: #E24B4A; border-color: #E24B4A; }
+.map-chip.c-pending.active    { background: #EF9F27; border-color: #EF9F27; }
+.map-chip.c-progress.active   { background: #1D9E75; border-color: #1D9E75; }
+.map-chip.c-planned.active    { background: #378ADD; border-color: #378ADD; }
+.map-chip.c-completed.active  { background: #6b6966; border-color: #6b6966; }
 .map-chip.c-alrt.active { background: var(--color-brand); border-color: var(--color-brand); }
 .map-theme-btn { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; border: 1px solid #2e2e2c; color: rgba(200,200,190,0.5); background: none; cursor: pointer; flex-shrink: 0; transition: all 0.12s; font-family: var(--font-sans); }
 .map-theme-btn:hover { border-color: #555; color: rgba(200,200,190,0.85); }
@@ -750,7 +749,6 @@ const state = {
   assignedServices: {},
   dashFilter: null,        // null | 'alerts' | 'unassigned' | 'sla-critical'
   alertTypeFilter: null,   // null | alert type key
-  statusFilter: null,      // null | 'in-progress-issues' | 'pending-unsolved' | 'in-progress' | 'planned' | 'completed'
   autoUpdate: true,        // flag de atualização automática
 };
 
@@ -845,24 +843,22 @@ function toggleAutoUpdate() {
 
 function renderStatusDots() {
   const dots = [
-    { key:'in-progress-issues', color:'#E24B4A', tip:'Issues ativos' },
-    { key:'pending-unsolved',   color:'#EF9F27', tip:'Pendente não resolvido' },
-    { key:'in-progress',        color:'#1D9E75', tip:'Em progresso' },
-    { key:'planned',            color:'#378ADD', tip:'Planejado' },
-    { key:'completed',          color:'#b4b2a9', tip:'Concluído' },
+    {color:'#E24B4A',tip:'critical issues'},
+    {color:'#EF9F27',tip:'pending unsolved'},
+    {color:'#1D9E75',tip:'in progress'},
+    {color:'#378ADD',tip:'planned'},
+    {color:'#b4b2a9',tip:'completed'},
+    {color:'#7F77DD',tip:'cc flagged'},
+    {color:'#085041',tip:'on time'},
+    {color:'#FCEBEB',tip:'delayed'},
+    {color:'#EAF3DE',tip:'early'},
+    {color:'#1a1a18',tip:'outros'},
   ];
   let html = '';
   dots.forEach(d => {
-    const active = state.statusFilter === d.key ? 'active' : '';
-    html += `<div class="status-dot-item ${active}" style="background:${d.color}" data-tip="${d.tip}" title="${d.tip}" onclick="toggleStatusFilter('${d.key}')"></div>`;
+    html += `<div class="status-dot-item" style="background:${d.color}" data-tip="${d.tip}" title="${d.tip}"></div>`;
   });
   document.getElementById('status-dots').innerHTML = html;
-}
-
-function toggleStatusFilter(key) {
-  state.statusFilter = (state.statusFilter === key) ? null : key;
-  renderStatusDots();
-  renderServiceList();
 }
 
 /* ===================== LIVE TRACKING MAP ===================== */
@@ -907,10 +903,10 @@ function _interpolateRoute(path, t) {
 
 function _applyMapFilters() {
   if (!_leafletMap) return;
-  _busMarkers.forEach(({marker, sev, alertTypes}) => {
-    const sevOk = !_mapSevFilter || sev === _mapSevFilter;
+  _busMarkers.forEach(({marker, status, alertTypes}) => {
+    const statusOk = !_mapSevFilter || status === _mapSevFilter;
     const alertOk = !_mapAlertFilter || alertTypes.includes(_mapAlertFilter);
-    if (sevOk && alertOk) {
+    if (statusOk && alertOk) {
       if (!_leafletMap.hasLayer(marker)) marker.addTo(_leafletMap);
     } else {
       if (_leafletMap.hasLayer(marker)) _leafletMap.removeLayer(marker);
@@ -929,15 +925,15 @@ function switchMapTheme(t) {
   });
 }
 
-function setMapSevFilter(s) {
+function setMapStatusFilter(s) {
   _mapSevFilter = s;
-  ['all','crit','high','med','ok'].forEach(k => {
-    const el = document.getElementById('mfsev-' + k);
+  ['all','issues','pending','progress','planned','completed'].forEach(k => {
+    const el = document.getElementById('mfst-' + k);
     if (el) el.classList.remove('active');
   });
-  const keyMap = { 'null':'all', critical:'crit', high:'high', medium:'med', ok:'ok' };
+  const keyMap = { 'null':'all', 'in-progress-issues':'issues', 'pending-unsolved':'pending', 'in-progress':'progress', 'planned':'planned', 'completed':'completed' };
   const activeKey = keyMap[String(s)] || 'all';
-  const el = document.getElementById('mfsev-' + activeKey);
+  const el = document.getElementById('mfst-' + activeKey);
   if (el) el.classList.add('active');
   _applyMapFilters();
 }
@@ -992,11 +988,12 @@ function openMainLiveTracking() {
       <button class="map-theme-btn" id="mtheme-color" onclick="switchMapTheme('color')">🗺️ color</button>
       <div class="map-tsep"></div>
       <span class="map-tlabel">status</span>
-      <button class="map-chip c-all active" id="mfsev-all" onclick="setMapSevFilter(null)">todos</button>
-      <button class="map-chip c-crit" id="mfsev-crit" onclick="setMapSevFilter('critical')"><span style="color:#E24B4A">●</span> crítico</button>
-      <button class="map-chip c-high" id="mfsev-high" onclick="setMapSevFilter('high')"><span style="color:#EF9F27">●</span> alto</button>
-      <button class="map-chip c-med" id="mfsev-med" onclick="setMapSevFilter('medium')"><span style="color:#378ADD">●</span> médio</button>
-      <button class="map-chip c-ok" id="mfsev-ok" onclick="setMapSevFilter('ok')"><span style="color:#1D9E75">●</span> ok</button>
+      <button class="map-chip c-all active" id="mfst-all" onclick="setMapStatusFilter(null)">todos</button>
+      <button class="map-chip c-issues"    id="mfst-issues"    onclick="setMapStatusFilter('in-progress-issues')"><span style="color:#E24B4A">●</span> issues ativos</button>
+      <button class="map-chip c-pending"   id="mfst-pending"   onclick="setMapStatusFilter('pending-unsolved')"><span style="color:#EF9F27">●</span> pendente</button>
+      <button class="map-chip c-progress"  id="mfst-progress"  onclick="setMapStatusFilter('in-progress')"><span style="color:#1D9E75">●</span> em progresso</button>
+      <button class="map-chip c-planned"   id="mfst-planned"   onclick="setMapStatusFilter('planned')"><span style="color:#378ADD">●</span> planejado</button>
+      <button class="map-chip c-completed" id="mfst-completed" onclick="setMapStatusFilter('completed')"><span style="color:#b4b2a9">●</span> concluído</button>
       ${alertChips}
     </div>
     <div class="map-body">
@@ -1028,13 +1025,14 @@ function openMainLiveTracking() {
     svcs.forEach((svc, i) => {
       const routeIdx = i % BUS_ROUTES_COORDS.length;
       const path = BUS_ROUTES_COORDS[routeIdx];
-      const sev = _getSeverity(svc);
-      const color = SEV_COLORS[sev];
+      const STATUS_COLORS = { 'in-progress-issues':'#E24B4A', 'pending-unsolved':'#EF9F27', 'in-progress':'#1D9E75', 'planned':'#378ADD', 'completed':'#b4b2a9' };
+      const STATUS_LABELS = { 'in-progress-issues':'ISSUES ATIVOS', 'pending-unsolved':'PENDENTE', 'in-progress':'EM PROGRESSO', 'planned':'PLANEJADO', 'completed':'CONCLUÍDO' };
+      const color = STATUS_COLORS[svc.status] || '#b4b2a9';
+      const statusLabel = STATUS_LABELS[svc.status] || svc.status;
       const code = svc.id.replace('svc-','#');
       const alertTypesList = svc.alerts.map(a => a.type);
       const alertTypesStr = alertTypesList.map(t => t.replace(/_/g,' ')).join(', ') || '—';
       const agent = state.assignedServices[svc.id] || svc.agent || '—';
-      const sevLabel = {critical:'CRÍTICO',high:'ALTO',medium:'MÉDIO',ok:'OK'}[sev];
 
       let progress = (i / svcs.length) % 1;
 
@@ -1050,7 +1048,7 @@ function openMainLiveTracking() {
       marker.bindPopup(`
         <div class="lp-route">${svc.route}</div>
         <table style="width:100%;font-size:11px;color:#ccc;border-collapse:collapse;margin-top:6px">
-          <tr><td style="padding:2px 0;color:#888">status</td><td style="color:${color};font-weight:700">${sevLabel}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">status</td><td style="color:${color};font-weight:700">${statusLabel}</td></tr>
           <tr><td style="padding:2px 0;color:#888">provider</td><td>${svc.provider}</td></tr>
           <tr><td style="padding:2px 0;color:#888">alertas</td><td>${alertTypesStr}</td></tr>
           <tr><td style="padding:2px 0;color:#888">pax</td><td>${svc.pax}</td></tr>
@@ -1061,7 +1059,7 @@ function openMainLiveTracking() {
         </button>
       `, { maxWidth: 220 });
 
-      _busMarkers.push({ marker, sev, alertTypes: alertTypesList });
+      _busMarkers.push({ marker, status: svc.status, alertTypes: alertTypesList });
 
       const speed = 0.00018 + (i % 5) * 0.00003;
       const interval = setInterval(() => {
@@ -1100,8 +1098,6 @@ function getFilteredServices() {
   if(state.dashFilter === 'sla-critical') svcs = svcs.filter(s => s.alerts.some(a => a.slaMin !== null && a.slaMin < 15));
   // Filtro de tipo de alerta
   if(state.alertTypeFilter) svcs = svcs.filter(s => s.alerts.some(a => a.type === state.alertTypeFilter));
-  // Filtro de status do serviço
-  if(state.statusFilter) svcs = svcs.filter(s => s.status === state.statusFilter);
   return svcs;
 }
 
@@ -1237,11 +1233,9 @@ function selectMarket(m) {
   state.selectedMarket = m;
   state.dashFilter = null;
   state.alertTypeFilter = null;
-  state.statusFilter = null;
   renderMarketNav();
   renderSummaryBar();
   renderAlertFilterBar();
-  renderStatusDots();
   renderServiceList();
   updateMarketTitle();
 }
