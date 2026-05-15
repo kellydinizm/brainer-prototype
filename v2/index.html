@@ -2208,36 +2208,84 @@ function _chatEscalate(level, client, alertType) {
   }, 300);
 }
 
+const ALERT_TYPE_LABELS = {
+  no_play: 'Serviço não iniciado', major_delay: 'Atraso crítico',
+  no_stop: 'Parada ignorada', driver_alert: 'Alerta de motorista',
+  minor_delay: 'Atraso moderado', no_readings: 'Sem leituras GPS',
+};
+
 function _chatShowFinalActions(alertType) {
   const svc = SERVICES.find(s=>s.id===_chatState.svcId);
   const alert = svc?.alerts.find(a=>a.id===_chatState.alertId);
   if(!svc||!alert) return;
-  const script = RESOLVE_CHAT_SCRIPTS[alertType] || {};
-  const msgId = 'bot-final-' + Date.now();
-  const actionsHtml = `
-    <button class="chat-action-btn primary" onclick="chatHandleFinal('close','${alertType}')"><i class="ti ti-check"></i> Fechar alerta</button>
+
+  // Outros alertas abertos no mesmo serviço
+  const otherAlerts = svc.alerts.filter(a => a.id !== _chatState.alertId);
+
+  let msgText = 'O que deseja fazer agora?';
+  let extraHtml = '';
+
+  if(otherAlerts.length > 0) {
+    const lista = otherAlerts.map(a =>
+      `<span class="chat-status-chip chip-sent"><i class="ti ti-alert-triangle"></i> ${ALERT_TYPE_LABELS[a.type]||a.type}</span>`
+    ).join(' ');
+    msgText = `⚠️ Este serviço ainda tem <strong>${otherAlerts.length} alerta${otherAlerts.length>1?'s':''} aberto${otherAlerts.length>1?'s':''}</strong>:<br><br>${lista}<br><br>Como quer proceder?`;
+    extraHtml = otherAlerts.map(a =>
+      `<button class="chat-action-btn warning" onclick="chatHandleFinal('review:${a.id}','${alertType}')"><i class="ti ti-arrow-right"></i> Resolver: ${ALERT_TYPE_LABELS[a.type]||a.type}</button>`
+    ).join('');
+    if(otherAlerts.length > 1) {
+      extraHtml += `<button class="chat-action-btn danger" onclick="chatHandleFinal('close_all','${alertType}')"><i class="ti ti-checks"></i> Fechar todos os alertas</button>`;
+    }
+  }
+
+  const baseHtml = `
+    <button class="chat-action-btn primary" onclick="chatHandleFinal('close','${alertType}')"><i class="ti ti-check"></i> Fechar este alerta</button>
+    ${extraHtml}
     <button class="chat-action-btn warning" onclick="chatHandleFinal('esc2','${alertType}')"><i class="ti ti-arrow-up"></i> Escalar L2 — supervisor</button>
     <button class="chat-action-btn danger"  onclick="chatHandleFinal('esc3','${alertType}')"><i class="ti ti-alert-triangle"></i> Escalar L3 — cliente</button>
     <button class="chat-action-btn neutral" onclick="chatHandleFinal('restart','${alertType}')"><i class="ti ti-refresh"></i> Recomeçar fluxo</button>
   `;
-  _chatAppendMessage('bot', 'O que deseja fazer agora?', actionsHtml, msgId);
+  _chatAppendMessage('bot', msgText, baseHtml, 'bot-final-' + Date.now());
 }
 
-function chatHandleFinal(action, alertType) {
-  // Desabilitar botões do grupo clicado
+function _chatDisableLastActions() {
   const msgArea = document.getElementById('chat-messages-area');
   const allGroups = msgArea?.querySelectorAll('.chat-actions');
   const lastGroup = allGroups?.[allGroups.length - 1];
   lastGroup?.querySelectorAll('.chat-action-btn').forEach(b => b.disabled = true);
+}
+
+function chatHandleFinal(action, alertType) {
+  _chatDisableLastActions();
 
   if(action === 'close') {
     closeAlert(_chatState.alertId, _chatState.svcId);
+
+  } else if(action === 'close_all') {
+    const svc = SERVICES.find(s=>s.id===_chatState.svcId);
+    const count = svc?.alerts?.length || 0;
+    if(svc) { svc.alerts = []; svc.status = 'in-progress'; }
+    closeChatResolve();
+    showToast(`${count} alerta${count>1?'s':''} fechado${count>1?'s':''} · resolvido`, 'success');
+    renderDetail();
+
+  } else if(action.startsWith('review:')) {
+    const targetAlertId = action.split(':')[1];
+    const svc = SERVICES.find(s=>s.id===_chatState.svcId);
+    // Fechar alerta atual primeiro
+    if(svc) svc.alerts = svc.alerts.filter(a=>a.id!==_chatState.alertId);
+    showToast('Alerta anterior fechado', 'success');
+    // Abrir chatbot para o próximo alerta
+    setTimeout(() => openResolvePopup(targetAlertId, _chatState.svcId), 300);
+
   } else if(action === 'esc2') {
     _chatAppendMessage('agent', '<strong>Escalar L2 — supervisor</strong>', '', 'agent-' + Date.now());
     setTimeout(() => _chatEscalate(2, null, alertType), 200);
+
   } else if(action === 'esc3') {
     _chatAppendMessage('agent', '<strong>Escalar L3 — cliente</strong>', '', 'agent-' + Date.now());
     setTimeout(() => _chatEscalate(3, null, alertType), 200);
+
   } else if(action === 'restart') {
     _chatAppendMessage('agent', '<strong>Recomeçar fluxo</strong>', '', 'agent-' + Date.now());
     const script = RESOLVE_CHAT_SCRIPTS[alertType] || {};
