@@ -812,6 +812,7 @@ const state = {
   assignedServices: {},
   dashFilter: null,        // null | 'alerts' | 'unassigned' | 'sla-critical'
   alertTypeFilter: null,   // null | alert type key
+  statusFilter: null,      // null | service status key
   autoUpdate: true,        // flag de atualização automática
 };
 
@@ -905,22 +906,25 @@ function toggleAutoUpdate() {
 
 function renderStatusDots() {
   const dots = [
-    {color:'#E24B4A',tip:'critical issues'},
-    {color:'#EF9F27',tip:'pending unsolved'},
-    {color:'#1D9E75',tip:'in progress'},
-    {color:'#378ADD',tip:'planned'},
-    {color:'#b4b2a9',tip:'completed'},
-    {color:'#7F77DD',tip:'cc flagged'},
-    {color:'#085041',tip:'on time'},
-    {color:'#FCEBEB',tip:'delayed'},
-    {color:'#EAF3DE',tip:'early'},
-    {color:'#1a1a18',tip:'outros'},
+    { key:'in-progress-issues', color:'#E24B4A', tip:'Issues ativos' },
+    { key:'pending-unsolved',   color:'#EF9F27', tip:'Pendente não resolvido' },
+    { key:'in-progress',        color:'#1D9E75', tip:'Em progresso' },
+    { key:'planned',            color:'#378ADD', tip:'Planejado' },
+    { key:'completed',          color:'#b4b2a9', tip:'Concluído' },
   ];
   let html = '';
   dots.forEach(d => {
-    html += `<div class="status-dot-item" style="background:${d.color}" data-tip="${d.tip}" title="${d.tip}"></div>`;
+    const active = state.statusFilter === d.key ? 'active' : '';
+    html += `<div class="status-dot-item ${active}" style="background:${d.color};${active?'border-color:#333;transform:scale(1.2)':''}" data-tip="${d.tip}" title="${d.tip}" onclick="toggleStatusFilter('${d.key}')"></div>`;
   });
   document.getElementById('status-dots').innerHTML = html;
+}
+
+function toggleStatusFilter(key) {
+  state.statusFilter = state.statusFilter === key ? null : key;
+  renderStatusDots();
+  renderServiceList();
+  updateMarketTitle();
 }
 
 /* ===================== LIVE TRACKING MAP ===================== */
@@ -1163,6 +1167,7 @@ function getFilteredServices() {
   if(state.dashFilter === 'sla-critical') svcs = svcs.filter(s => s.alerts.some(a => a.slaMin !== null && a.slaMin < 15));
   // Filtro de tipo de alerta
   if(state.alertTypeFilter) svcs = svcs.filter(s => s.alerts.some(a => a.type === state.alertTypeFilter));
+  if(state.statusFilter) svcs = svcs.filter(s => s.status === state.statusFilter);
   return svcs;
 }
 
@@ -1302,9 +1307,11 @@ function selectMarket(m) {
   state.selectedMarket = m;
   state.dashFilter = null;
   state.alertTypeFilter = null;
+  state.statusFilter = null;
   renderMarketNav();
   renderSummaryBar();
   renderAlertFilterBar();
+  renderStatusDots();
   renderServiceList();
   updateMarketTitle();
 }
@@ -1315,8 +1322,10 @@ function toggleCountry(c) {
   } else {
     state.activeCountries.push(c);
   }
+  state.statusFilter = null;
   renderCountryPills();
   renderMarketNav();
+  renderStatusDots();
   renderServiceList();
   updateMarketTitle();
 }
