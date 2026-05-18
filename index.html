@@ -527,23 +527,38 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
   .s-val { font-size: 16px; }
 
   /* Content header */
-  .content-header { flex-wrap: wrap; padding: 8px 10px; gap: 6px; }
-  .content-title { font-size: 12px; }
+  .content-header { flex-wrap: nowrap; padding: 6px 8px; gap: 4px; overflow-x: auto; }
+  .content-title { font-size: 11px; white-space: nowrap; flex-shrink: 0; }
   .sort-group { display: none; }
-  .alert-filter-bar { border-right: none; padding-right: 0; margin-right: 0; overflow-x: auto; max-width: 100%; }
-  .btn-live { padding: 5px 10px; font-size: 11px; }
+  .alert-filter-bar { border-right: none; padding-right: 0; margin-right: 0; overflow-x: auto; flex-shrink: 0; flex-wrap: nowrap; }
+  .alert-filter-chip { font-size: 9px; padding: 2px 6px; }
+  .filter-label { display: none; }
+  .btn-live { padding: 4px 8px; font-size: 10px; white-space: nowrap; flex-shrink: 0; }
 
-  /* Service table → cards no mobile */
+  /* Service table → lista compacta no mobile */
   .table-header { display: none; }
-  .provider-divider { padding: 6px 10px 3px; }
+  .provider-divider { padding: 4px 10px 2px; font-size: 10px; }
   .service-row {
-    display: flex; flex-direction: column; height: auto;
-    padding: 10px 12px; gap: 4px; border-bottom: 1px solid var(--color-border-tertiary);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-rows: auto auto;
+    height: auto; padding: 7px 10px; gap: 1px 6px;
+    border-bottom: 1px solid var(--color-border-tertiary);
   }
-  .cell, .cell-sm { overflow: visible; white-space: normal; }
-  .route-name { font-size: 13px; }
-  .route-meta { font-size: 11px; }
-  .sla-bar { width: 80px; }
+  .service-row > .cell:nth-child(1),
+  .service-row > .cell:nth-child(2) { display: none; }
+  .service-row > .cell:nth-child(3) { grid-column: 1; grid-row: 1; }
+  .service-row > .cell:nth-child(4) { grid-column: 1; grid-row: 2; }
+  .service-row > .cell:nth-child(5) { grid-column: 2; grid-row: 1 / 3; align-self: center; }
+  .service-row > .cell:nth-child(6) { grid-column: 3; grid-row: 1; align-self: center; }
+  .service-row > .cell:nth-child(7),
+  .service-row > .cell:nth-child(8) { display: none; }
+  .service-row > .cell:nth-child(9) { grid-column: 3; grid-row: 2; align-self: center; justify-self: end; }
+  .cell, .cell-sm { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .route-name { font-size: 12px; }
+  .route-meta { font-size: 10px; }
+  .sla-bar { width: 50px; }
+  .sla-val { font-size: 10px; }
   .collapse-row { display: none; }
 
   /* Service detail */
@@ -670,7 +685,7 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
         <i class="ti ti-refresh" id="auto-update-icon"></i><span id="auto-update-label">auto</span>
       </button>
       <div class="topbar-spacer"></div>
-      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> language</button>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> English</button>
       <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
     </div>
     <div class="main-body">
@@ -729,7 +744,7 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
       <div class="topbar-logo">BUSUP <span>brainer</span></div>
       <div class="live-badge"><div class="live-dot"></div>live</div>
       <div class="topbar-spacer"></div>
-      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> language</button>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> English</button>
       <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
     </div>
     <div class="detail-layout" id="detail-layout"></div>
@@ -745,7 +760,7 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
       </div>
       <div class="live-badge"><div class="live-dot"></div>live</div>
       <div class="topbar-spacer"></div>
-      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> language</button>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> English</button>
       <div class="agent-chip">Ana Lima · CC Global <div class="avatar avatar-purple">AL</div></div>
     </div>
     <div class="cc-layout">
@@ -1192,6 +1207,9 @@ function applyStaticLang() {
 function toggleLang() {
   state.lang = state.lang === 'pt' ? 'en' : 'pt';
   applyStaticLang();
+  document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
+    btn.innerHTML = `<i class="ti ti-language"></i> ${state.lang === 'pt' ? 'English' : 'Português'}`;
+  });
   if(state.currentView === 'main-page') renderMainPage();
   else if(state.currentView === 'service-detail') renderDetail();
   else if(state.currentView === 'cc-chatbot') renderCC();
