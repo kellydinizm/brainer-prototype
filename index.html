@@ -669,8 +669,8 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
       <button id="auto-update-toggle" onclick="toggleAutoUpdate()" style="display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);" title="Ativar/desativar atualização automática">
         <i class="ti ti-refresh" id="auto-update-icon"></i><span id="auto-update-label">auto</span>
       </button>
-      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:600;">EN</button>
       <div class="topbar-spacer"></div>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> language</button>
       <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
     </div>
     <div class="main-body">
@@ -728,8 +728,8 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
       <button class="topbar-back" onclick="navigateTo('main-page')"><i class="ti ti-arrow-left"></i> <span data-i18n="back">brasil</span></button>
       <div class="topbar-logo">BUSUP <span>brainer</span></div>
       <div class="live-badge"><div class="live-dot"></div>live</div>
-      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:600;">EN</button>
       <div class="topbar-spacer"></div>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> language</button>
       <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
     </div>
     <div class="detail-layout" id="detail-layout"></div>
@@ -744,8 +744,8 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
         <button class="mode-pill active-cc" onclick="switchMode('cc')" data-i18n="modeCC">customer care</button>
       </div>
       <div class="live-badge"><div class="live-dot"></div>live</div>
-      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:600;">EN</button>
       <div class="topbar-spacer"></div>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:500;display:flex;align-items:center;gap:4px;"><i class="ti ti-language"></i> language</button>
       <div class="agent-chip">Ana Lima · CC Global <div class="avatar avatar-purple">AL</div></div>
     </div>
     <div class="cc-layout">
@@ -848,12 +848,12 @@ const ITINERARY_DATA = {
 };
 
 const PROCEDURES = {
-  no_play:{ title:'No Play', client:'Amazon BR', steps:[{text:'Verificar tracking — confirmar posição do veículo',cta:null},{text:'Contatar operador e identificar o motivo da não iniciação',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se sem resposta em 20 min → comunicar passageiros sobre o atraso',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Se motorista não localizado em 30 min → solicitar veículo substituto',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
-  major_delay:{ title:'Major Delay', client:'Amazon BR', steps:[{text:'Verificar live tracking — confirmar se há trânsito real na rota',cta:null},{text:'Contatar operador para identificar causa do atraso',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Enviar push informando atraso aos passageiros',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Se atraso superior a 30 min → avaliar substituição',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
-  no_stop:{ title:'No Stop', client:'Mercado Livre BR', steps:[{text:'Verificar tracking — confirmar se ponto foi de fato pulado',cta:null},{text:'Contatar motorista via operador para entender o motivo',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se ponto pulado confirmado → verificar passageiros impactados',cta:{label:'ver passageiros',icon:'ti-users',color:'secondary'}},{text:'Autorizar transporte alternativo se necessário',cta:{label:'autorizar uber',icon:'ti-car',color:'secondary'}}] },
-  driver_alert:{ title:'Driver Alert', client:'Boticário BR', steps:[{text:'Verificar categoria do alerta enviado pelo motorista',cta:null},{text:'Contatar motorista diretamente via operador',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Avaliar gravidade e comunicar passageiros se necessário',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}},{text:'Registrar ocorrência e classificar incidente',cta:null}] },
-  minor_delay:{ title:'Minor Delay', client:'Mercado Livre BR', steps:[{text:'Verificar ETA atual no tracking',cta:null},{text:'Monitorar por 5 minutos — atraso pode se resolver sozinho',cta:null},{text:'Se persistir, enviar push preventivo aos passageiros',cta:{label:'enviar push ao passageiro',icon:'ti-message',color:'amber'}}] },
-  no_readings:{ title:'No Readings', client:'Volkswagen BR', steps:[{text:'Verificar se rota exige leitura de QR obrigatoriamente',cta:null},{text:'Contatar operador para confirmar embarque dos passageiros',cta:{label:'ligar para operador',icon:'ti-phone',color:'primary'}},{text:'Se embarque confirmado sem leitura → fechar como não incidente',cta:null}] },
+  no_play:{ title:'No Play', client:'Amazon BR', steps:[{text:'proc_no_play_s1',cta:null},{text:'proc_no_play_s2',cta:{label:'call_operator',icon:'ti-phone',color:'primary'}},{text:'proc_no_play_s3',cta:{label:'send_push',icon:'ti-message',color:'amber'}},{text:'proc_no_play_s4',cta:{label:'authorize_uber',icon:'ti-car',color:'secondary'}}] },
+  major_delay:{ title:'Major Delay', client:'Amazon BR', steps:[{text:'proc_major_delay_s1',cta:null},{text:'proc_major_delay_s2',cta:{label:'call_operator',icon:'ti-phone',color:'primary'}},{text:'proc_major_delay_s3',cta:{label:'send_push',icon:'ti-message',color:'amber'}},{text:'proc_major_delay_s4',cta:{label:'authorize_uber',icon:'ti-car',color:'secondary'}}] },
+  no_stop:{ title:'No Stop', client:'Mercado Livre BR', steps:[{text:'proc_no_stop_s1',cta:null},{text:'proc_no_stop_s2',cta:{label:'call_operator',icon:'ti-phone',color:'primary'}},{text:'proc_no_stop_s3',cta:{label:'view_passengers',icon:'ti-users',color:'secondary'}},{text:'proc_no_stop_s4',cta:{label:'authorize_uber',icon:'ti-car',color:'secondary'}}] },
+  driver_alert:{ title:'Driver Alert', client:'Boticário BR', steps:[{text:'proc_driver_alert_s1',cta:null},{text:'proc_driver_alert_s2',cta:{label:'call_operator',icon:'ti-phone',color:'primary'}},{text:'proc_driver_alert_s3',cta:{label:'send_push',icon:'ti-message',color:'amber'}},{text:'proc_driver_alert_s4',cta:null}] },
+  minor_delay:{ title:'Minor Delay', client:'Mercado Livre BR', steps:[{text:'proc_minor_delay_s1',cta:null},{text:'proc_minor_delay_s2',cta:null},{text:'proc_minor_delay_s3',cta:{label:'send_push',icon:'ti-message',color:'amber'}}] },
+  no_readings:{ title:'No Readings', client:'Volkswagen BR', steps:[{text:'proc_no_readings_s1',cta:null},{text:'proc_no_readings_s2',cta:{label:'call_operator',icon:'ti-phone',color:'primary'}},{text:'proc_no_readings_s3',cta:null}] },
 };
 
 const DRIVER_CONTEXT = {
@@ -932,6 +932,115 @@ const TRANSLATIONS = {
     chatPlaceholder: 'Digite um nome, ID ou descreva o problema...', history: 'histórico',
     today: 'hoje', yesterday: 'ontem', histResolved: 'resolvido', histReported: 'reportado',
     histWaiting: 'aguardando', protoBadge: 'protótipo · dados mockados',
+    noServiceFound: 'Nenhum serviço encontrado para os filtros aplicados.',
+    alertsCount: 'alertas', aiReady: 'análise pronta', aiAnalyzing: 'analisando',
+    expandMoreServices: '+ 7 serviços sem alerta ativo — clique para expandir',
+    cascadeBanner: 'Alerta em cascata: resolva o No Play primeiro para desbloquear o Major Delay',
+    ccBanner: 'Alerta originado no Customer Care — passageiro relatou ocorrência às 05:39',
+    openStatus: 'aberto', pendingStatus: 'pendente', resolveBtn: 'resolver',
+    severity: 'severidade', fromCCLabel: 'originado no CC', autoDetection: 'detecção automática',
+    detailsBtn: 'detalhes', tabAlerts: 'Alertas', tabItin: 'Itinerário',
+    realTimeBadge: 'tempo real', alertsThisService: 'alertas deste serviço',
+    sortedByCriticality: 'ordenado por criticidade',
+    tooltipAlerts: 'Alertas ordenados do mais crítico para o menos crítico. SLA mostra tempo restante para resolução conforme SLA do cliente.',
+    copilotTitle: 'brainer · copilot', analysisReady: 'análise pronta',
+    recommendationLabel: 'recomendação', callNow: 'ligar agora', pushPax: 'push pax',
+    usefulQuestion: 'útil?', driverContextTitle: 'contexto do motorista',
+    delaysLabel: 'atrasos/30d', incidentsLabel: 'incidentes/30d',
+    pushSentLabel: 'push enviado', pushNotSentLabel: 'não enviado', pushNotReadLabel: 'não lido',
+    assignedServicesToday: 'serviços assignados hoje', serviceLog: 'log do serviço',
+    clientLabel: 'cliente', marketLabel: 'mercado', serviceTimeLabel: 'hora serviço',
+    serviceIdLabel: 'ID serviço', vehicleLabel: 'veículo', driverLabel: 'motorista',
+    driverIdLabel: 'ID motorista', capacityLabel: 'capacidade', occupancyLabel: 'ocupação',
+    lastReadingLabel: 'última leitura', routeTypeLabel: 'tipo rota', noReading: 'sem leitura ⚠',
+    seatsLabel: 'lugares', entryLabel: 'Entrada', exitLabel: 'Saída',
+    noItinerary: 'Sem itinerário disponível para este serviço.',
+    onTime: 'no prazo', inCourse: 'em curso…',
+    stopHeader: 'Parada', scheduledHeader: 'Previsto', etaHeader: 'ETA',
+    actualHeader: 'Tempo Real', deltaHeader: 'Δ Atraso', paxHeader: 'Pax',
+    procedureLabel: 'procedimento', escalationLabel: 'escalamento',
+    escalateL2Title: 'escalar level 2', escalateL2Sub: 'supervisor de tráfego',
+    escalateL3Title: 'escalar level 3', escalateL3Sub: 'notificar cliente',
+    incidentLabel: 'incidente', markAsIncident: 'marcar como incidente',
+    incidentMechanical: 'falha mecânica', incidentSignal: 'problema de sinal',
+    incidentAccident: 'acidente', incidentTraffic: 'atraso por trânsito',
+    incidentDriver: 'erro do motorista', incidentOther: 'outro',
+    incidentComment: 'Comentário sobre o incidente...',
+    resolutionLabel: 'resolução:', resolvedOpt: 'resolvido', unresolvedOpt: 'não resolvido',
+    saveAndExit: 'salvar e sair', closeAlertBtn: 'fechar alerta',
+    toastCallOperator: 'Ligação iniciada para AB Turismo · +55 11 3333-4444',
+    toastSendPush: 'Push enviado para os passageiros',
+    toastAuthorizeUber: 'Uber autorizado · custo imputado ao operador',
+    toastViewPassengers: 'Abrindo lista de passageiros impactados...',
+    toastEscalateL2: 'Escalado para supervisor · Eriqueson M. notificado',
+    toastEscalateL3: 'Nível 3 acionado · cliente notificado',
+    toastAlertClosed: 'Alerta fechado · resolvido',
+    mapRealtime: 'Mapa em tempo real — integração pendente', closeBtn: 'fechar',
+    assignedToast: 'Serviço atribuído para Eriqueson M.',
+    aiTextNoPlay: 'Veículo não iniciou rota. Carlos Mendes tem histórico limpo (0 atrasos/30d). Recomendação: ligue imediatamente para o operador AB Turismo. Se sem resposta em 15 min, autorize Uber para os 46 passageiros. Push preventivo já enviado.',
+    aiTextDefault: 'Monitorar a situação. Verificar se há tráfego intenso na rota via live tracking. Se atraso persistir por mais 10 min, enviar push informativo para passageiros.',
+    botGreeting: 'Olá! Sou o assistente Brainer CC. Busque um passageiro pelo nome, ID ou booking para começar.',
+    userSearch: 'Maria da Silva',
+    userReport: 'ela disse que o ônibus não chegou hoje de manhã',
+    botFoundProfile: 'Encontrei o perfil de <strong>Maria da Silva</strong>. Veja os dados abaixo:',
+    ccPhoneLabel: 'telefone', ccEmailLabel: 'e-mail', ccSiteLabel: 'site',
+    ccUsualRouteLabel: 'rota habitual', ccTodayLabel: 'hoje', ccNextLabel: 'próximos',
+    ccLastReadingsLabel: 'últimas leituras (7 dias)', ccTomorrow: 'amanhã',
+    ccViewService: 'ver serviço', ccCancel: 'cancelar', ccView: 'ver',
+    ccReadOk: '✓ Leitura correta', ccReadErr: '✗ ERRO',
+    botReportIntro: 'Entendido. Com base no contexto, o serviço Guru 9 — Entrada (05:42) está com alerta ativo de <strong>No Play</strong>. Selecione o tipo de ocorrência para reportar ao tráfego:',
+    ccOptNoPlay: 'Ônibus não saiu (No Play)', ccOptDelay: 'Atraso significativo',
+    ccOptSkip: 'Ponto pulado', ccOptDriver: 'Problema com motorista',
+    ccAdditionalComment: 'Comentário adicional (opcional)...',
+    ccSendTraffic: 'enviar para tráfego', ccSending: 'enviando...', ccUserSent: 'enviado',
+    ccReportSent: '✓ Reporte enviado para o time de tráfego às 05:53. Protocolo #RPT-00892 gerado.',
+    ccTrafficUpdateTitle: 'Atualização do tráfego recebida:',
+    ccTrafficResponse: 'Resposta do tráfego',
+    ccTrafficText: 'Operador AB Turismo contatado. Motorista Carlos Mendes localizou atraso por congestionamento na Via Anhanguera. ETA atualizado para 06:20. Passageiros estão sendo comunicados via push.',
+    ccGenerateVoucher: 'gerar voucher Uber',
+    ccVoucherGenerated: 'Voucher gerado · código BRAINER-X923. Chamado #RPT-00892 finalizado automaticamente. ✓ resolvido',
+    ccVoucherToast: 'Voucher Uber gerado · BRAINER-X923',
+    ccFreeInput: 'Entendido. Posso buscar outro passageiro ou ajudar com mais alguma coisa?',
+    ccNewChatMsg: 'Nova conversa iniciada. Como posso ajudar?',
+    aiFeedbackPositive: 'Obrigado pelo feedback positivo!',
+    aiFeedbackNegative: 'Feedback registrado. Vamos melhorar!',
+    etaDelayed: 'em curso · atrasado', etaAtRisk: 'ETA em risco', etaOnTime: 'ETA no prazo',
+    noteCurrentAlert: 'serviço atual com alerta ativo',
+    noteAtRisk: 'impactado se atraso não resolver até 06:45',
+    noteNoImpact: 'sem impacto previsto',
+    logAssigned: 'serviço atribuído · Eriqueson M.',
+    logCCReport: 'CC recebeu reporte de passageiro',
+    logCCSub: 'ônibus não apareceu no ponto',
+    logAlertNoPlay: 'alerta disparado: no play',
+    logAlertDelay: 'alerta disparado: major delay',
+    logSla50: 'SLA atingiu 50% · aviso ativado',
+    logAgentContacted: 'agente contatou AB Turismo',
+    logTagCritical: 'crítico · SLA 60 min', logTagHigh: 'alto',
+    logTag30min: '30 min restantes', logTagAction: 'ação registrada',
+    proc_no_play_s1: 'Verificar tracking — confirmar posição do veículo',
+    proc_no_play_s2: 'Contatar operador e identificar o motivo da não iniciação',
+    proc_no_play_s3: 'Se sem resposta em 20 min → comunicar passageiros sobre o atraso',
+    proc_no_play_s4: 'Se motorista não localizado em 30 min → solicitar veículo substituto',
+    proc_major_delay_s1: 'Verificar live tracking — confirmar se há trânsito real na rota',
+    proc_major_delay_s2: 'Contatar operador para identificar causa do atraso',
+    proc_major_delay_s3: 'Enviar push informando atraso aos passageiros',
+    proc_major_delay_s4: 'Se atraso superior a 30 min → avaliar substituição',
+    proc_no_stop_s1: 'Verificar tracking — confirmar se ponto foi de fato pulado',
+    proc_no_stop_s2: 'Contatar motorista via operador para entender o motivo',
+    proc_no_stop_s3: 'Se ponto pulado confirmado → verificar passageiros impactados',
+    proc_no_stop_s4: 'Autorizar transporte alternativo se necessário',
+    proc_driver_alert_s1: 'Verificar categoria do alerta enviado pelo motorista',
+    proc_driver_alert_s2: 'Contatar motorista diretamente via operador',
+    proc_driver_alert_s3: 'Avaliar gravidade e comunicar passageiros se necessário',
+    proc_driver_alert_s4: 'Registrar ocorrência e classificar incidente',
+    proc_minor_delay_s1: 'Verificar ETA atual no tracking',
+    proc_minor_delay_s2: 'Monitorar por 5 minutos — atraso pode se resolver sozinho',
+    proc_minor_delay_s3: 'Se persistir, enviar push preventivo aos passageiros',
+    proc_no_readings_s1: 'Verificar se rota exige leitura de QR obrigatoriamente',
+    proc_no_readings_s2: 'Contatar operador para confirmar embarque dos passageiros',
+    proc_no_readings_s3: 'Se embarque confirmado sem leitura → fechar como não incidente',
+    cta_call_operator: 'ligar para operador', cta_send_push: 'enviar push ao passageiro',
+    cta_authorize_uber: 'autorizar uber', cta_view_passengers: 'ver passageiros',
   },
   en: {
     modeTraffic: 'traffic', modeCC: 'customer care', liveBadge: 'live · auto update',
@@ -958,6 +1067,115 @@ const TRANSLATIONS = {
     chatPlaceholder: 'Enter a name, ID or describe the issue...', history: 'history',
     today: 'today', yesterday: 'yesterday', histResolved: 'resolved', histReported: 'reported',
     histWaiting: 'waiting', protoBadge: 'prototype · mock data',
+    noServiceFound: 'No services found for the applied filters.',
+    alertsCount: 'alerts', aiReady: 'analysis ready', aiAnalyzing: 'analyzing',
+    expandMoreServices: '+ 7 services with no active alert — click to expand',
+    cascadeBanner: 'Cascade alert: resolve No Play first to unblock Major Delay',
+    ccBanner: 'Alert originated in Customer Care — passenger reported incident at 05:39',
+    openStatus: 'open', pendingStatus: 'pending', resolveBtn: 'resolve',
+    severity: 'severity', fromCCLabel: 'from CC', autoDetection: 'auto detection',
+    detailsBtn: 'details', tabAlerts: 'Alerts', tabItin: 'Itinerary',
+    realTimeBadge: 'real time', alertsThisService: 'alerts for this service',
+    sortedByCriticality: 'sorted by criticality',
+    tooltipAlerts: 'Alerts sorted from most to least critical. SLA shows remaining time for resolution per client SLA.',
+    copilotTitle: 'brainer · copilot', analysisReady: 'analysis ready',
+    recommendationLabel: 'recommendation', callNow: 'call now', pushPax: 'push pax',
+    usefulQuestion: 'useful?', driverContextTitle: 'driver context',
+    delaysLabel: 'delays/30d', incidentsLabel: 'incidents/30d',
+    pushSentLabel: 'push sent', pushNotSentLabel: 'not sent', pushNotReadLabel: 'not read',
+    assignedServicesToday: "today's assigned services", serviceLog: 'service log',
+    clientLabel: 'client', marketLabel: 'market', serviceTimeLabel: 'service time',
+    serviceIdLabel: 'service ID', vehicleLabel: 'vehicle', driverLabel: 'driver',
+    driverIdLabel: 'driver ID', capacityLabel: 'capacity', occupancyLabel: 'occupancy',
+    lastReadingLabel: 'last reading', routeTypeLabel: 'route type', noReading: 'no reading ⚠',
+    seatsLabel: 'seats', entryLabel: 'Inbound', exitLabel: 'Outbound',
+    noItinerary: 'No itinerary available for this service.',
+    onTime: 'on time', inCourse: 'in progress…',
+    stopHeader: 'Stop', scheduledHeader: 'Scheduled', etaHeader: 'ETA',
+    actualHeader: 'Actual', deltaHeader: 'Δ Delay', paxHeader: 'Pax',
+    procedureLabel: 'procedure', escalationLabel: 'escalation',
+    escalateL2Title: 'escalate level 2', escalateL2Sub: 'traffic supervisor',
+    escalateL3Title: 'escalate level 3', escalateL3Sub: 'notify client',
+    incidentLabel: 'incident', markAsIncident: 'mark as incident',
+    incidentMechanical: 'mechanical failure', incidentSignal: 'signal issue',
+    incidentAccident: 'accident', incidentTraffic: 'traffic delay',
+    incidentDriver: 'driver error', incidentOther: 'other',
+    incidentComment: 'Comment about the incident...',
+    resolutionLabel: 'resolution:', resolvedOpt: 'resolved', unresolvedOpt: 'unresolved',
+    saveAndExit: 'save and exit', closeAlertBtn: 'close alert',
+    toastCallOperator: 'Call initiated to AB Turismo · +55 11 3333-4444',
+    toastSendPush: 'Push sent to passengers',
+    toastAuthorizeUber: 'Uber authorized · cost charged to operator',
+    toastViewPassengers: 'Opening list of affected passengers...',
+    toastEscalateL2: 'Escalated to supervisor · Eriqueson M. notified',
+    toastEscalateL3: 'Level 3 triggered · client notified',
+    toastAlertClosed: 'Alert closed · resolved',
+    mapRealtime: 'Real-time map — integration pending', closeBtn: 'close',
+    assignedToast: 'Service assigned to Eriqueson M.',
+    aiTextNoPlay: 'Vehicle did not start route. Carlos Mendes has a clean record (0 delays/30d). Recommendation: call AB Turismo operator immediately. If no response in 15 min, authorize Uber for 46 passengers. Preventive push already sent.',
+    aiTextDefault: 'Monitor the situation. Check for heavy traffic on the route via live tracking. If delay persists for 10+ min, send an informational push to passengers.',
+    botGreeting: "Hello! I'm the Brainer CC assistant. Search for a passenger by name, ID or booking to get started.",
+    userSearch: 'Maria da Silva',
+    userReport: "she said the bus didn't show up this morning",
+    botFoundProfile: 'I found the profile for <strong>Maria da Silva</strong>. See the details below:',
+    ccPhoneLabel: 'phone', ccEmailLabel: 'e-mail', ccSiteLabel: 'site',
+    ccUsualRouteLabel: 'usual route', ccTodayLabel: 'today', ccNextLabel: 'upcoming',
+    ccLastReadingsLabel: 'last readings (7 days)', ccTomorrow: 'tomorrow',
+    ccViewService: 'view service', ccCancel: 'cancel', ccView: 'view',
+    ccReadOk: '✓ Correct reading', ccReadErr: '✗ ERROR',
+    botReportIntro: 'Understood. Based on context, the Guru 9 — Entrada service (05:42) has an active <strong>No Play</strong> alert. Select the incident type to report to traffic:',
+    ccOptNoPlay: "Bus didn't show (No Play)", ccOptDelay: 'Significant delay',
+    ccOptSkip: 'Stop skipped', ccOptDriver: 'Driver issue',
+    ccAdditionalComment: 'Additional comment (optional)...',
+    ccSendTraffic: 'send to traffic', ccSending: 'sending...', ccUserSent: 'sent',
+    ccReportSent: '✓ Report sent to traffic team at 05:53. Protocol #RPT-00892 generated.',
+    ccTrafficUpdateTitle: 'Traffic update received:',
+    ccTrafficResponse: 'Traffic response',
+    ccTrafficText: 'AB Turismo operator contacted. Driver Carlos Mendes located delay due to congestion on Via Anhanguera. ETA updated to 06:20. Passengers are being notified via push.',
+    ccGenerateVoucher: 'generate Uber voucher',
+    ccVoucherGenerated: 'Voucher generated · code BRAINER-X923. Case #RPT-00892 automatically closed. ✓ resolved',
+    ccVoucherToast: 'Uber voucher generated · BRAINER-X923',
+    ccFreeInput: 'Understood. I can search for another passenger or help with something else?',
+    ccNewChatMsg: 'New chat started. How can I help?',
+    aiFeedbackPositive: 'Thank you for the positive feedback!',
+    aiFeedbackNegative: "Feedback recorded. We'll improve!",
+    etaDelayed: 'active · delayed', etaAtRisk: 'ETA at risk', etaOnTime: 'ETA on time',
+    noteCurrentAlert: 'current service with active alert',
+    noteAtRisk: 'impacted if delay not resolved by 06:45',
+    noteNoImpact: 'no expected impact',
+    logAssigned: 'service assigned · Eriqueson M.',
+    logCCReport: 'CC received passenger report',
+    logCCSub: "bus didn't show at stop",
+    logAlertNoPlay: 'alert triggered: no play',
+    logAlertDelay: 'alert triggered: major delay',
+    logSla50: 'SLA reached 50% · warning activated',
+    logAgentContacted: 'agent contacted AB Turismo',
+    logTagCritical: 'critical · SLA 60 min', logTagHigh: 'high',
+    logTag30min: '30 min remaining', logTagAction: 'action logged',
+    proc_no_play_s1: 'Check tracking — confirm vehicle position',
+    proc_no_play_s2: 'Contact operator and identify reason for no-start',
+    proc_no_play_s3: 'If no response in 20 min → notify passengers of delay',
+    proc_no_play_s4: 'If driver not located in 30 min → request replacement vehicle',
+    proc_major_delay_s1: 'Check live tracking — confirm real traffic on route',
+    proc_major_delay_s2: 'Contact operator to identify cause of delay',
+    proc_major_delay_s3: 'Send push notifying passengers of delay',
+    proc_major_delay_s4: 'If delay over 30 min → evaluate replacement',
+    proc_no_stop_s1: 'Check tracking — confirm stop was actually skipped',
+    proc_no_stop_s2: 'Contact driver via operator to understand reason',
+    proc_no_stop_s3: 'If skip confirmed → check affected passengers',
+    proc_no_stop_s4: 'Authorize alternative transport if needed',
+    proc_driver_alert_s1: 'Check category of alert sent by driver',
+    proc_driver_alert_s2: 'Contact driver directly via operator',
+    proc_driver_alert_s3: 'Assess severity and notify passengers if needed',
+    proc_driver_alert_s4: 'Log incident and classify',
+    proc_minor_delay_s1: 'Check current ETA in tracking',
+    proc_minor_delay_s2: 'Monitor for 5 minutes — delay may resolve on its own',
+    proc_minor_delay_s3: 'If persists, send preventive push to passengers',
+    proc_no_readings_s1: 'Check if route requires mandatory QR reading',
+    proc_no_readings_s2: 'Contact operator to confirm passenger boarding',
+    proc_no_readings_s3: 'If boarding confirmed without reading → close as non-incident',
+    cta_call_operator: 'call operator', cta_send_push: 'send passenger push',
+    cta_authorize_uber: 'authorize uber', cta_view_passengers: 'view passengers',
   }
 };
 
@@ -977,9 +1195,6 @@ function toggleLang() {
   if(state.currentView === 'main-page') renderMainPage();
   else if(state.currentView === 'service-detail') renderDetail();
   else if(state.currentView === 'cc-chatbot') renderCC();
-  document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
-    btn.textContent = state.lang === 'pt' ? 'EN' : 'PT';
-  });
 }
 
 /* ===================== NAVEGAÇÃO ===================== */
@@ -1396,7 +1611,7 @@ function renderServiceList() {
   const svcs = getFilteredServices();
   let html = '';
   if(svcs.length === 0) {
-    document.getElementById('service-list').innerHTML = `<div style="padding:40px;text-align:center;color:var(--color-text-tertiary);font-size:13px;"><i class="ti ti-search-off" style="font-size:28px;display:block;margin-bottom:10px;opacity:0.4"></i>Nenhum serviço foi encontrado de acordo com os filtros.</div>`;
+    document.getElementById('service-list').innerHTML = `<div style="padding:40px;text-align:center;color:var(--color-text-tertiary);font-size:13px;"><i class="ti ti-search-off" style="font-size:28px;display:block;margin-bottom:10px;opacity:0.4"></i>${t('noServiceFound')}</div>`;
     return;
   }
   if(state.sortBy === 'provider') {
@@ -1407,7 +1622,7 @@ function renderServiceList() {
     });
     Object.entries(byProvider).forEach(([prov,list]) => {
       const alertCount = list.reduce((a,s)=>a+s.alerts.length,0);
-      html += `<div class="provider-divider"><i class="ti ti-building"></i>${prov}<span class="prov-badge">${alertCount} alertas</span></div>`;
+      html += `<div class="provider-divider"><i class="ti ti-building"></i>${prov}<span class="prov-badge">${alertCount} ${t('alertsCount')}</span></div>`;
       list.forEach(s => { html += renderServiceRow(s); });
     });
   } else {
@@ -1419,7 +1634,7 @@ function renderServiceList() {
     });
     sorted.forEach(s => { html += renderServiceRow(s); });
   }
-  html += `<div class="collapse-row" onclick="showToast('Expandindo serviços sem alerta...','info')">+ 7 serviços sem alerta ativo — clique para expandir</div>`;
+  html += `<div class="collapse-row" onclick="showToast(t('expandMoreServices'),'info')">${t('expandMoreServices')}</div>`;
   document.getElementById('service-list').innerHTML = html;
 }
 
@@ -1435,8 +1650,8 @@ function renderServiceRow(s) {
   const critSla = s.alerts.reduce((m,a)=>a.slaMin!==null&&(m===null||a.slaMin<m)?a.slaMin:m, null);
   const slaHtml = critSla !== null ? renderSlaCell(critSla, 60) : '<span style="color:var(--color-text-tertiary);font-size:11px;">—</span>';
   const aiHtml = s.aiReady
-    ? `<span class="ai-badge ai-ready"><i class="ti ti-sparkles"></i>análise pronta</span>`
-    : `<span class="ai-badge ai-analyzing"><i class="ti ti-loader"></i>analisando</span>`;
+    ? `<span class="ai-badge ai-ready"><i class="ti ti-sparkles"></i>${t('aiReady')}</span>`
+    : `<span class="ai-badge ai-analyzing"><i class="ti ti-loader"></i>${t('aiAnalyzing')}</span>`;
   const agentHtml = agent
     ? `<span class="agent-name"><span class="agent-dot"></span>${agent.split(' ')[0]}</span>`
     : `<button class="assign-btn" onclick="event.stopPropagation();assignService('${s.id}')">assign</button>`;
@@ -1466,7 +1681,7 @@ function renderSlaCell(min, total) {
 
 function assignService(id) {
   state.assignedServices[id] = 'Eriqueson M.';
-  showToast('Serviço atribuído para Eriqueson M.', 'success');
+  showToast(t('assignedToast'), 'success');
   renderServiceList();
 }
 
@@ -1518,8 +1733,8 @@ function renderDetail() {
   const hasCC = svc.alerts.some(a => a.fromCC);
 
   let alertsHtml = '';
-  if(hasCascade) alertsHtml += `<div class="cascade-banner"><i class="ti ti-link"></i> Alerta em cascata: resolva o No Play primeiro para desbloquear o Major Delay</div>`;
-  if(hasCC) alertsHtml += `<div class="cc-banner"><i class="ti ti-headset"></i> Alerta originado no Customer Care — passageiro relatou ocorrência às 05:39</div>`;
+  if(hasCascade) alertsHtml += `<div class="cascade-banner"><i class="ti ti-link"></i> ${t('cascadeBanner')}</div>`;
+  if(hasCC) alertsHtml += `<div class="cc-banner"><i class="ti ti-headset"></i> ${t('ccBanner')}</div>`;
 
   svc.alerts.forEach(a => {
     const proc = PROCEDURES[a.type];
@@ -1530,43 +1745,53 @@ function renderDetail() {
     alertsHtml += `<div class="alert-card ${clsBorder}">
       <div class="alert-card-header">
         <span class="alert-type-badge ${clsBadge}">${(proc?.title||a.type).toUpperCase()}</span>
-        <span class="open-pill">aberto</span>
-        <span class="open-pill">pendente</span>
+        <span class="open-pill">${t('openStatus')}</span>
+        <span class="open-pill">${t('pendingStatus')}</span>
         ${a.slaMin!==null?`<span class="sla-chip ${a.slaMin<15?'sla-danger':a.slaMin<30?'sla-warn':'sla-ok'}">${a.slaMin} min</span>`:''}
-        <button class="resolve-btn ${clsResolve}" onclick="openResolvePopup('${a.id}','${svc.id}')">resolver</button>
+        <button class="resolve-btn ${clsResolve}" onclick="openResolvePopup('${a.id}','${svc.id}')">${t('resolveBtn')}</button>
       </div>
-      <div class="alert-desc"><i class="ti ${ALERT_ICONS[a.type]||'ti-alert'}"></i> ${a.type.replace(/_/g,' ')} · severidade ${a.severity} · ${a.fromCC?'originado no CC':'detecção automática'}</div>
+      <div class="alert-desc"><i class="ti ${ALERT_ICONS[a.type]||'ti-alert'}"></i> ${a.type.replace(/_/g,' ')} · ${t('severity')} ${a.severity} · ${a.fromCC?t('fromCCLabel'):t('autoDetection')}</div>
     </div>`;
   });
 
   const dotClass = {critical:'dot-critical',risk:'dot-risk',ok:'dot-ok'};
+  const etaMap = { 'em curso · atrasado':'etaDelayed','ETA em risco':'etaAtRisk','ETA no prazo':'etaOnTime' };
+  const noteMap = { 'serviço atual com alerta ativo':'noteCurrentAlert','impactado se atraso não resolver até 06:45':'noteAtRisk','sem impacto previsto':'noteNoImpact' };
   const todaySvcs = DRIVER_CONTEXT.todayServices.map(ts => `
     <div class="today-svc-item">
       <span class="today-dot ${dotClass[ts.status]||'dot-ok'}"></span>
       <div class="today-info">
         <div class="today-route">${ts.route} · ${ts.time}</div>
-        <div class="today-eta">${ts.eta}</div>
-        <div class="today-note">${ts.aiNote}</div>
+        <div class="today-eta">${t(etaMap[ts.eta]||ts.eta)}</div>
+        <div class="today-note">${t(noteMap[ts.aiNote]||ts.aiNote)}</div>
       </div>
     </div>`).join('');
 
+  const logTextMap = {
+    'serviço atribuído · Eriqueson M.':'logAssigned',
+    'CC recebeu reporte de passageiro':'logCCReport',
+    'alerta disparado: no play':'logAlertNoPlay',
+    'alerta disparado: major delay':'logAlertDelay',
+    'SLA atingiu 50% · aviso ativado':'logSla50',
+    'agente contatou AB Turismo':'logAgentContacted',
+  };
+  const logSubMap = { 'ônibus não apareceu no ponto':'logCCSub' };
+  const logTagMap = { 'crítico · SLA 60 min':'logTagCritical','alto':'logTagHigh','30 min restantes':'logTag30min','ação registrada':'logTagAction' };
   const logHtml = SERVICE_LOG.map(l => `
     <div class="log-item">
       <div class="log-dot log-dot-${l.tagColor}"></div>
       <div class="log-content">
         <div class="log-time">${l.time}</div>
-        <div class="log-text">${l.text}</div>
-        ${l.sub?`<div class="log-sub">"${l.sub}"</div>`:''}
-        <span class="log-tag tag-${l.tagColor}">${l.tag}</span>
+        <div class="log-text">${t(logTextMap[l.text]||l.text)}</div>
+        ${l.sub?`<div class="log-sub">"${t(logSubMap[l.sub]||l.sub)}"</div>`:''}
+        <span class="log-tag tag-${l.tagColor}">${t(logTagMap[l.tag]||l.tag)}</span>
       </div>
     </div>`).join('');
 
   const statusLabel = svc.status.replace(/-/g,' ');
   const statusPillClass = svc.status==='in-progress-issues'?'pill-critical':svc.status==='pending-unsolved'?'pill-high':svc.status==='in-progress'?'pill-ok':'pill-medium';
 
-  const aiText = critAlert?.type === 'no_play'
-    ? 'Veículo não iniciou rota. Carlos Mendes tem histórico limpo (0 atrasos/30d). Recomendação: ligue imediatamente para o operador AB Turismo. Se sem resposta em 15 min, autorize Uber para os 46 passageiros. Push preventivo já enviado.'
-    : 'Monitorar a situação. Verificar se há tráfego intenso na rota via live tracking. Se atraso persistir por mais 10 min, enviar push informativo para passageiros.';
+  const aiText = critAlert?.type === 'no_play' ? t('aiTextNoPlay') : t('aiTextDefault');
 
   if(_itinInterval) { clearInterval(_itinInterval); _itinInterval = null; }
   document.getElementById('detail-layout').innerHTML = `
@@ -1574,7 +1799,7 @@ function renderDetail() {
       <div class="service-header-top">
         <div class="service-title">${svc.route}</div>
         <div class="header-actions">
-          <button class="btn btn-secondary" onclick="toggleExtraFields()"><i class="ti ti-plus"></i> detalhes</button>
+          <button class="btn btn-secondary" onclick="toggleExtraFields()"><i class="ti ti-plus"></i> ${t('detailsBtn')}</button>
           <button class="btn btn-brand" onclick="openLiveTracking('${svc.route}')"><i class="ti ti-map-pin"></i> live tracking</button>
         </div>
       </div>
@@ -1587,31 +1812,31 @@ function renderDetail() {
         ${agent?`<span style="display:flex;align-items:center;gap:4px;font-size:11px;background:var(--color-brand-light);padding:3px 8px;border-radius:4px;color:var(--color-brand-dark)"><i class="ti ti-user-check"></i>${agent}</span>`:''}
       </div>
       <div class="detail-extra" id="detail-extra-fields">
-        <div class="extra-field"><div class="extra-label">cliente</div><div class="extra-val">${svc.client}</div></div>
-        <div class="extra-field"><div class="extra-label">mercado</div><div class="extra-val">${svc.market.toUpperCase()}</div></div>
-        <div class="extra-field"><div class="extra-label">hora serviço</div><div class="extra-val">${svc.serviceTime}</div></div>
-        <div class="extra-field"><div class="extra-label">ID serviço</div><div class="extra-val">${svc.id}</div></div>
-        <div class="extra-field"><div class="extra-label">veículo</div><div class="extra-val">${svc.vehicle}</div></div>
-        <div class="extra-field"><div class="extra-label">motorista</div><div class="extra-val">${svc.driverName}</div></div>
-        <div class="extra-field"><div class="extra-label">ID motorista</div><div class="extra-val">${svc.driverId}</div></div>
-        <div class="extra-field"><div class="extra-label">capacidade</div><div class="extra-val">${svc.capacity} lugares</div></div>
-        <div class="extra-field"><div class="extra-label">ocupação</div><div class="extra-val" style="color:${svc.pax/svc.capacity>0.9?'var(--color-critical)':'var(--color-brand)'};font-weight:700">${Math.round(svc.pax/svc.capacity*100)}% (${svc.pax}/${svc.capacity})</div></div>
-        <div class="extra-field"><div class="extra-label">última leitura</div><div class="extra-val" style="color:${svc.lastReading?'var(--color-text-primary)':'var(--color-critical)'}">${svc.lastReading?svc.lastReading+'  ✓':'sem leitura ⚠'}</div></div>
-        <div class="extra-field"><div class="extra-label">tipo rota</div><div class="extra-val">${svc.route.includes('Entrada')||svc.route.includes('- E')?'Entrada':'Saída'}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('clientLabel')}</div><div class="extra-val">${svc.client}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('marketLabel')}</div><div class="extra-val">${svc.market.toUpperCase()}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('serviceTimeLabel')}</div><div class="extra-val">${svc.serviceTime}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('serviceIdLabel')}</div><div class="extra-val">${svc.id}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('vehicleLabel')}</div><div class="extra-val">${svc.vehicle}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('driverLabel')}</div><div class="extra-val">${svc.driverName}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('driverIdLabel')}</div><div class="extra-val">${svc.driverId}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('capacityLabel')}</div><div class="extra-val">${svc.capacity} ${t('seatsLabel')}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('occupancyLabel')}</div><div class="extra-val" style="color:${svc.pax/svc.capacity>0.9?'var(--color-critical)':'var(--color-brand)'};font-weight:700">${Math.round(svc.pax/svc.capacity*100)}% (${svc.pax}/${svc.capacity})</div></div>
+        <div class="extra-field"><div class="extra-label">${t('lastReadingLabel')}</div><div class="extra-val" style="color:${svc.lastReading?'var(--color-text-primary)':'var(--color-critical)'}">${svc.lastReading?svc.lastReading+'  ✓':t('noReading')}</div></div>
+        <div class="extra-field"><div class="extra-label">${t('routeTypeLabel')}</div><div class="extra-val">${svc.route.includes('Entrada')||svc.route.includes('- E')?t('entryLabel'):t('exitLabel')}</div></div>
       </div>
     </div>
     <div class="detail-body">
       <div class="detail-left">
         <div class="detail-tabs">
-          <div class="detail-tab active" id="tab-alerts" onclick="switchDetailTab('alerts')">Alertas (${svc.alerts.length})</div>
-          <div class="detail-tab" id="tab-itin" onclick="switchDetailTab('itin')">Itinerário</div>
-          <span class="live-badge-sm"><div class="live-dot-sm"></div>tempo real</span>
+          <div class="detail-tab active" id="tab-alerts" onclick="switchDetailTab('alerts')">${t('tabAlerts')} (${svc.alerts.length})</div>
+          <div class="detail-tab" id="tab-itin" onclick="switchDetailTab('itin')">${t('tabItin')}</div>
+          <span class="live-badge-sm"><div class="live-dot-sm"></div>${t('realTimeBadge')}</span>
         </div>
         <div id="detail-tab-alerts">
           <div class="section-header">
-            <span class="section-title">alertas deste serviço (${svc.alerts.length})</span>
-            <span class="section-sub">ordenado por criticidade</span>
-            <div class="tt-wrap"><span class="tt-icon">?</span><div class="tt-box">Alertas ordenados do mais crítico para o menos crítico. SLA mostra tempo restante para resolução conforme SLA do cliente.</div></div>
+            <span class="section-title">${t('alertsThisService')} (${svc.alerts.length})</span>
+            <span class="section-sub">${t('sortedByCriticality')}</span>
+            <div class="tt-wrap"><span class="tt-icon">?</span><div class="tt-box">${t('tooltipAlerts')}</div></div>
           </div>
           ${alertsHtml}
         </div>
@@ -1621,41 +1846,41 @@ function renderDetail() {
       </div>
       <div class="detail-right">
         <div class="copilot-header">
-          <div class="copilot-title"><i class="ti ti-sparkles"></i> brainer · copilot</div>
-          ${svc.aiReady?'<span class="copilot-badge">análise pronta</span>':''}
+          <div class="copilot-title"><i class="ti ti-sparkles"></i> ${t('copilotTitle')}</div>
+          ${svc.aiReady?`<span class="copilot-badge">${t('analysisReady')}</span>`:''}
         </div>
         <div class="copilot-body">
           <div class="ai-rec-card">
-            <div class="ai-rec-label"><i class="ti ti-sparkles"></i> recomendação</div>
+            <div class="ai-rec-label"><i class="ti ti-sparkles"></i> ${t('recommendationLabel')}</div>
             <div class="ai-rec-text">${aiText}</div>
             <div class="ai-actions">
-              <button class="ai-action-btn aab-green" onclick="showToast('Ligação iniciada para AB Turismo · +55 11 3333-4444','success')"><i class="ti ti-phone"></i> ligar agora</button>
-              <button class="ai-action-btn aab-amber" onclick="showToast('Push enviado para ${svc.pax} passageiros','success')"><i class="ti ti-message"></i> push pax</button>
+              <button class="ai-action-btn aab-green" onclick="showToast(t('toastCallOperator'),'success')"><i class="ti ti-phone"></i> ${t('callNow')}</button>
+              <button class="ai-action-btn aab-amber" onclick="showToast(t('toastSendPush'),'success')"><i class="ti ti-message"></i> ${t('pushPax')}</button>
             </div>
             <div class="ai-feedback">
-              <span>útil?</span>
+              <span>${t('usefulQuestion')}</span>
               <button class="fb-btn ${state.aiLike==='like'?'liked':''}" id="fb-like" onclick="setAiFeedback('like')"><i class="ti ti-thumb-up"></i></button>
               <button class="fb-btn ${state.aiLike==='dislike'?'disliked':''}" id="fb-dislike" onclick="setAiFeedback('dislike')"><i class="ti ti-thumb-down"></i></button>
             </div>
           </div>
           <div class="info-card">
-            <div class="info-card-title">contexto do motorista</div>
+            <div class="info-card-title">${t('driverContextTitle')}</div>
             <div style="font-size:12px;font-weight:600;margin-bottom:6px;">${DRIVER_CONTEXT.name}</div>
             <div class="driver-stats">
-              <div class="driver-stat"><div class="ds-label">atrasos/30d</div><div class="ds-val">${DRIVER_CONTEXT.delaysLast30}</div></div>
-              <div class="driver-stat"><div class="ds-label">incidentes/30d</div><div class="ds-val">${DRIVER_CONTEXT.incidentsLast30}</div></div>
+              <div class="driver-stat"><div class="ds-label">${t('delaysLabel')}</div><div class="ds-val">${DRIVER_CONTEXT.delaysLast30}</div></div>
+              <div class="driver-stat"><div class="ds-label">${t('incidentsLabel')}</div><div class="ds-val">${DRIVER_CONTEXT.incidentsLast30}</div></div>
             </div>
             <div class="push-status">
-              <span class="${DRIVER_CONTEXT.pushSent?'push-sent':''}"><i class="ti ti-send"></i> push ${DRIVER_CONTEXT.pushSent?'enviado':'não enviado'}</span>
-              ${DRIVER_CONTEXT.pushSent?`<span class="push-not-read"><i class="ti ti-eye-off"></i> não lido</span>`:''}
+              <span class="${DRIVER_CONTEXT.pushSent?'push-sent':''}"><i class="ti ti-send"></i> push ${DRIVER_CONTEXT.pushSent?t('pushSentLabel'):t('pushNotSentLabel')}</span>
+              ${DRIVER_CONTEXT.pushSent?`<span class="push-not-read"><i class="ti ti-eye-off"></i> ${t('pushNotReadLabel')}</span>`:''}
             </div>
           </div>
           <div class="info-card">
-            <div class="info-card-title">serviços assignados hoje</div>
+            <div class="info-card-title">${t('assignedServicesToday')}</div>
             ${todaySvcs}
           </div>
           <div style="border-top:1px solid var(--color-border-tertiary);padding-top:10px;">
-            <div class="info-card-title" style="padding:0 12px 6px;">log do serviço</div>
+            <div class="info-card-title" style="padding:0 12px 6px;">${t('serviceLog')}</div>
             <div class="log-timeline">${logHtml}</div>
           </div>
         </div>
@@ -1682,7 +1907,7 @@ let _itinInterval = null;
 
 function renderItinerary(svcId) {
   const stops = (ITINERARY_DATA[svcId] || []).map((s, i) => ({ ...s, _idx: i }));
-  if(!stops.length) return '<p style="color:var(--color-text-tertiary);font-size:12px;padding:20px">Sem itinerário disponível para este serviço.</p>';
+  if(!stops.length) return `<p style="color:var(--color-text-tertiary);font-size:12px;padding:20px">${t('noItinerary')}</p>`;
 
   const rows = stops.map(s => {
     const isDone    = s.status === 'done';
@@ -1696,12 +1921,12 @@ function renderItinerary(svcId) {
 
     const deltaTxt  = etaDelay > 0 ? `<span class="itin-delta-late" id="itin-delta-${svcId}-${s._idx}">+${etaDelay} min</span>`
                     : etaDelay < 0 ? `<span class="itin-delta-ok" id="itin-delta-${svcId}-${s._idx}">${etaDelay} min</span>`
-                    : `<span class="itin-delta-ok" id="itin-delta-${svcId}-${s._idx}">no prazo</span>`;
+                    : `<span class="itin-delta-ok" id="itin-delta-${svcId}-${s._idx}">${t('onTime')}</span>`;
 
     const realTd    = isDone
       ? `<span class="itin-real-done">${s.real}</span>`
       : isCurrent
-        ? `<span style="color:var(--color-text-tertiary);font-size:10px">em curso…</span>`
+        ? `<span style="color:var(--color-text-tertiary);font-size:10px">${t('inCourse')}</span>`
         : `<span style="color:var(--color-text-tertiary)">—</span>`;
 
     const paxTd     = s.paxBoarded != null
@@ -1722,18 +1947,18 @@ function renderItinerary(svcId) {
     <table class="itin-table">
       <thead>
         <tr>
-          <th>Parada</th>
-          <th>Previsto</th>
-          <th>ETA</th>
-          <th>Tempo Real</th>
-          <th>Δ Atraso</th>
-          <th>Pax</th>
+          <th>${t('stopHeader')}</th>
+          <th>${t('scheduledHeader')}</th>
+          <th>${t('etaHeader')}</th>
+          <th>${t('actualHeader')}</th>
+          <th>${t('deltaHeader')}</th>
+          <th>${t('paxHeader')}</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>
   </div>`;
-  _startItinRealtime(svc.id);
+  _startItinRealtime(svcId);
 }
 
 function _calcDelay(scheduled, eta) {
@@ -1764,7 +1989,7 @@ function _startItinRealtime(svcId) {
         etaEl.textContent = s.eta;
         etaEl.className   = delay > 0 ? 'itin-eta-late' : 'itin-eta-ok';
         if(deltaEl) {
-          deltaEl.textContent = delay > 0 ? `+${delay} min` : delay < 0 ? `${delay} min` : 'no prazo';
+          deltaEl.textContent = delay > 0 ? `+${delay} min` : delay < 0 ? `${delay} min` : t('onTime');
           deltaEl.className   = delay > 0 ? 'itin-delta-late' : 'itin-delta-ok';
         }
       }
@@ -1778,7 +2003,7 @@ function setAiFeedback(type) {
   const dislikeBtn = document.getElementById('fb-dislike');
   if(likeBtn) { likeBtn.className = 'fb-btn' + (state.aiLike==='like'?' liked':''); }
   if(dislikeBtn) { dislikeBtn.className = 'fb-btn' + (state.aiLike==='dislike'?' disliked':''); }
-  if(state.aiLike) showToast(state.aiLike==='like'?'Obrigado pelo feedback positivo!':'Feedback registrado. Vamos melhorar!', state.aiLike==='like'?'success':'warning');
+  if(state.aiLike) showToast(state.aiLike==='like'?t('aiFeedbackPositive'):t('aiFeedbackNegative'), state.aiLike==='like'?'success':'warning');
 }
 
 /* ===================== RESOLVE POPUP ===================== */
@@ -1802,11 +2027,11 @@ function renderResolvePopup() {
     const cls = isDone ? 'step-done' : isCurrent ? 'step-current' : '';
     const cbCls = isDone ? 'done' : isCurrent ? 'current' : '';
     const cbContent = isDone ? '✓' : '';
-    const ctaHtml = step.cta && !isDone ? `<button class="step-cta cta-${step.cta.color}" onclick="triggerCTA('${step.cta.label}')"><i class="ti ${step.cta.icon}"></i> ${step.cta.label}</button>` : '';
+    const ctaHtml = step.cta && !isDone ? `<button class="step-cta cta-${step.cta.color}" onclick="triggerCTA('${step.cta.label}')"><i class="ti ${step.cta.icon}"></i> ${t('cta_'+step.cta.label)}</button>` : '';
     return `<div class="step-item ${cls}" id="step-${state.selectedAlert}-${i}">
       <div class="step-cb ${cbCls}" onclick="toggleStep('${alert.id}',${i})">${cbContent}</div>
       <div class="step-content">
-        <div class="step-text ${isDone?'done-text':''}">${step.text}</div>
+        <div class="step-text ${isDone?'done-text':''}">${t(step.text)}</div>
         ${ctaHtml}
       </div>
     </div>`;
@@ -1832,50 +2057,50 @@ function renderResolvePopup() {
       </div>
       <div class="popup-body">
         <div>
-          <div class="popup-section-label">procedimento · ${proc?.client||''} · ${proc?.title||''}</div>
+          <div class="popup-section-label">${t('procedureLabel')} · ${proc?.client||''} · ${proc?.title||''}</div>
           <div class="checklist">${stepsHtml}</div>
         </div>
         <div>
-          <div class="popup-section-label">escalamento</div>
+          <div class="popup-section-label">${t('escalationLabel')}</div>
           <div class="escalate-row">
             <button class="escalate-btn esc-amber" onclick="escalate(2,'${svc.client}')">
-              <div class="esc-title"><i class="ti ti-arrow-up"></i> escalar level 2</div>
-              <div class="esc-sub">supervisor de tráfego</div>
+              <div class="esc-title"><i class="ti ti-arrow-up"></i> ${t('escalateL2Title')}</div>
+              <div class="esc-sub">${t('escalateL2Sub')}</div>
             </button>
             <button class="escalate-btn esc-red" onclick="escalate(3,'${svc.client}')">
-              <div class="esc-title"><i class="ti ti-alert-triangle"></i> escalar level 3</div>
-              <div class="esc-sub">notificar cliente ${svc.client}</div>
+              <div class="esc-title"><i class="ti ti-alert-triangle"></i> ${t('escalateL3Title')}</div>
+              <div class="esc-sub">${t('escalateL3Sub')} ${svc.client}</div>
             </button>
           </div>
         </div>
         <div>
-          <div class="popup-section-label">incidente</div>
+          <div class="popup-section-label">${t('incidentLabel')}</div>
           <div class="incident-toggle">
             <input type="checkbox" class="incident-cb" id="incident-cb" ${state.incidentFlagged?'checked':''} onchange="toggleIncident(this.checked)">
-            <label class="incident-label" for="incident-cb">marcar como incidente</label>
+            <label class="incident-label" for="incident-cb">${t('markAsIncident')}</label>
           </div>
           <div class="incident-fields" id="incident-fields" style="${state.incidentFlagged?'':'display:none'}">
             <select class="incident-select">
-              <option>falha mecânica</option>
-              <option>problema de sinal</option>
-              <option>acidente</option>
-              <option>atraso por trânsito</option>
-              <option>erro do motorista</option>
-              <option>outro</option>
+              <option>${t('incidentMechanical')}</option>
+              <option>${t('incidentSignal')}</option>
+              <option>${t('incidentAccident')}</option>
+              <option>${t('incidentTraffic')}</option>
+              <option>${t('incidentDriver')}</option>
+              <option>${t('incidentOther')}</option>
             </select>
-            <textarea class="incident-textarea" placeholder="Comentário sobre o incidente..."></textarea>
+            <textarea class="incident-textarea" placeholder="${t('incidentComment')}"></textarea>
           </div>
         </div>
       </div>
       <div class="popup-footer">
-        <span style="font-size:11px;font-weight:600;color:var(--color-text-secondary)">resolução:</span>
+        <span style="font-size:11px;font-weight:600;color:var(--color-text-secondary)">${t('resolutionLabel')}</span>
         <div class="resolution-toggle">
-          <span class="res-opt ${state.resolutionStatus==='resolved'?'active':''}" onclick="setResolution('resolved')">resolvido</span>
-          <span class="res-opt ${state.resolutionStatus==='unresolved'?'active':''}" onclick="setResolution('unresolved')">não resolvido</span>
+          <span class="res-opt ${state.resolutionStatus==='resolved'?'active':''}" data-val="resolved" onclick="setResolution('resolved')">${t('resolvedOpt')}</span>
+          <span class="res-opt ${state.resolutionStatus==='unresolved'?'active':''}" data-val="unresolved" onclick="setResolution('unresolved')">${t('unresolvedOpt')}</span>
         </div>
         <div class="footer-spacer"></div>
-        <button class="btn btn-save" onclick="closeResolvePopup()">salvar e sair</button>
-        <button class="btn btn-close-alert" onclick="closeAlert('${alert.id}','${svc.id}')">fechar alerta</button>
+        <button class="btn btn-save" onclick="closeResolvePopup()">${t('saveAndExit')}</button>
+        <button class="btn btn-close-alert" onclick="closeAlert('${alert.id}','${svc.id}')">${t('closeAlertBtn')}</button>
       </div>
     </div>`;
   popup.addEventListener('click', e => { if(e.target === popup) closeResolvePopup(); });
@@ -1906,16 +2131,16 @@ function toggleStep(alertId, idx) {
 
 function triggerCTA(label) {
   const messages = {
-    'ligar para operador': 'Ligação iniciada para AB Turismo · +55 11 3333-4444',
-    'enviar push ao passageiro': 'Push enviado para os passageiros',
-    'autorizar uber': 'Uber autorizado · custo imputado ao operador',
-    'ver passageiros': 'Abrindo lista de passageiros impactados...',
+    'call_operator': t('toastCallOperator'),
+    'send_push': t('toastSendPush'),
+    'authorize_uber': t('toastAuthorizeUber'),
+    'view_passengers': t('toastViewPassengers'),
   };
-  showToast(messages[label] || `Ação executada: ${label}`, 'success');
+  showToast(messages[label] || label, 'success');
 }
 
 function escalate(level, client) {
-  const msg = level===2 ? 'Escalado para supervisor · Eriqueson M. notificado' : `Nível 3 acionado · ${client} notificado`;
+  const msg = level===2 ? t('toastEscalateL2') : `${t('toastEscalateL3')} · ${client}`;
   showToast(msg, level===3?'warning':'info');
 }
 
@@ -1928,7 +2153,8 @@ function toggleIncident(checked) {
 function setResolution(val) {
   state.resolutionStatus = val;
   document.querySelectorAll('.res-opt').forEach(el => {
-    el.classList.toggle('active', el.textContent.trim() === (val==='resolved'?'resolvido':'não resolvido'));
+    if(val==='resolved') el.classList.toggle('active', el.dataset.val === 'resolved');
+    else el.classList.toggle('active', el.dataset.val === 'unresolved');
   });
 }
 
@@ -1939,7 +2165,7 @@ function closeAlert(alertId, svcId) {
     if(svc.alerts.length===0) svc.status = 'in-progress';
   }
   closeResolvePopup();
-  showToast('Alerta fechado · resolvido', 'success');
+  showToast(t('toastAlertClosed'), 'success');
   renderDetail();
 }
 
@@ -1956,8 +2182,8 @@ function openLiveTracking(route) {
         <span class="modal-title"><i class="ti ti-map-pin"></i> Live Tracking — ${route}</span>
         <button class="modal-close" onclick="document.getElementById('live-modal').remove()"><i class="ti ti-x"></i></button>
       </div>
-      <div class="map-placeholder"><i class="ti ti-map" style="font-size:32px;margin-right:10px;"></i>Mapa em tempo real — integração pendente</div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="document.getElementById('live-modal').remove()">fechar</button></div>
+      <div class="map-placeholder"><i class="ti ti-map" style="font-size:32px;margin-right:10px;"></i>${t('mapRealtime')}</div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="document.getElementById('live-modal').remove()">${t('closeBtn')}</button></div>
     </div>`;
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
   document.body.appendChild(modal);
@@ -1982,50 +2208,50 @@ function loadInitialChat() {
 
 function buildInitialMessages() {
   return [
-    { from:'bot', text:'Olá! Sou o assistente Brainer CC. Busque um passageiro pelo nome, ID ou booking para começar.' },
-    { from:'user', text:'Maria da Silva' },
+    { from:'bot', text: t('botGreeting') },
+    { from:'user', text: t('userSearch') },
     { from:'bot', html: buildProfileCard() },
-    { from:'user', text:'ela disse que o ônibus não chegou hoje de manhã' },
+    { from:'user', text: t('userReport') },
     { from:'bot', html: buildReportCard() },
   ];
 }
 
 function buildProfileCard() {
-  return `<div>Encontrei o perfil de <strong>Maria da Silva</strong>. Veja os dados abaixo:</div>
+  return `<div>${t('botFoundProfile')}</div>
   <div class="msg-card">
     <div class="card-header-purple"><div class="card-name">Maria da Silva</div><div style="font-size:11px;color:var(--color-text-secondary)">ID: PAX-88421 · Amazon Guru</div></div>
     <div class="card-grid">
-      <div class="card-field"><div class="card-field-label">telefone</div><div class="card-field-val">+55 11 9 8821-4432</div></div>
-      <div class="card-field"><div class="card-field-label">e-mail</div><div class="card-field-val">maria.silva@amazon.com</div></div>
-      <div class="card-field"><div class="card-field-label">site</div><div class="card-field-val">Betim MG 02</div></div>
-      <div class="card-field"><div class="card-field-label">rota habitual</div><div class="card-field-val">Guru 9 — Entrada</div></div>
+      <div class="card-field"><div class="card-field-label">${t('ccPhoneLabel')}</div><div class="card-field-val">+55 11 9 8821-4432</div></div>
+      <div class="card-field"><div class="card-field-label">${t('ccEmailLabel')}</div><div class="card-field-val">maria.silva@amazon.com</div></div>
+      <div class="card-field"><div class="card-field-label">${t('ccSiteLabel')}</div><div class="card-field-val">Betim MG 02</div></div>
+      <div class="card-field"><div class="card-field-label">${t('ccUsualRouteLabel')}</div><div class="card-field-val">Guru 9 — Entrada</div></div>
     </div>
     <div class="booking-section">
-      <div class="booking-section-label">hoje</div>
-      <div class="booking-item"><span class="booking-route">Guru 9 — Entrada</span><span class="booking-time">05:42</span><div class="booking-actions"><button class="booking-btn bb-view" onclick="showToast('Abrindo serviço Guru 9 no dashboard...','info')">ver serviço</button><button class="booking-btn bb-cancel" onclick="showToast('Booking BSP-88421 cancelado','warning')">cancelar</button></div></div>
-      <div class="booking-section-label" style="margin-top:8px">próximos</div>
-      <div class="booking-item"><span class="booking-route">Guru 9 — Saída</span><span class="booking-time">amanhã 07:30</span><div class="booking-actions"><button class="booking-btn bb-view" onclick="showToast('Abrindo serviço...','info')">ver</button></div></div>
+      <div class="booking-section-label">${t('ccTodayLabel')}</div>
+      <div class="booking-item"><span class="booking-route">Guru 9 — Entrada</span><span class="booking-time">05:42</span><div class="booking-actions"><button class="booking-btn bb-view" onclick="showToast('Abrindo serviço Guru 9 no dashboard...','info')">${t('ccViewService')}</button><button class="booking-btn bb-cancel" onclick="showToast('Booking BSP-88421 cancelado','warning')">${t('ccCancel')}</button></div></div>
+      <div class="booking-section-label" style="margin-top:8px">${t('ccNextLabel')}</div>
+      <div class="booking-item"><span class="booking-route">Guru 9 — Saída</span><span class="booking-time">${t('ccTomorrow')} 07:30</span><div class="booking-actions"><button class="booking-btn bb-view" onclick="showToast('Abrindo serviço...','info')">${t('ccView')}</button></div></div>
     </div>
     <div class="booking-section" style="border-top:1px solid var(--color-border-tertiary)">
-      <div class="booking-section-label">últimas leituras (7 dias)</div>
-      <div class="reading-item"><span style="flex:1">Guru 9 — 13/05</span><span class="read-ok">✓ Leitura correta</span></div>
-      <div class="reading-item"><span style="flex:1">Guru 9 — 12/05</span><span class="read-ok">✓ Leitura correta</span></div>
-      <div class="reading-item"><span style="flex:1">Guru 9 — 09/05</span><span class="read-err">✗ ERRO</span></div>
+      <div class="booking-section-label">${t('ccLastReadingsLabel')}</div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 13/05</span><span class="read-ok">${t('ccReadOk')}</span></div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 12/05</span><span class="read-ok">${t('ccReadOk')}</span></div>
+      <div class="reading-item"><span style="flex:1">Guru 9 — 09/05</span><span class="read-err">${t('ccReadErr')}</span></div>
     </div>
   </div>`;
 }
 
 function buildReportCard() {
-  return `<div>Entendido. Com base no contexto, o serviço Guru 9 — Entrada (05:42) está com alerta ativo de <strong>No Play</strong>. Selecione o tipo de ocorrência para reportar ao tráfego:</div>
+  return `<div>${t('botReportIntro')}</div>
   <div class="msg-card" style="padding:12px">
     <div class="report-opts" id="report-opts">
-      <div class="report-opt selected" onclick="toggleReportOpt(this)"><i class="ti ti-player-play"></i> Ônibus não saiu (No Play)</div>
-      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-clock-exclamation"></i> Atraso significativo</div>
-      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-map-pin-pause"></i> Ponto pulado</div>
-      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-user-exclamation"></i> Problema com motorista</div>
+      <div class="report-opt selected" onclick="toggleReportOpt(this)"><i class="ti ti-player-play"></i> ${t('ccOptNoPlay')}</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-clock-exclamation"></i> ${t('ccOptDelay')}</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-map-pin-pause"></i> ${t('ccOptSkip')}</div>
+      <div class="report-opt" onclick="toggleReportOpt(this)"><i class="ti ti-user-exclamation"></i> ${t('ccOptDriver')}</div>
     </div>
-    <textarea class="report-textarea" placeholder="Comentário adicional (opcional)..."></textarea>
-    <button class="send-traffic-btn" id="btn-send-traffic" onclick="sendToTraffic()"><i class="ti ti-send"></i> enviar para tráfego</button>
+    <textarea class="report-textarea" placeholder="${t('ccAdditionalComment')}"></textarea>
+    <button class="send-traffic-btn" id="btn-send-traffic" onclick="sendToTraffic()"><i class="ti ti-send"></i> ${t('ccSendTraffic')}</button>
   </div>`;
 }
 
@@ -2036,12 +2262,12 @@ function toggleReportOpt(el) {
 
 function sendToTraffic() {
   const btn = document.getElementById('btn-send-traffic');
-  if(btn) { btn.disabled = true; btn.textContent = 'enviando...'; }
-  appendMessage({from:'user', text:'enviado'});
+  if(btn) { btn.disabled = true; btn.textContent = t('ccSending'); }
+  appendMessage({from:'user', text: t('ccUserSent')});
   showTyping();
   setTimeout(() => {
     hideTyping();
-    appendMessage({from:'bot', text:'✓ Reporte enviado para o time de tráfego às 05:53. Protocolo #RPT-00892 gerado.'});
+    appendMessage({from:'bot', text: t('ccReportSent')});
     showTyping();
     setTimeout(() => {
       hideTyping();
@@ -2051,11 +2277,11 @@ function sendToTraffic() {
 }
 
 function buildResolutionCard() {
-  return `<div>Atualização do tráfego recebida:</div>
+  return `<div>${t('ccTrafficUpdateTitle')}</div>
   <div class="resolution-card">
-    <div class="res-card-title"><i class="ti ti-check"></i> Resposta do tráfego</div>
-    <div class="res-card-text">Operador AB Turismo contatado. Motorista Carlos Mendes localizou atraso por congestionamento na Via Anhanguera. ETA atualizado para 06:20. Passageiros estão sendo comunicados via push.</div>
-    <button class="uber-btn" id="btn-uber" onclick="generateVoucher()"><i class="ti ti-car"></i> gerar voucher Uber</button>
+    <div class="res-card-title"><i class="ti ti-check"></i> ${t('ccTrafficResponse')}</div>
+    <div class="res-card-text">${t('ccTrafficText')}</div>
+    <button class="uber-btn" id="btn-uber" onclick="generateVoucher()"><i class="ti ti-car"></i> ${t('ccGenerateVoucher')}</button>
   </div>`;
 }
 
@@ -2065,8 +2291,8 @@ function generateVoucher() {
   showTyping();
   setTimeout(() => {
     hideTyping();
-    appendMessage({from:'bot', text:'Voucher gerado · código BRAINER-X923. Chamado #RPT-00892 finalizado automaticamente. ✓ resolvido'});
-    showToast('Voucher Uber gerado · BRAINER-X923', 'success');
+    appendMessage({from:'bot', text: t('ccVoucherGenerated')});
+    showToast(t('ccVoucherToast'), 'success');
   }, 800);
 }
 
@@ -2111,7 +2337,7 @@ function sendChatMessage() {
   showTyping();
   setTimeout(() => {
     hideTyping();
-    appendMessage({from:'bot', text:'Entendido. Posso buscar outro passageiro ou ajudar com mais alguma coisa?'});
+    appendMessage({from:'bot', text: t('ccFreeInput')});
   }, 800);
 }
 
@@ -2120,7 +2346,7 @@ function newChat() {
   state.uberVoucherUsed = false;
   document.getElementById('chat-messages').innerHTML = '';
   setTimeout(() => {
-    appendMessage({from:'bot', text:'Nova conversa iniciada. Como posso ajudar?'});
+    appendMessage({from:'bot', text: t('ccNewChatMsg')});
   }, 100);
 }
 
