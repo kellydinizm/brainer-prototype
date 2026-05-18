@@ -527,6 +527,91 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
 /* ===================== PROTOTYPE BADGE ===================== */
 .proto-badge { position: fixed; bottom: 8px; left: 8px; font-size: 10px; color: var(--color-text-tertiary); background: var(--color-background-secondary); padding: 3px 8px; border-radius: var(--border-radius-sm); z-index: 5; border: 1px solid var(--color-border-tertiary); }
 
+/* ===================== MOBILE RESPONSIVE ===================== */
+@media (max-width: 768px) {
+  /* Topbar */
+  .topbar { padding: 0 10px; gap: 6px; height: 44px; min-height: 44px; flex-wrap: nowrap; overflow-x: auto; }
+  .topbar-logo { font-size: 13px; }
+  .topbar-modes { gap: 2px; }
+  .mode-pill { padding: 3px 8px; font-size: 11px; }
+  .live-badge { display: none; }
+  .agent-chip { display: none; }
+
+  /* Main layout */
+  .main-body { flex-direction: column; }
+  .sidebar {
+    width: 100%; min-width: unset; height: auto;
+    border-right: none; border-bottom: 1px solid var(--color-border-tertiary);
+    flex-direction: row; overflow-x: auto; flex-shrink: 0;
+  }
+  .sidebar-block { padding: 8px; min-width: 140px; flex-shrink: 0; }
+  .sidebar-block + .sidebar-block { border-top: none; border-left: 1px solid var(--color-border-tertiary); }
+  .sidebar-scroll { flex-direction: row; display: flex; gap: 8px; overflow-x: auto; align-items: flex-start; }
+  .filter-section { margin-bottom: 0; min-width: 120px; }
+  .filter-dropdown { font-size: 10px; padding: 3px 4px; }
+
+  /* Summary bar */
+  .summary-bar { overflow-x: auto; flex-wrap: nowrap; gap: 6px; padding: 8px; }
+  .summary-card { min-width: 100px; flex: none; padding: 6px 8px; }
+  .s-val { font-size: 16px; }
+
+  /* Content header */
+  .content-header { flex-wrap: wrap; padding: 8px 10px; gap: 6px; }
+  .content-title { font-size: 12px; }
+  .sort-group { display: none; }
+  .alert-filter-bar { border-right: none; padding-right: 0; margin-right: 0; overflow-x: auto; max-width: 100%; }
+  .btn-live { padding: 5px 10px; font-size: 11px; }
+
+  /* Service table → cards no mobile */
+  .table-header { display: none; }
+  .provider-divider { padding: 6px 10px 3px; }
+  .service-row {
+    display: flex; flex-direction: column; height: auto;
+    padding: 10px 12px; gap: 4px; border-bottom: 1px solid var(--color-border-tertiary);
+  }
+  .cell, .cell-sm { overflow: visible; white-space: normal; }
+  .route-name { font-size: 13px; }
+  .route-meta { font-size: 11px; }
+  .sla-bar { width: 80px; }
+  .collapse-row { display: none; }
+
+  /* Service detail */
+  .detail-body { flex-direction: column; }
+  .detail-left { overflow-y: visible; }
+  .detail-right { width: 100%; min-width: unset; border-left: none; border-top: 1px solid var(--color-border-tertiary); }
+  .detail-extra.open { grid-template-columns: repeat(2, 1fr); }
+  .service-meta { gap: 8px; font-size: 11px; }
+  .header-actions { flex-wrap: wrap; }
+  .btn { padding: 5px 8px; font-size: 11px; }
+  .service-title { font-size: 15px; }
+
+  /* Itinerary table */
+  .itin-wrap { overflow-x: auto; }
+
+  /* CC Chatbot */
+  .cc-layout { flex-direction: column; }
+  .history-panel { width: 100%; min-width: unset; border-left: none; border-top: 1px solid var(--color-border-tertiary); max-height: 200px; overflow-y: auto; }
+  .msg-bubble { max-width: 100%; }
+
+  /* Map overlay */
+  .map-header { padding: 8px 12px; gap: 8px; flex-wrap: wrap; }
+  .map-title { display: none; }
+  .map-toolbar { padding: 5px 10px; gap: 4px; }
+  .map-chip, .map-theme-btn { padding: 2px 7px; font-size: 9px; }
+  .map-stats { bottom: 8px; right: 6px; padding: 5px 8px; gap: 10px; }
+  .mstat strong { font-size: 11px; }
+
+  /* Toast */
+  .toast-container { bottom: 12px; right: 12px; left: 12px; }
+  .toast { max-width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .topbar-modes { display: none; }
+  .summary-card { min-width: 80px; }
+  .mode-pill { padding: 3px 6px; font-size: 10px; }
+}
+
 /* ===================== SUMMARY CARDS CLICÁVEIS ===================== */
 .summary-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
 .summary-card:hover { border-color: var(--color-border-secondary); }
@@ -606,13 +691,14 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
     <div class="topbar">
       <div class="topbar-logo">BUSUP <span>brainer</span></div>
       <div class="topbar-modes">
-        <button class="mode-pill active-traffic" onclick="switchMode('traffic')">tráfego</button>
-        <button class="mode-pill" onclick="switchMode('cc')">customer care</button>
+        <button class="mode-pill active-traffic" onclick="switchMode('traffic')" data-i18n="modeTraffic">tráfego</button>
+        <button class="mode-pill" onclick="switchMode('cc')" data-i18n="modeCC">customer care</button>
       </div>
-      <div class="live-badge" id="live-badge-main"><div class="live-dot" id="live-dot-main"></div>live · atualização automática</div>
+      <div class="live-badge" id="live-badge-main"><div class="live-dot" id="live-dot-main"></div><span data-i18n="liveBadge">live · atualização automática</span></div>
       <button id="auto-update-toggle" onclick="toggleAutoUpdate()" style="display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);" title="Ativar/desativar atualização automática">
         <i class="ti ti-refresh" id="auto-update-icon"></i><span id="auto-update-label">auto</span>
       </button>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:600;">EN</button>
       <div class="topbar-spacer"></div>
       <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
     </div>
@@ -620,25 +706,25 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
       <!-- SIDEBAR -->
       <div class="sidebar">
         <div class="sidebar-block">
-          <div class="sidebar-label">mercados ativos</div>
+          <div class="sidebar-label" data-i18n="activeMarkets">mercados ativos</div>
           <div id="market-nav"></div>
         </div>
         <div class="sidebar-block sidebar-scroll">
           <div class="filter-section">
-            <div class="filter-title">países</div>
+            <div class="filter-title" data-i18n="countries">países</div>
             <div class="country-pills" id="country-pills"></div>
           </div>
           <div class="filter-section">
-            <div class="filter-title">status do serviço</div>
+            <div class="filter-title" data-i18n="serviceStatus">status do serviço</div>
             <div class="status-dots" id="status-dots"></div>
           </div>
           <div class="filter-section">
-            <select class="filter-dropdown"><option>business unit</option></select>
-            <select class="filter-dropdown"><option>site / cliente</option></select>
-            <select class="filter-dropdown"><option>provider</option></select>
-            <select class="filter-dropdown"><option>tipo de rota</option></select>
-            <select class="filter-dropdown"><option>nome da rota</option></select>
-            <select class="filter-dropdown"><option>prioridade</option></select>
+            <select class="filter-dropdown"><option data-i18n="buUnit">business unit</option></select>
+            <select class="filter-dropdown"><option data-i18n="siteClient">site / cliente</option></select>
+            <select class="filter-dropdown"><option data-i18n="provider">provider</option></select>
+            <select class="filter-dropdown"><option data-i18n="routeType">tipo de rota</option></select>
+            <select class="filter-dropdown"><option data-i18n="routeName">nome da rota</option></select>
+            <select class="filter-dropdown"><option data-i18n="priority">prioridade</option></select>
           </div>
         </div>
       </div>
@@ -649,15 +735,15 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
           <div class="content-title" id="market-title">brasil · 5 serviços</div>
           <div class="alert-filter-bar" id="alert-filter-bar"></div>
           <div class="sort-group">
-            <button class="sort-btn active" onclick="setSort('provider')">por provider</button>
-            <button class="sort-btn" onclick="setSort('priority')">por prioridade</button>
+            <button class="sort-btn active" onclick="setSort('provider')" data-i18n="sortByProvider">por provider</button>
+            <button class="sort-btn" onclick="setSort('priority')" data-i18n="sortByPriority">por prioridade</button>
           </div>
-          <button class="btn btn-live" onclick="openMainLiveTracking()"><i class="ti ti-map-2"></i> live tracking</button>
+          <button class="btn btn-live" onclick="openMainLiveTracking()"><i class="ti ti-map-2"></i> <span data-i18n="liveTracking">live tracking</span></button>
         </div>
         <div class="service-list" id="service-list-container">
           <div class="table-header">
-            <div>hora local</div><div>hora serviço</div><div>rota</div><div>site · cliente</div>
-            <div>alertas</div><div>SLA</div><div>IA brainer</div><div>agente</div><div></div>
+            <div data-i18n="localTime">hora local</div><div data-i18n="serviceTime">hora serviço</div><div data-i18n="route">rota</div><div data-i18n="siteClientCol">site · cliente</div>
+            <div data-i18n="alerts">alertas</div><div>SLA</div><div data-i18n="aiLabel">IA brainer</div><div data-i18n="agent">agente</div><div></div>
           </div>
           <div id="service-list"></div>
         </div>
@@ -668,9 +754,10 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
   <!-- VIEW: SERVICE DETAIL -->
   <div class="view" id="view-service-detail">
     <div class="topbar">
-      <button class="topbar-back" onclick="navigateTo('main-page')"><i class="ti ti-arrow-left"></i> brasil</button>
+      <button class="topbar-back" onclick="navigateTo('main-page')"><i class="ti ti-arrow-left"></i> <span data-i18n="back">brasil</span></button>
       <div class="topbar-logo">BUSUP <span>brainer</span></div>
       <div class="live-badge"><div class="live-dot"></div>live</div>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:600;">EN</button>
       <div class="topbar-spacer"></div>
       <div class="agent-chip">Eriqueson M. <div class="avatar avatar-green">EM</div></div>
     </div>
@@ -682,10 +769,11 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
     <div class="topbar">
       <div class="topbar-logo">BUSUP <span>brainer</span></div>
       <div class="topbar-modes">
-        <button class="mode-pill" onclick="switchMode('traffic')">tráfego</button>
-        <button class="mode-pill active-cc" onclick="switchMode('cc')">customer care</button>
+        <button class="mode-pill" onclick="switchMode('traffic')" data-i18n="modeTraffic">tráfego</button>
+        <button class="mode-pill active-cc" onclick="switchMode('cc')" data-i18n="modeCC">customer care</button>
       </div>
       <div class="live-badge"><div class="live-dot"></div>live</div>
+      <button class="lang-toggle-btn" onclick="toggleLang()" style="font-size:11px;padding:4px 8px;border-radius:var(--border-radius-sm);border:1px solid var(--color-border-tertiary);background:none;cursor:pointer;color:var(--color-text-secondary);font-weight:600;">EN</button>
       <div class="topbar-spacer"></div>
       <div class="agent-chip">Ana Lima · CC Global <div class="avatar avatar-purple">AL</div></div>
     </div>
@@ -693,50 +781,50 @@ html, body { height: 100%; font-family: var(--font-sans); font-size: 13px; backg
       <div class="chat-area">
         <div class="chat-header">
           <div class="chat-icon"><i class="ti ti-robot"></i></div>
-          <div class="chat-header-title">assistente CC · brainer</div>
-          <button class="new-chat-btn" onclick="newChat()"><i class="ti ti-plus"></i> nova conversa</button>
+          <div class="chat-header-title" data-i18n="ccAssistant">assistente CC · brainer</div>
+          <button class="new-chat-btn" onclick="newChat()"><i class="ti ti-plus"></i> <span data-i18n="newChat">nova conversa</span></button>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
-          <input class="chat-input" id="chat-input" placeholder="Digite um nome, ID ou describe o problema..." onkeydown="if(event.key==='Enter')sendChatMessage()" />
+          <input class="chat-input" id="chat-input" data-i18n="chatPlaceholder" placeholder="Digite um nome, ID ou descreva o problema..." onkeydown="if(event.key==='Enter')sendChatMessage()" />
           <button class="chat-send-btn" onclick="sendChatMessage()"><i class="ti ti-send"></i></button>
         </div>
       </div>
       <div class="history-panel">
-        <div class="history-header"><i class="ti ti-clock"></i> histórico</div>
-        <div class="history-group-label">hoje</div>
+        <div class="history-header"><i class="ti ti-clock"></i> <span data-i18n="history">histórico</span></div>
+        <div class="history-group-label" data-i18n="today">hoje</div>
         <div class="history-item active">
           <div class="hist-name">Maria da Silva</div>
           <div class="hist-route">Guru 9 — Entrada</div>
-          <div class="hist-meta"><span class="hist-time">05:52</span><span class="hist-badge hb-green">resolvido</span></div>
+          <div class="hist-meta"><span class="hist-time">05:52</span><span class="hist-badge hb-green" data-i18n="histResolved">resolvido</span></div>
         </div>
         <div class="history-item">
           <div class="hist-name">João Santos</div>
           <div class="hist-route">95 — Cotia - E</div>
-          <div class="hist-meta"><span class="hist-time">06:10</span><span class="hist-badge hb-purple">reportado</span></div>
+          <div class="hist-meta"><span class="hist-time">06:10</span><span class="hist-badge hb-purple" data-i18n="histReported">reportado</span></div>
         </div>
         <div class="history-item">
           <div class="hist-name">Ana Costa</div>
           <div class="hist-route">07 — Itapecerica</div>
-          <div class="hist-meta"><span class="hist-time">06:31</span><span class="hist-badge hb-amber">aguardando</span></div>
+          <div class="hist-meta"><span class="hist-time">06:31</span><span class="hist-badge hb-amber" data-i18n="histWaiting">aguardando</span></div>
         </div>
-        <div class="history-group-label">ontem</div>
+        <div class="history-group-label" data-i18n="yesterday">ontem</div>
         <div class="history-item">
           <div class="hist-name">Pedro Alves</div>
           <div class="hist-route">Rota LX-3 — Entrada</div>
-          <div class="hist-meta"><span class="hist-time">07:18</span><span class="hist-badge hb-green">resolvido</span></div>
+          <div class="hist-meta"><span class="hist-time">07:18</span><span class="hist-badge hb-green" data-i18n="histResolved">resolvido</span></div>
         </div>
         <div class="history-item">
           <div class="hist-name">Carla Lima</div>
           <div class="hist-route">Guru 5 — Entrada</div>
-          <div class="hist-meta"><span class="hist-time">05:55</span><span class="hist-badge hb-green">resolvido</span></div>
+          <div class="hist-meta"><span class="hist-time">05:55</span><span class="hist-badge hb-green" data-i18n="histResolved">resolvido</span></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- PROTOTYPE BADGE -->
-  <div class="proto-badge">protótipo · dados mockados</div>
+  <div class="proto-badge" data-i18n="protoBadge">protótipo · dados mockados</div>
 </div>
 
 <script>
@@ -843,7 +931,87 @@ const state = {
   alertTypeFilter: null,   // null | alert type key
   statusFilter: null,      // null | service status key
   autoUpdate: true,        // flag de atualização automática
+  lang: 'pt',
 };
+
+/* ===================== TRADUÇÕES ===================== */
+const TRANSLATIONS = {
+  pt: {
+    modeTraffic: 'tráfego', modeCC: 'customer care', liveBadge: 'live · atualização automática',
+    autoLabel: 'auto', pausedLabel: 'paused', activeMarkets: 'mercados ativos', countries: 'países',
+    serviceStatus: 'status do serviço', buUnit: 'business unit', siteClient: 'site / cliente',
+    provider: 'provider', routeType: 'tipo de rota', routeName: 'nome da rota', priority: 'prioridade',
+    sortByProvider: 'por provider', sortByPriority: 'por prioridade', liveTracking: 'live tracking',
+    localTime: 'hora local', serviceTime: 'hora serviço', route: 'rota', siteClientCol: 'site · cliente',
+    alerts: 'alertas', aiLabel: 'IA brainer', agent: 'agente',
+    activeServices: 'serviços ativos', openAlerts: 'alertas abertos', unassigned: 'sem dono',
+    slaCritical: 'SLA crítica <15min', activeIssues: 'Issues ativos', pendingUnsolved: 'Pendente não resolvido',
+    inProgress: 'Em progresso', planned: 'Planejado', completed: 'Concluído', postOp: 'pós-operação',
+    services: 'serviços', openAlertsFilter: 'alertas abertos', noAgent: 'sem agente',
+    slaCriticalFilter: 'SLA crítica', realTime: 'em tempo real', close: 'fechar', theme: 'tema',
+    status: 'status', all: 'todos', mapIssues: 'issues ativos', pending: 'pendente',
+    mapInProgress: 'em progresso', mapPlanned: 'planejado', mapCompleted: 'concluído',
+    alertsFilter: 'alertas', monitored: 'monitorados', critical: 'críticos', withAlert: 'com alerta',
+    popupStatus: 'status', popupProvider: 'provider', popupAlerts: 'alertas', popupAgent: 'agente',
+    viewDetail: 'ver detalhe', statusIssues: 'ISSUES ATIVOS', statusPending: 'PENDENTE',
+    statusInProgress: 'EM PROGRESSO', statusPlanned: 'PLANEJADO', statusCompleted: 'CONCLUÍDO',
+    servicesCount: 'serviços', autoUpdateOn: 'Atualização automática ativada',
+    autoUpdateOff: 'Atualização automática pausada', filterAlerts: 'alertas', back: 'brasil',
+    ccAssistant: 'assistente CC · brainer', newChat: 'nova conversa',
+    chatPlaceholder: 'Digite um nome, ID ou descreva o problema...', history: 'histórico',
+    today: 'hoje', yesterday: 'ontem', histResolved: 'resolvido', histReported: 'reportado',
+    histWaiting: 'aguardando', protoBadge: 'protótipo · dados mockados',
+    otherAlerts: 'outros alertas do serviço', noOtherAlerts: 'nenhum outro alerta neste serviço',
+  },
+  en: {
+    modeTraffic: 'traffic', modeCC: 'customer care', liveBadge: 'live · auto update',
+    autoLabel: 'auto', pausedLabel: 'paused', activeMarkets: 'active markets', countries: 'countries',
+    serviceStatus: 'service status', buUnit: 'business unit', siteClient: 'site / client',
+    provider: 'provider', routeType: 'route type', routeName: 'route name', priority: 'priority',
+    sortByProvider: 'by provider', sortByPriority: 'by priority', liveTracking: 'live tracking',
+    localTime: 'local time', serviceTime: 'service time', route: 'route', siteClientCol: 'site · client',
+    alerts: 'alerts', aiLabel: 'brainer AI', agent: 'agent',
+    activeServices: 'active services', openAlerts: 'open alerts', unassigned: 'unassigned',
+    slaCritical: 'critical SLA <15min', activeIssues: 'Active issues', pendingUnsolved: 'Pending unsolved',
+    inProgress: 'In progress', planned: 'Planned', completed: 'Completed', postOp: 'post-operation',
+    services: 'services', openAlertsFilter: 'open alerts', noAgent: 'no agent',
+    slaCriticalFilter: 'critical SLA', realTime: 'real time', close: 'close', theme: 'theme',
+    status: 'status', all: 'all', mapIssues: 'active issues', pending: 'pending',
+    mapInProgress: 'in progress', mapPlanned: 'planned', mapCompleted: 'completed',
+    alertsFilter: 'alerts', monitored: 'monitored', critical: 'critical', withAlert: 'with alert',
+    popupStatus: 'status', popupProvider: 'provider', popupAlerts: 'alerts', popupAgent: 'agent',
+    viewDetail: 'view detail', statusIssues: 'ACTIVE ISSUES', statusPending: 'PENDING',
+    statusInProgress: 'IN PROGRESS', statusPlanned: 'PLANNED', statusCompleted: 'COMPLETED',
+    servicesCount: 'services', autoUpdateOn: 'Auto update enabled',
+    autoUpdateOff: 'Auto update paused', filterAlerts: 'alerts', back: 'back',
+    ccAssistant: 'CC assistant · brainer', newChat: 'new chat',
+    chatPlaceholder: 'Enter a name, ID or describe the issue...', history: 'history',
+    today: 'today', yesterday: 'yesterday', histResolved: 'resolved', histReported: 'reported',
+    histWaiting: 'waiting', protoBadge: 'prototype · mock data',
+    otherAlerts: 'other service alerts', noOtherAlerts: 'no other alerts for this service',
+  }
+};
+
+function t(key) { return TRANSLATIONS[state.lang][key] || key; }
+
+function applyStaticLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(el.tagName === 'INPUT') el.placeholder = t(key);
+    else el.textContent = t(key);
+  });
+}
+
+function toggleLang() {
+  state.lang = state.lang === 'pt' ? 'en' : 'pt';
+  applyStaticLang();
+  if(state.currentView === 'main-page') renderMainPage();
+  else if(state.currentView === 'service-detail') renderDetail();
+  else if(state.currentView === 'cc-chatbot') renderCC();
+  document.querySelectorAll('.lang-toggle-btn').forEach(btn => {
+    btn.textContent = state.lang === 'pt' ? 'EN' : 'PT';
+  });
+}
 
 /* ===================== NAVEGAÇÃO ===================== */
 function navigateTo(view, svcId=null) {
@@ -872,12 +1040,13 @@ function renderMainPage() {
   renderAlertFilterBar();
   renderServiceList();
   updateMarketTitle();
+  applyStaticLang();
 }
 
 function renderMarketNav() {
   const markets = ['brasil','portugal'];
   const flags = {brasil:'🇧🇷', portugal:'🇵🇹'};
-  const extra = [{label:'pós-operação',badge:4}];
+  const extra = [{label:t('postOp'),badge:4}];
   let html = '';
   markets.forEach(m => {
     if(state.activeCountries.includes(m)) {
@@ -920,26 +1089,26 @@ function toggleAutoUpdate() {
     if(dot) dot.style.animationPlayState = 'running';
     if(badge) badge.style.opacity = '1';
     if(icon) icon.className = 'ti ti-refresh';
-    if(label) label.textContent = 'auto';
+    if(label) label.textContent = t('autoLabel');
     if(toggle) { toggle.style.color = 'var(--color-text-secondary)'; toggle.style.borderColor = 'var(--color-border-tertiary)'; }
-    showToast('Atualização automática ativada', 'success');
+    showToast(t('autoUpdateOn'), 'success');
   } else {
     if(dot) dot.style.animationPlayState = 'paused';
     if(badge) badge.style.opacity = '0.4';
     if(icon) icon.className = 'ti ti-refresh-off';
-    if(label) label.textContent = 'paused';
+    if(label) label.textContent = t('pausedLabel');
     if(toggle) { toggle.style.color = 'var(--color-high)'; toggle.style.borderColor = 'var(--color-high)'; }
-    showToast('Atualização automática pausada', 'warning');
+    showToast(t('autoUpdateOff'), 'warning');
   }
 }
 
 function renderStatusDots() {
   const dots = [
-    { key:'in-progress-issues', color:'#E24B4A', tip:'Issues ativos' },
-    { key:'pending-unsolved',   color:'#EF9F27', tip:'Pendente não resolvido' },
-    { key:'in-progress',        color:'#1D9E75', tip:'Em progresso' },
-    { key:'planned',            color:'#378ADD', tip:'Planejado' },
-    { key:'completed',          color:'#b4b2a9', tip:'Concluído' },
+    { key:'in-progress-issues', color:'#E24B4A', tip:t('activeIssues') },
+    { key:'pending-unsolved',   color:'#EF9F27', tip:t('pendingUnsolved') },
+    { key:'in-progress',        color:'#1D9E75', tip:t('inProgress') },
+    { key:'planned',            color:'#378ADD', tip:t('planned') },
+    { key:'completed',          color:'#b4b2a9', tip:t('completed') },
   ];
   let html = '';
   dots.forEach(d => {
@@ -987,9 +1156,9 @@ function _getSeverity(svc) {
   }, svc.alerts.length ? null : 'ok') || 'ok';
 }
 
-function _interpolateRoute(path, t) {
+function _interpolateRoute(path, pos) {
   const total = path.length - 1;
-  const scaled = t * total;
+  const scaled = pos * total;
   const idx = Math.min(Math.floor(scaled), total - 1);
   const frac = scaled - idx;
   const a = path[idx], b = path[idx + 1] || path[idx];
@@ -1009,14 +1178,14 @@ function _applyMapFilters() {
   });
 }
 
-function switchMapTheme(t) {
+function switchMapTheme(theme) {
   if (!_leafletMap) return;
   if (_mapTileLayer) _leafletMap.removeLayer(_mapTileLayer);
-  _mapTileLayer = L.tileLayer(MAP_TILES[t], { maxZoom: 19, attribution: '' }).addTo(_leafletMap);
+  _mapTileLayer = L.tileLayer(MAP_TILES[theme], { maxZoom: 19, attribution: '' }).addTo(_leafletMap);
   _mapTileLayer.bringToBack();
   ['dark','light','color'].forEach(th => {
     const btn = document.getElementById('mtheme-' + th);
-    if (btn) btn.classList.toggle('active', th === t);
+    if (btn) btn.classList.toggle('active', th === theme);
   });
 }
 
@@ -1033,10 +1202,10 @@ function setMapStatusFilter(s) {
   _applyMapFilters();
 }
 
-function setMapAlertFilter(t) {
-  _mapAlertFilter = t;
+function setMapAlertFilter(alertType) {
+  _mapAlertFilter = alertType;
   document.querySelectorAll('.mf-alert-chip').forEach(el => el.classList.remove('active'));
-  const activeId = t ? 'mfalert-' + t : 'mfalert-all';
+  const activeId = alertType ? 'mfalert-' + alertType : 'mfalert-all';
   const el = document.getElementById(activeId);
   if (el) el.classList.add('active');
   _applyMapFilters();
@@ -1055,15 +1224,15 @@ function openMainLiveTracking() {
   const alertTypes = [...new Set(svcs.flatMap(s => s.alerts.map(a => a.type)))];
 
   const filterLabel = state.dashFilter
-    ? { alerts:'alertas abertos', unassigned:'sem agente', 'sla-critical':'SLA crítica' }[state.dashFilter]
+    ? { alerts:t('openAlertsFilter'), unassigned:t('noAgent'), 'sla-critical':t('slaCriticalFilter') }[state.dashFilter]
     : state.alertTypeFilter ? state.alertTypeFilter.replace(/_/g,' ')
     : state.selectedMarket.toUpperCase();
 
   const alertChips = alertTypes.length ? `
     <div class="map-tsep"></div>
-    <span class="map-tlabel">alertas</span>
-    <button class="map-chip c-alrt active mf-alert-chip" id="mfalert-all" onclick="setMapAlertFilter(null)">todos</button>
-    ${alertTypes.map(t => `<button class="map-chip c-alrt mf-alert-chip" id="mfalert-${t}" onclick="setMapAlertFilter('${t}')">${t.replace(/_/g,' ')}</button>`).join('')}
+    <span class="map-tlabel">${t('alertsFilter')}</span>
+    <button class="map-chip c-alrt active mf-alert-chip" id="mfalert-all" onclick="setMapAlertFilter(null)">${t('all')}</button>
+    ${alertTypes.map(tp => `<button class="map-chip c-alrt mf-alert-chip" id="mfalert-${tp}" onclick="setMapAlertFilter('${tp}')">${tp.replace(/_/g,' ')}</button>`).join('')}
   ` : '';
 
   const el = document.createElement('div');
@@ -1072,31 +1241,31 @@ function openMainLiveTracking() {
   el.innerHTML = `
     <div class="map-header">
       <div class="map-logo">BUSUP <span>brainer</span></div>
-      <div class="map-title"><i class="ti ti-map-2" style="font-size:12px;margin-right:4px"></i>live tracking · ${filterLabel} · ${total} serviços</div>
-      <div class="map-live"><div class="map-live-dot"></div>em tempo real</div>
-      <button class="map-close" onclick="closeMap()"><i class="ti ti-x"></i> fechar</button>
+      <div class="map-title"><i class="ti ti-map-2" style="font-size:12px;margin-right:4px"></i>live tracking · ${filterLabel} · ${total} ${t('services')}</div>
+      <div class="map-live"><div class="map-live-dot"></div>${t('realTime')}</div>
+      <button class="map-close" onclick="closeMap()"><i class="ti ti-x"></i> ${t('close')}</button>
     </div>
     <div class="map-toolbar">
-      <span class="map-tlabel">tema</span>
+      <span class="map-tlabel">${t('theme')}</span>
       <button class="map-theme-btn active" id="mtheme-dark" onclick="switchMapTheme('dark')">🌙 dark</button>
       <button class="map-theme-btn" id="mtheme-light" onclick="switchMapTheme('light')">☀️ light</button>
       <button class="map-theme-btn" id="mtheme-color" onclick="switchMapTheme('color')">🗺️ color</button>
       <div class="map-tsep"></div>
-      <span class="map-tlabel">status</span>
-      <button class="map-chip c-all active" id="mfst-all" onclick="setMapStatusFilter(null)">todos</button>
-      <button class="map-chip c-issues"    id="mfst-issues"    onclick="setMapStatusFilter('in-progress-issues')"><span style="color:#E24B4A">●</span> issues ativos</button>
-      <button class="map-chip c-pending"   id="mfst-pending"   onclick="setMapStatusFilter('pending-unsolved')"><span style="color:#EF9F27">●</span> pendente</button>
-      <button class="map-chip c-progress"  id="mfst-progress"  onclick="setMapStatusFilter('in-progress')"><span style="color:#1D9E75">●</span> em progresso</button>
-      <button class="map-chip c-planned"   id="mfst-planned"   onclick="setMapStatusFilter('planned')"><span style="color:#378ADD">●</span> planejado</button>
-      <button class="map-chip c-completed" id="mfst-completed" onclick="setMapStatusFilter('completed')"><span style="color:#b4b2a9">●</span> concluído</button>
+      <span class="map-tlabel">${t('status')}</span>
+      <button class="map-chip c-all active" id="mfst-all" onclick="setMapStatusFilter(null)">${t('all')}</button>
+      <button class="map-chip c-issues"    id="mfst-issues"    onclick="setMapStatusFilter('in-progress-issues')"><span style="color:#E24B4A">●</span> ${t('mapIssues')}</button>
+      <button class="map-chip c-pending"   id="mfst-pending"   onclick="setMapStatusFilter('pending-unsolved')"><span style="color:#EF9F27">●</span> ${t('pending')}</button>
+      <button class="map-chip c-progress"  id="mfst-progress"  onclick="setMapStatusFilter('in-progress')"><span style="color:#1D9E75">●</span> ${t('mapInProgress')}</button>
+      <button class="map-chip c-planned"   id="mfst-planned"   onclick="setMapStatusFilter('planned')"><span style="color:#378ADD">●</span> ${t('mapPlanned')}</button>
+      <button class="map-chip c-completed" id="mfst-completed" onclick="setMapStatusFilter('completed')"><span style="color:#b4b2a9">●</span> ${t('mapCompleted')}</button>
       ${alertChips}
     </div>
     <div class="map-body">
       <div id="leaflet-map"></div>
       <div class="map-stats">
-        <div class="mstat">monitorados<strong>${total}</strong></div>
-        <div class="mstat">críticos<strong style="color:#E24B4A">${critical}</strong></div>
-        <div class="mstat">com alerta<strong>${withAlerts}</strong></div>
+        <div class="mstat">${t('monitored')}<strong>${total}</strong></div>
+        <div class="mstat">${t('critical')}<strong style="color:#E24B4A">${critical}</strong></div>
+        <div class="mstat">${t('withAlert')}<strong>${withAlerts}</strong></div>
       </div>
     </div>`;
   document.body.appendChild(el);
@@ -1121,12 +1290,12 @@ function openMainLiveTracking() {
       const routeIdx = i % BUS_ROUTES_COORDS.length;
       const path = BUS_ROUTES_COORDS[routeIdx];
       const STATUS_COLORS = { 'in-progress-issues':'#E24B4A', 'pending-unsolved':'#EF9F27', 'in-progress':'#1D9E75', 'planned':'#378ADD', 'completed':'#b4b2a9' };
-      const STATUS_LABELS = { 'in-progress-issues':'ISSUES ATIVOS', 'pending-unsolved':'PENDENTE', 'in-progress':'EM PROGRESSO', 'planned':'PLANEJADO', 'completed':'CONCLUÍDO' };
+      const STATUS_LABELS = { 'in-progress-issues':t('statusIssues'), 'pending-unsolved':t('statusPending'), 'in-progress':t('statusInProgress'), 'planned':t('statusPlanned'), 'completed':t('statusCompleted') };
       const color = STATUS_COLORS[svc.status] || '#b4b2a9';
       const statusLabel = STATUS_LABELS[svc.status] || svc.status;
       const code = svc.id.replace('svc-','#');
       const alertTypesList = svc.alerts.map(a => a.type);
-      const alertTypesStr = alertTypesList.map(t => t.replace(/_/g,' ')).join(', ') || '—';
+      const alertTypesStr = alertTypesList.map(tp => tp.replace(/_/g,' ')).join(', ') || '—';
       const agent = state.assignedServices[svc.id] || svc.agent || '—';
 
       let progress = (i / svcs.length) % 1;
@@ -1143,14 +1312,14 @@ function openMainLiveTracking() {
       marker.bindPopup(`
         <div class="lp-route">${svc.route}</div>
         <table style="width:100%;font-size:11px;color:#ccc;border-collapse:collapse;margin-top:6px">
-          <tr><td style="padding:2px 0;color:#888">status</td><td style="color:${color};font-weight:700">${statusLabel}</td></tr>
-          <tr><td style="padding:2px 0;color:#888">provider</td><td>${svc.provider}</td></tr>
-          <tr><td style="padding:2px 0;color:#888">alertas</td><td>${alertTypesStr}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">${t('popupStatus')}</td><td style="color:${color};font-weight:700">${statusLabel}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">${t('popupProvider')}</td><td>${svc.provider}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">${t('popupAlerts')}</td><td>${alertTypesStr}</td></tr>
           <tr><td style="padding:2px 0;color:#888">pax</td><td>${svc.pax}</td></tr>
-          <tr><td style="padding:2px 0;color:#888">agente</td><td>${agent}</td></tr>
+          <tr><td style="padding:2px 0;color:#888">${t('popupAgent')}</td><td>${agent}</td></tr>
         </table>
         <button class="lp-btn" onclick="closeMap();navigateTo('service-detail','${svc.id}')">
-          <i class="ti ti-arrow-right" style="font-size:11px"></i> ver detalhe
+          <i class="ti ti-arrow-right" style="font-size:11px"></i> ${t('viewDetail')}
         </button>
       `, { maxWidth: 220 });
 
@@ -1181,7 +1350,7 @@ function updateMarketTitle() {
   const marketLabel = state.activeCountries.length === 1
     ? state.activeCountries[0].toUpperCase()
     : state.activeCountries.map(c => c.toUpperCase()).join(' + ');
-  document.getElementById('market-title').textContent = `${marketLabel} · ${svcs.length} serviços`;
+  document.getElementById('market-title').textContent = `${marketLabel} · ${svcs.length} ${t('servicesCount')}`;
 }
 
 function getBaseServices() {
@@ -1208,10 +1377,10 @@ function renderSummaryBar() {
   const slaCrit = base.filter(s => s.alerts.some(a => a.slaMin !== null && a.slaMin < 15)).length;
 
   const cards = [
-    { key: null,           label: 'serviços ativos', val: base.length, cls: '', valCls: '', hint: 'ver todos' },
-    { key: 'alerts',       label: 'alertas abertos', val: withAlerts,  cls: 'card-active-red',   valCls: 'red', hint: 'filtrar por alertas' },
-    { key: 'unassigned',   label: 'sem dono',         val: unassigned, cls: 'card-active-amber', valCls: 'amber', hint: 'filtrar sem agente' },
-    { key: 'sla-critical', label: 'SLA crítica <15min', val: slaCrit,  cls: 'card-active-red',   valCls: 'red', hint: 'filtrar SLA crítica' },
+    { key: null,           label: t('activeServices'), val: base.length, cls: '', valCls: '', hint: 'ver todos' },
+    { key: 'alerts',       label: t('openAlerts'),     val: withAlerts,  cls: 'card-active-red',   valCls: 'red', hint: 'filtrar por alertas' },
+    { key: 'unassigned',   label: t('unassigned'),     val: unassigned, cls: 'card-active-amber', valCls: 'amber', hint: 'filtrar sem agente' },
+    { key: 'sla-critical', label: t('slaCritical'),    val: slaCrit,  cls: 'card-active-red',   valCls: 'red', hint: 'filtrar SLA crítica' },
   ];
 
   let html = '';
@@ -1237,7 +1406,7 @@ function setDashFilter(key) {
 /* ===================== ALERT TYPE FILTER BAR ===================== */
 function renderAlertFilterBar() {
   const types = Object.entries(ALERT_ICONS);
-  let html = `<span class="filter-label">alerta:</span>`;
+  let html = `<span class="filter-label">${t('filterAlerts')}:</span>`;
   types.forEach(([k, icon]) => {
     const active = state.alertTypeFilter === k ? 'active' : '';
     html += `<button class="alert-filter-chip ${active}" onclick="setAlertTypeFilter('${k}')">
@@ -1523,6 +1692,7 @@ function renderDetail() {
         </div>
       </div>
     </div>`;
+  applyStaticLang();
 }
 
 function toggleExtraFields() {
@@ -2336,6 +2506,7 @@ function renderCC() {
     state.ccFlowStep = 1;
     loadInitialChat();
   }
+  applyStaticLang();
 }
 
 function loadInitialChat() {
@@ -2503,6 +2674,7 @@ function showToast(message, type='success') {
 
 /* ===================== INIT ===================== */
 renderMainPage();
+applyStaticLang();
 </script>
 </body>
 </html>
