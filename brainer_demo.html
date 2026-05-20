@@ -3174,7 +3174,7 @@ applyStaticLang();
 <script>
 /* ════════ KPI DEFINITIONS ════════ */
 const KPIS = {
-  SRT: { name:'System Response Time',   desc:'Tempo entre disparo do alerta e primeira ação do agente' },
+  SRT: { name:'System Response Time',   desc:'Tempo de processamento e renderização de tela pelo sistema — latência técnica, não comportamento do agente' },
   ART: { name:'Alert Resolution Time',  desc:'Tempo total de abertura até fechamento do alerta' },
   ARA: { name:'Alert Resolution Accuracy', desc:'Proporção de alertas resolvidos com diagnóstico e procedimento corretos' },
   ARR: { name:'Autonomous Resolution Rate', desc:'Proporção de alertas resolvidos sem intervenção humana (meta fase 3: ≥20%)' },
@@ -3192,7 +3192,7 @@ const DEMO_POINTS = [
     quote: '"O sistema não me diz quais mercados estão com problema. Eu preciso ir atrás — abro e fico procurando."',
     stitle: 'Mercados ativos com contagem de alertas em tempo real',
     stext: 'A sidebar exibe todos os mercados em operação com badge de alertas abertos. Filtros de país, status e provider hierarquizados. Um clique muda o contexto — lista, mapa e dashboard filtram automaticamente.',
-    kpis: [{ id:'SRT', style:'', impact:'agente vê o que é urgente ao entrar, sem varrer a lista' }]
+    kpis: [{ id:'ART', style:'', impact:'agente identifica o mercado crítico imediatamente — menos tempo até a primeira ação' }]
   },
 
   /* 2 — Dashboard */
@@ -3203,7 +3203,7 @@ const DEMO_POINTS = [
     quote: '"Quando chego no turno, não sei de cara quão crítico está o momento. Tenho que ler a lista toda pra entender a situação."',
     stitle: 'Dashboard de apoio — situação do turno em 2 segundos',
     stext: 'Cards com totais: alertas abertos, serviços sem agente, SLAs críticos, análises da IA prontas. Clicar num card filtra a lista diretamente. Visão geral antes de qualquer ação.',
-    kpis: [{ id:'SRT', style:'', impact:'diagnóstico imediato do turno — sem leitura linha a linha' }]
+    kpis: [{ id:'ART', style:'', impact:'diagnóstico do turno em segundos — agente age mais rápido no que importa' }]
   },
 
   /* 3 — SLA timer */
@@ -3214,7 +3214,7 @@ const DEMO_POINTS = [
     quote: '"Eles contam ali no dedo ou no bloco de nota. Deu 60 minutos, Uber liberado. Não tem nada automático."',
     stitle: 'SLA timer visual e automático por alerta',
     stext: 'Cada linha tem um timer regressivo com barra de progresso. Fica vermelho e pulsa quando resta menos de 15 minutos. Nenhum cálculo mental, nenhum bloco de notas, nenhuma ligação para checar.',
-    kpis: [{ id:'SRT', style:'', impact:'priorização automática — agente age no alerta mais urgente primeiro' }]
+    kpis: [{ id:'ART', style:'', impact:'priorização correta sem esforço — alerta mais urgente sempre visível' }]
   },
 
   /* 4 — Provider grouping + filtros */
