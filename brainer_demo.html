@@ -2868,55 +2868,45 @@ applyStaticLang();
 <style>
 /* ── Launcher ── */
 #demo-launcher {
-  position: fixed; bottom: 20px; right: 20px; z-index: 9100;
-  display: flex; align-items: center; gap: 8px;
-  background: #0D1F1A; color: #fff;
-  border: none; border-radius: 999px;
-  padding: 10px 20px; font-size: 13px; font-weight: 600;
-  cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-  font-family: var(--font-sans);
-  transition: transform 0.15s, box-shadow 0.15s;
-  letter-spacing: -0.2px;
+  position:fixed; bottom:20px; right:20px; z-index:9100;
+  display:flex; align-items:center; gap:8px;
+  background:#0D1F1A; color:#fff;
+  border:none; border-radius:999px;
+  padding:10px 20px; font-size:13px; font-weight:600;
+  cursor:pointer; box-shadow:0 4px 20px rgba(0,0,0,0.35);
+  font-family:var(--font-sans); letter-spacing:-0.2px;
+  transition:transform 0.15s, box-shadow 0.15s;
 }
-#demo-launcher:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
-#demo-launcher .dl-dot { width:8px;height:8px;border-radius:50%;background:#1D9E75;animation:demoBlink 1.4s infinite; }
-#demo-launcher .dl-resume { font-size:10px;background:rgba(29,158,117,0.25);border-radius:4px;padding:2px 6px;margin-left:2px;color:#5DCAA5; }
+#demo-launcher:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,0.4); }
+#demo-launcher .dl-dot { width:8px;height:8px;border-radius:50%;background:#1D9E75;animation:demoBlink 1.4s infinite; flex-shrink:0; }
 @keyframes demoBlink { 0%,100%{opacity:1}50%{opacity:0.3} }
 
 /* ── Spotlight ── */
-#demo-spotlight {
-  display:none; position:fixed; inset:0; z-index:8000; pointer-events:none;
-}
+#demo-spotlight { display:none; position:fixed; inset:0; z-index:8000; pointer-events:none; }
 #demo-spotlight.active { display:block; }
 
 /* ── Ring ── */
 #demo-ring {
-  display:none; position:fixed; z-index:8500; pointer-events:none;
-  border-radius:8px;
-  transition: left 0.3s cubic-bezier(0.4,0,0.2,1),
-              top 0.3s cubic-bezier(0.4,0,0.2,1),
-              width 0.3s cubic-bezier(0.4,0,0.2,1),
-              height 0.3s cubic-bezier(0.4,0,0.2,1);
+  display:none; position:fixed; z-index:8500; pointer-events:none; border-radius:8px;
+  transition:left .3s cubic-bezier(.4,0,.2,1),top .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1);
 }
 #demo-ring.active { display:block; }
-#demo-ring.clr-green { box-shadow:0 0 0 3px #1D9E75, 0 0 0 8px rgba(29,158,117,0.2), 0 0 40px rgba(29,158,117,0.35); animation:pulseGreen 2s ease-in-out infinite; }
-#demo-ring.clr-red   { box-shadow:0 0 0 3px #E24B4A, 0 0 0 8px rgba(226,75,74,0.2),  0 0 40px rgba(226,75,74,0.35);  animation:pulseRed   2s ease-in-out infinite; }
-#demo-ring.clr-cc    { box-shadow:0 0 0 3px #7F77DD, 0 0 0 8px rgba(127,119,221,0.2),0 0 40px rgba(127,119,221,0.35); animation:pulseCC    2s ease-in-out infinite; }
-#demo-ring.clr-amber { box-shadow:0 0 0 3px #EF9F27, 0 0 0 8px rgba(239,159,39,0.2), 0 0 40px rgba(239,159,39,0.35);  animation:pulseAmber 2s ease-in-out infinite; }
-@keyframes pulseGreen { 0%,100%{box-shadow:0 0 0 3px #1D9E75,0 0 0 8px rgba(29,158,117,0.2),0 0 40px rgba(29,158,117,0.35)} 50%{box-shadow:0 0 0 3px #1D9E75,0 0 0 16px rgba(29,158,117,0.08),0 0 60px rgba(29,158,117,0.2)} }
-@keyframes pulseRed   { 0%,100%{box-shadow:0 0 0 3px #E24B4A,0 0 0 8px rgba(226,75,74,0.2),0 0 40px rgba(226,75,74,0.35)}  50%{box-shadow:0 0 0 3px #E24B4A,0 0 0 16px rgba(226,75,74,0.08),0 0 60px rgba(226,75,74,0.2)}  }
-@keyframes pulseCC    { 0%,100%{box-shadow:0 0 0 3px #7F77DD,0 0 0 8px rgba(127,119,221,0.2),0 0 40px rgba(127,119,221,0.35)} 50%{box-shadow:0 0 0 3px #7F77DD,0 0 0 16px rgba(127,119,221,0.08),0 0 60px rgba(127,119,221,0.2)} }
-@keyframes pulseAmber { 0%,100%{box-shadow:0 0 0 3px #EF9F27,0 0 0 8px rgba(239,159,39,0.2),0 0 40px rgba(239,159,39,0.35)}  50%{box-shadow:0 0 0 3px #EF9F27,0 0 0 16px rgba(239,159,39,0.08),0 0 60px rgba(239,159,39,0.2)}  }
+#demo-ring.clr-green { animation:pulseG 2s ease-in-out infinite; }
+#demo-ring.clr-red   { animation:pulseR 2s ease-in-out infinite; }
+#demo-ring.clr-cc    { animation:pulseC 2s ease-in-out infinite; }
+#demo-ring.clr-amber { animation:pulseA 2s ease-in-out infinite; }
+@keyframes pulseG { 0%,100%{box-shadow:0 0 0 3px #1D9E75,0 0 0 8px rgba(29,158,117,.2),0 0 40px rgba(29,158,117,.3)} 50%{box-shadow:0 0 0 3px #1D9E75,0 0 0 16px rgba(29,158,117,.07),0 0 60px rgba(29,158,117,.15)} }
+@keyframes pulseR { 0%,100%{box-shadow:0 0 0 3px #E24B4A,0 0 0 8px rgba(226,75,74,.2),0 0 40px rgba(226,75,74,.3)}  50%{box-shadow:0 0 0 3px #E24B4A,0 0 0 16px rgba(226,75,74,.07),0 0 60px rgba(226,75,74,.15)} }
+@keyframes pulseC { 0%,100%{box-shadow:0 0 0 3px #7F77DD,0 0 0 8px rgba(127,119,221,.2),0 0 40px rgba(127,119,221,.3)} 50%{box-shadow:0 0 0 3px #7F77DD,0 0 0 16px rgba(127,119,221,.07),0 0 60px rgba(127,119,221,.15)} }
+@keyframes pulseA { 0%,100%{box-shadow:0 0 0 3px #EF9F27,0 0 0 8px rgba(239,159,39,.2),0 0 40px rgba(239,159,39,.3)}  50%{box-shadow:0 0 0 3px #EF9F27,0 0 0 16px rgba(239,159,39,.07),0 0 60px rgba(239,159,39,.15)} }
 
 /* ── Badge numérico ── */
 #demo-badge {
   display:none; position:fixed; z-index:8600; pointer-events:none;
-  width:28px; height:28px; border-radius:50%;
-  font-size:12px; font-weight:800;
-  align-items:center; justify-content:center;
-  font-family:var(--font-sans);
+  width:28px; height:28px; border-radius:50%; font-size:12px; font-weight:800;
+  align-items:center; justify-content:center; font-family:var(--font-sans);
   box-shadow:0 2px 10px rgba(0,0,0,0.3);
-  transition: left 0.3s, top 0.3s;
+  transition:left .3s, top .3s;
 }
 #demo-badge.active { display:flex; }
 #demo-badge.clr-green { background:#1D9E75; color:#fff; }
@@ -2924,94 +2914,128 @@ applyStaticLang();
 #demo-badge.clr-cc    { background:#7F77DD; color:#fff; }
 #demo-badge.clr-amber { background:#EF9F27; color:#fff; }
 
-/* ── Card principal ── */
+/* ── Card ── */
 #demo-card {
   display:none; position:fixed; bottom:20px; left:20px; z-index:9000;
-  width:440px; max-height:calc(100vh - 40px);
-  background:#fff; border-radius:18px;
-  box-shadow:0 12px 60px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.08);
-  font-family:var(--font-sans); overflow:hidden;
-  flex-direction:column;
+  width:460px; max-height:calc(100vh - 40px);
+  background:#fff; border-radius:18px; overflow:hidden;
+  box-shadow:0 12px 60px rgba(0,0,0,0.2),0 2px 8px rgba(0,0,0,0.08);
+  font-family:var(--font-sans); flex-direction:column;
 }
-#demo-card.active { display:flex; animation:demoSlideUp 0.25s cubic-bezier(0.4,0,0.2,1); }
-@keyframes demoSlideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+#demo-card.active { display:flex; animation:demoUp .25s cubic-bezier(.4,0,.2,1); }
+@keyframes demoUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
 .dc-head {
   background:#0D1F1A; padding:14px 18px;
-  display:flex; align-items:center; justify-content:space-between;
-  flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
 }
-.dc-section-badge {
-  font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase;
-  padding:3px 9px; border-radius:999px; border:1px solid rgba(93,202,165,0.4);
-  color:#5DCAA5;
+.dc-section-pill {
+  font-size:10px; font-weight:700; letter-spacing:.7px; text-transform:uppercase;
+  padding:3px 10px; border-radius:999px; border:1px solid rgba(93,202,165,.35); color:#5DCAA5;
 }
-.dc-close-btn {
-  background:none; border:none; color:rgba(255,255,255,0.5); cursor:pointer;
-  font-size:18px; line-height:1; padding:0 4px; transition:color 0.15s;
-}
-.dc-close-btn:hover { color:#fff; }
+.dc-x { background:none; border:none; color:rgba(255,255,255,.45); cursor:pointer; font-size:17px; line-height:1; transition:color .15s; }
+.dc-x:hover { color:#fff; }
 
-.dc-body { flex:1; overflow-y:auto; padding:0; }
+.dc-body { flex:1; overflow-y:auto; padding-bottom:4px; }
 
 .dc-quote {
-  margin:16px 18px 0;
-  background:#F5F5F3; border-left:3px solid #1D9E75;
-  border-radius:0 8px 8px 0; padding:12px 14px;
+  margin:16px 18px 0; background:#F5F5F3;
+  border-left:3px solid #1D9E75; border-radius:0 8px 8px 0; padding:12px 14px;
 }
-.dc-quote-label {
-  font-size:9px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase;
-  color:#888780; margin-bottom:6px; display:flex; align-items:center; gap:5px;
-}
-.dc-quote-text {
-  font-size:14px; color:#1A1A18; font-style:italic; line-height:1.6;
-}
+.dc-qlabel { font-size:9px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:#888780; margin-bottom:6px; }
+.dc-qtext  { font-size:14px; color:#1A1A18; font-style:italic; line-height:1.65; }
 
-.dc-sep { margin:14px 18px; height:1px; background:#EEEDE9; flex-shrink:0; }
+.dc-sep { margin:14px 18px; height:1px; background:#EEEDE9; }
 
-.dc-solution { margin:0 18px; }
-.dc-sol-label {
-  font-size:9px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase;
-  color:#1D9E75; margin-bottom:6px; display:flex; align-items:center; gap:5px;
-}
-.dc-sol-title { font-size:16px; font-weight:700; color:#1A1A18; margin-bottom:6px; line-height:1.3; }
-.dc-sol-text { font-size:13px; color:#5F5E5A; line-height:1.6; }
+.dc-sol { margin:0 18px; }
+.dc-slabel { font-size:9px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:#1D9E75; margin-bottom:6px; }
+.dc-stitle { font-size:16px; font-weight:700; color:#1A1A18; margin-bottom:6px; line-height:1.3; }
+.dc-stext  { font-size:13px; color:#5F5E5A; line-height:1.65; }
 
 .dc-kpis { margin:12px 18px 0; display:flex; gap:6px; flex-wrap:wrap; }
 .dc-kpi {
-  display:flex; align-items:flex-start; flex-direction:column; gap:2px;
-  background:#E1F5EE; border-radius:8px; padding:8px 12px;
-  min-width:120px; flex:1;
+  flex:1; min-width:130px; background:#E1F5EE; border-radius:8px; padding:9px 12px;
+  display:flex; flex-direction:column; gap:3px;
 }
-.dc-kpi .kk-abbr { font-size:13px; font-weight:800; color:#085041; }
-.dc-kpi .kk-name { font-size:10px; color:#1D9E75; font-weight:500; line-height:1.3; }
-.dc-kpi.cc { background:#EEEDFE; }
-.dc-kpi.cc .kk-abbr { color:#4B44A8; }
-.dc-kpi.cc .kk-name { color:#7F77DD; }
-.dc-kpi.amber { background:#FAEEDA; }
-.dc-kpi.amber .kk-abbr { color:#8A5A00; }
-.dc-kpi.amber .kk-name { color:#EF9F27; }
+.dc-kpi .ka { font-size:13px; font-weight:800; color:#085041; }
+.dc-kpi .kn { font-size:10px; font-weight:600; color:#1D9E75; letter-spacing:.1px; }
+.dc-kpi .kd { font-size:11px; color:#1D9E75; line-height:1.4; margin-top:1px; opacity:.85; }
+.dc-kpi.kcc { background:#EEEDFE; }
+.dc-kpi.kcc .ka { color:#4B44A8; } .dc-kpi.kcc .kn { color:#7F77DD; } .dc-kpi.kcc .kd { color:#7F77DD; }
+.dc-kpi.kamb { background:#FAEEDA; }
+.dc-kpi.kamb .ka { color:#8A5A00; } .dc-kpi.kamb .kn { color:#EF9F27; } .dc-kpi.kamb .kd { color:#EF9F27; }
 
 .dc-foot {
-  background:#F5F5F3; padding:12px 18px;
-  display:flex; align-items:center; gap:10px; flex-shrink:0;
-  margin-top:14px;
+  background:#F5F5F3; padding:12px 18px; margin-top:14px;
+  display:flex; align-items:center; gap:8px; flex-shrink:0;
 }
 .dc-btn {
   background:#fff; border:1px solid #D3D1C7; border-radius:8px;
   padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer;
-  color:#1A1A18; font-family:var(--font-sans);
-  transition:background 0.1s; white-space:nowrap;
+  color:#1A1A18; font-family:var(--font-sans); white-space:nowrap; transition:background .1s;
 }
-.dc-btn:hover { background:#EEEDE9; }
-.dc-btn:disabled { opacity:0.3; cursor:default; }
-.dc-btn.primary { background:#1D9E75; color:#fff; border-color:#1D9E75; }
-.dc-btn.primary:hover { background:#178a65; }
-.dc-dots { display:flex; gap:5px; flex:1; justify-content:center; }
-.dc-dot { width:6px; height:6px; border-radius:50%; background:#D3D1C7; cursor:pointer; transition:all 0.2s; }
-.dc-dot.active { background:#1D9E75; transform:scale(1.3); }
-.dc-dot:hover { background:#888780; }
-.dc-counter { font-size:11px; color:#888780; font-weight:500; white-space:nowrap; }
+.dc-btn:hover  { background:#EEEDE9; }
+.dc-btn:disabled { opacity:.3; cursor:default; }
+.dc-btn.pr { background:#1D9E75; color:#fff; border-color:#1D9E75; }
+.dc-btn.pr:hover { background:#178a65; }
+.dc-btn.end { background:#0D1F1A; color:#5DCAA5; border-color:#0D1F1A; }
+.dc-dots { flex:1; display:flex; gap:5px; justify-content:center; }
+.dc-dot { width:6px; height:6px; border-radius:50%; background:#D3D1C7; cursor:pointer; transition:all .2s; }
+.dc-dot.active { background:#1D9E75; transform:scale(1.35); }
+.dc-dot:hover  { background:#888780; }
+.dc-ctr { font-size:11px; color:#888780; font-weight:500; white-space:nowrap; }
+
+/* ── Tela final V1 vs V2 ── */
+#demo-final {
+  display:none; position:fixed; inset:0; z-index:9500;
+  background:#0D1F1A; flex-direction:column; align-items:center; justify-content:flex-start;
+  overflow-y:auto; padding:40px 24px;
+  animation:demoUp .35s cubic-bezier(.4,0,.2,1);
+  font-family:var(--font-sans);
+}
+#demo-final.active { display:flex; }
+.df-close {
+  position:fixed; top:20px; right:24px; background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15); color:#fff; border-radius:8px;
+  padding:6px 14px; font-size:12px; cursor:pointer; font-family:var(--font-sans);
+  transition:background .15s; z-index:1;
+}
+.df-close:hover { background:rgba(255,255,255,.18); }
+.df-kicker { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#5DCAA5; margin-bottom:10px; }
+.df-title { font-size:clamp(24px,3.5vw,38px); font-weight:800; color:#fff; text-align:center; line-height:1.2; max-width:700px; margin-bottom:6px; }
+.df-sub { font-size:15px; color:rgba(255,255,255,.55); text-align:center; max-width:600px; margin-bottom:32px; }
+.df-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; width:100%; max-width:900px; }
+.df-col {
+  border-radius:14px; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.df-col-head {
+  padding:14px 18px; font-size:13px; font-weight:700;
+  display:flex; align-items:center; gap:8px;
+}
+.df-col.v1 .df-col-head { background:#2a2a28; color:#888780; }
+.df-col.v2 .df-col-head { background:#1D9E75; color:#fff; }
+.df-col-body { background:#1c1c1a; flex:1; padding:16px 18px; display:flex; flex-direction:column; gap:10px; }
+.df-item { display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.5; }
+.df-item .di-icon { font-size:15px; flex-shrink:0; margin-top:1px; }
+.df-item .di-text { color:rgba(255,255,255,.75); }
+.df-item .di-text strong { color:#fff; display:block; margin-bottom:1px; }
+.df-col.v1 .di-icon { color:#E24B4A; }
+.df-col.v2 .di-icon { color:#1D9E75; }
+
+.df-verdict {
+  margin-top:24px; background:rgba(29,158,117,.12); border:1px solid rgba(29,158,117,.25);
+  border-radius:14px; padding:20px 28px; max-width:900px; width:100%;
+  display:flex; gap:16px; align-items:flex-start;
+}
+.df-verdict-icon { font-size:28px; flex-shrink:0; }
+.df-verdict-body {}
+.df-verdict-title { font-size:16px; font-weight:700; color:#5DCAA5; margin-bottom:6px; }
+.df-verdict-text { font-size:13px; color:rgba(255,255,255,.7); line-height:1.65; }
+
+.df-footer { margin-top:28px; padding-bottom:20px; }
+.df-restart { background:transparent; border:1px solid rgba(93,202,165,.35); color:#5DCAA5; border-radius:8px; padding:8px 20px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font-sans); transition:background .15s; }
+.df-restart:hover { background:rgba(93,202,165,.1); }
 </style>
 
 <!-- Launcher -->
@@ -3028,221 +3052,295 @@ applyStaticLang();
 <!-- Card -->
 <div id="demo-card">
   <div class="dc-head">
-    <span class="dc-section-badge" id="dc-section">—</span>
-    <button class="dc-close-btn" onclick="demoPause()" title="Pausar (retoma de onde parou)">❌</button>
+    <span class="dc-section-pill" id="dc-section">—</span>
+    <button class="dc-x" onclick="demoPause()" title="Pausar — retoma de onde parou">✕</button>
   </div>
   <div class="dc-body">
     <div class="dc-quote">
-      <div class="dc-quote-label">🎙 Eriqueson disse</div>
-      <div class="dc-quote-text" id="dc-quote-text"></div>
+      <div class="dc-qlabel">🎙 Eriqueson disse</div>
+      <div class="dc-qtext" id="dc-qtext"></div>
     </div>
     <div class="dc-sep"></div>
-    <div class="dc-solution">
-      <div class="dc-sol-label">✦ Solução implementada</div>
-      <div class="dc-sol-title" id="dc-sol-title"></div>
-      <div class="dc-sol-text" id="dc-sol-text"></div>
+    <div class="dc-sol">
+      <div class="dc-slabel">✦ Solução implementada</div>
+      <div class="dc-stitle" id="dc-stitle"></div>
+      <div class="dc-stext" id="dc-stext"></div>
     </div>
     <div class="dc-kpis" id="dc-kpis"></div>
   </div>
   <div class="dc-foot">
     <button class="dc-btn" id="dc-prev" onclick="demoGo(DS.cur-1)">← anterior</button>
     <div class="dc-dots" id="dc-dots"></div>
-    <span class="dc-counter" id="dc-counter">1/10</span>
-    <button class="dc-btn primary" id="dc-next" onclick="demoGo(DS.cur+1)">próximo →</button>
+    <span class="dc-ctr" id="dc-ctr">1/11</span>
+    <button class="dc-btn pr" id="dc-next" onclick="demoNext()">próximo →</button>
+  </div>
+</div>
+
+<!-- Tela final V1 vs V2 -->
+<div id="demo-final">
+  <button class="df-close" onclick="demoFinalClose()">✕ fechar</button>
+  <div class="df-kicker">Brainer 2.0 · Resolução de Alertas</div>
+  <div class="df-title">Por que o chat é a escolha certa para o Brainer</div>
+  <div class="df-sub">Comparação direta entre a V1 (checklist estático) e a V2 (assistente conversacional)</div>
+  <div class="df-grid">
+    <div class="df-col v1">
+      <div class="df-col-head">
+        <span>V1 — Checklist estático</span>
+      </div>
+      <div class="df-col-body">
+        <div class="df-item">
+          <span class="di-icon">✗</span>
+          <div class="di-text"><strong>Agente decide sozinho</strong>Lista fixa de checkboxes — sem contexto do serviço, sem orientação. Cada agente resolve do seu jeito.</div>
+        </div>
+        <div class="df-item">
+          <span class="di-icon">✗</span>
+          <div class="di-text"><strong>Qualquer ordem, qualquer passo</strong>Checkboxes independentes — agente pode pular etapas ou marcar sem executar. Sem validação.</div>
+        </div>
+        <div class="df-item">
+          <span class="di-icon">✗</span>
+          <div class="di-text"><strong>Contexto fora do popup</strong>Para ver dados do motorista ou histórico, precisa fechar e navegar. Interrompe o fluxo.</div>
+        </div>
+        <div class="df-item">
+          <span class="di-icon">✗</span>
+          <div class="di-text"><strong>Sem detecção de dependências</strong>Se resolver um alerta fecha outro, o agente só descobre depois. Nada é registrado.</div>
+        </div>
+        <div class="df-item">
+          <span class="di-icon">✗</span>
+          <div class="di-text"><strong>Dado morto</strong>O checklist não gera dado estruturado. Não há como saber o caminho percorrido nem treinar um modelo com isso.</div>
+        </div>
+      </div>
+    </div>
+    <div class="df-col v2">
+      <div class="df-col-head">
+        <span>✓ V2 — Assistente conversacional</span>
+      </div>
+      <div class="df-col-body">
+        <div class="df-item">
+          <span class="di-icon">✓</span>
+          <div class="di-text"><strong>IA conduz o fluxo</strong>O assistente apresenta a pergunta certa no momento certo. Agente novo age igual ao sênior desde o dia 1.</div>
+        </div>
+        <div class="df-item">
+          <span class="di-icon">✓</span>
+          <div class="di-text"><strong>Quick replies — 1 clique por etapa</strong>Ações executáveis inline. O caminho mais curto para a resolução já está mapeado pela IA.</div>
+        </div>
+        <div class="df-item">
+          <span class="di-icon">✓</span>
+          <div class="di-text"><strong>Contexto fixo no chat</strong>Dados do serviço, motorista e SLA visíveis dentro do popup. Sem precisar sair para consultar.</div>
+        </div>
+        <div class="df-item">
+          <span class="di-icon">✓</span>
+          <div class="di-text"><strong>Detecção de cascata automática</strong>Ao fechar um alerta, o assistente avisa se há outros dependentes e pergunta se quer abrir juntos.</div>
+        </div>
+        <div class="df-item">
+          <span class="di-icon">✓</span>
+          <div class="di-text"><strong>Infraestrutura de aprendizado</strong>Cada clique é dado estruturado: caminho escolhido, like/dislike, tempo por etapa. É o que leva do copilot ao autopilot.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="df-verdict">
+    <div class="df-verdict-icon">🧠</div>
+    <div class="df-verdict-body">
+      <div class="df-verdict-title">O Brainer não substitui o agente — ele o augmenta</div>
+      <div class="df-verdict-text">
+        A V2 não é só uma interface melhor. É a arquitetura que permite ao Brainer evoluir de <strong style="color:#5DCAA5">copilot</strong> para <strong style="color:#5DCAA5">autopilot</strong>. Cada resolução guiada gera dado estruturado. Cada dado estruturado treina o modelo. Cada ciclo de treinamento aumenta a ARR — taxa de resolução autônoma. A meta de 20% de ARR na fase 3 só é possível se a fase 1 coletar dados com qualidade. A V2 é essa fundação.
+      </div>
+    </div>
+  </div>
+  <div class="df-footer">
+    <button class="df-restart" onclick="demoFinalClose(); DS.cur=0; demoToggle();">↩ recomeçar demo</button>
   </div>
 </div>
 
 <script>
-/* ════════════════════════════════════════════
-   PONTOS DA DEMO
-════════════════════════════════════════════ */
+/* ════════ KPI DEFINITIONS ════════ */
+const KPIS = {
+  SRT: { name:'System Response Time',   desc:'Tempo entre disparo do alerta e primeira ação do agente' },
+  ART: { name:'Alert Resolution Time',  desc:'Tempo total de abertura até fechamento do alerta' },
+  ARA: { name:'Alert Resolution Accuracy', desc:'Proporção de alertas resolvidos com diagnóstico e procedimento corretos' },
+  ARR: { name:'Autonomous Resolution Rate', desc:'Proporção de alertas resolvidos sem intervenção humana (meta fase 3: ≥20%)' },
+  PCA: { name:'Procedure Compliance Accuracy', desc:'Proporção de resoluções que seguiram o fluxo correto de ponta a ponta' },
+};
+
+/* ════════ DEMO POINTS ════════ */
 const DEMO_POINTS = [
 
   /* 1 — Mercados ativos */
   {
-    section: 'Visão Geral',
-    color: 'green',
-    setup: async () => { navigateTo('main-page'); await demowait(400); },
-    target: () => document.querySelector('.sidebar') || document.querySelector('.market-item'),
-    targetPad: { x: 0, y: 0 },
-    quote: '"O sistema não me diz que mercados estão com problema. Eu preciso ir atrás."',
-    solTitle: 'Mercados ativos com contagem de alertas',
-    solText: 'A sidebar exibe os mercados em operação com badge de alertas abertos em tempo real. Um clique muda o contexto — lista, mapa e dashboard filtram automaticamente.',
-    kpis: [{ abbr:'SRT', name:'tempo de resposta — agente vê o que é urgente ao entrar', style:'' }]
+    section:'Visão Geral', color:'green',
+    setup: async () => { navigateTo('main-page'); await dw(400); },
+    target: () => document.querySelector('.sidebar-block'),
+    quote: '"O sistema não me diz quais mercados estão com problema. Eu preciso ir atrás — abro e fico procurando."',
+    stitle: 'Mercados ativos com contagem de alertas em tempo real',
+    stext: 'A sidebar exibe todos os mercados em operação com badge de alertas abertos. Filtros de país, status e provider hierarquizados. Um clique muda o contexto — lista, mapa e dashboard filtram automaticamente.',
+    kpis: [{ id:'SRT', style:'', impact:'agente vê o que é urgente ao entrar, sem varrer a lista' }]
   },
 
-  /* 2 — Dashboard de apoio */
+  /* 2 — Dashboard */
   {
-    section: 'Visão Geral',
-    color: 'green',
-    setup: async () => { navigateTo('main-page'); await demowait(400); },
+    section:'Visão Geral', color:'green',
+    setup: async () => { navigateTo('main-page'); await dw(400); },
     target: () => document.querySelector('#summary-bar'),
-    quote: '"Quando chego, não sei de cara quão crítico está o momento — tenho que ler a lista toda."',
-    solTitle: 'Dashboard de apoio acima da lista',
-    solText: 'Cards com totais: alertas abertos, serviços sem agente, SLAs críticos, análises prontas. Clicar num card filtra a lista diretamente. Situação do turno em 2 segundos.',
-    kpis: [{ abbr:'SRT', name:'visão imediata do estado do turno sem ler a lista', style:'' }]
+    quote: '"Quando chego no turno, não sei de cara quão crítico está o momento. Tenho que ler a lista toda pra entender a situação."',
+    stitle: 'Dashboard de apoio — situação do turno em 2 segundos',
+    stext: 'Cards com totais: alertas abertos, serviços sem agente, SLAs críticos, análises da IA prontas. Clicar num card filtra a lista diretamente. Visão geral antes de qualquer ação.',
+    kpis: [{ id:'SRT', style:'', impact:'diagnóstico imediato do turno — sem leitura linha a linha' }]
   },
 
   /* 3 — SLA timer */
   {
-    section: 'Lista de Serviços',
-    color: 'red',
-    setup: async () => { navigateTo('main-page'); await demowait(400); },
+    section:'Lista de Serviços', color:'red',
+    setup: async () => { navigateTo('main-page'); await dw(400); },
     target: () => document.querySelector('.sla-danger') || document.querySelector('.sla-cell'),
-    quote: '"Eles contam ali no dedo ou no bloco de nota. Deu 60 minutos, Uber liberado."',
-    solTitle: 'SLA timer visual e automático',
-    solText: 'Timer regressivo com barra de progresso em cada linha. Fica vermelho e pulsa quando resta menos de 15 minutos. Nenhum cálculo mental, nenhum bloco de notas.',
-    kpis: [{ abbr:'SRT', name:'priorização correta sem esforço manual', style:'' }]
+    quote: '"Eles contam ali no dedo ou no bloco de nota. Deu 60 minutos, Uber liberado. Não tem nada automático."',
+    stitle: 'SLA timer visual e automático por alerta',
+    stext: 'Cada linha tem um timer regressivo com barra de progresso. Fica vermelho e pulsa quando resta menos de 15 minutos. Nenhum cálculo mental, nenhum bloco de notas, nenhuma ligação para checar.',
+    kpis: [{ id:'SRT', style:'', impact:'priorização automática — agente age no alerta mais urgente primeiro' }]
   },
 
-  /* 4 — Agrupamento por provider + filtros */
+  /* 4 — Provider grouping + filtros */
   {
-    section: 'Lista de Serviços',
-    color: 'green',
-    setup: async () => { navigateTo('main-page'); await demowait(400); },
+    section:'Lista de Serviços', color:'green',
+    setup: async () => { navigateTo('main-page'); await dw(400); },
     target: () => document.querySelector('.alert-filter-bar') || document.querySelector('.provider-divider'),
-    quote: '"Se tenho alertas do AB Turismo, faço uma ligação e resolvo todos de uma vez. Começo pelos abertos sem atribuição, alto primeiro."',
-    solTitle: 'Agrupamento por provider + filtros de alerta',
-    solText: 'Lista agrupa por provider por padrão — uma ligação resolve o grupo. Filtros de tipo de alerta e prioridade na barra acima da lista. Botão assign direto na linha.',
-    kpis: [{ abbr:'ART', name:'resolução por lote — um contato, vários alertas', style:'' }]
+    quote: '"Se tenho alertas do AB Turismo, faço uma ligação e resolvo todos de uma vez. Começo sempre pelos abertos sem atribuição, alto primeiro, depois médio."',
+    stitle: 'Agrupamento por provider + filtros de tipo de alerta',
+    stext: 'Lista agrupa por provider por padrão — um contato resolve o grupo inteiro. Filtros de tipo de alerta (no play, major delay, etc.) e botão de assign direto na linha, sem precisar abrir o serviço.',
+    kpis: [{ id:'ART', style:'', impact:'resolução por lote — um contato por provider, múltiplos alertas fechados' }]
   },
 
   /* 5 — Live tracking */
   {
-    section: 'Live Tracking',
-    color: 'amber',
-    setup: async () => {
-      navigateTo('main-page'); await demowait(300);
-      openMainLiveTracking(); await demowait(600);
-    },
-    target: () => document.querySelector('.map-overlay') || document.querySelector('.map-body'),
-    quote: '"Às vezes quero ver se o ônibus está se movendo ou parado — mas não consigo sem ligar pro motorista."',
-    solTitle: 'Live tracking com mapa e filtros de status',
-    solText: 'Mapa em tempo real com marcadores coloridos por status (crítico, pendente, em andamento). Filtros de tipo de alerta na toolbar. Clicar num marcador vai direto pro detalhe do serviço.',
-    kpis: [{ abbr:'ART', name:'diagnóstico visual sem ligar pro motorista', style:'amber' }],
+    section:'Live Tracking', color:'amber',
+    setup: async () => { navigateTo('main-page'); await dw(300); openMainLiveTracking(); await dw(700); },
+    target: () => document.querySelector('.map-body') || document.querySelector('.map-overlay'),
+    quote: '"Às vezes quero saber se o ônibus está andando ou parado — mas preciso ligar pro motorista pra descobrir, e isso toma tempo."',
+    stitle: 'Mapa em tempo real com filtros de status e alerta',
+    stext: 'Marcadores coloridos por criticidade. Filtros de status e tipo de alerta na toolbar. Clicar num ponto no mapa vai direto para o detalhe do serviço — sem voltar para a lista.',
+    kpis: [{ id:'ART', style:'amber', impact:'diagnóstico visual em segundos, sem ligar para o motorista' }],
     cleanup: async () => { const m = document.getElementById('map-overlay'); if(m) m.remove(); }
   },
 
   /* 6 — Copilot: previsões da IA */
   {
-    section: 'Detalhe do Serviço',
-    color: 'green',
-    setup: async () => { navigateTo('service-detail','svc-001'); await demowait(500); },
+    section:'Detalhe · Copilot', color:'green',
+    setup: async () => { navigateTo('service-detail','svc-001'); await dw(500); },
     target: () => document.querySelector('.ai-rec-card'),
-    quote: '"Cada cliente tem sua exceção. Um agente novo nunca sabe de cor. Quando a operação é grande, eu não consigo acompanhar tudo."',
-    solTitle: 'Copilot — previsões da IA sobre o serviço',
-    solText: 'O Brainer analisa histórico do motorista, padrão do alerta e contexto do cliente. Exibe a previsão mais provável e ações recomendadas com 1 clique. Agente novo age igual ao sênior desde o dia 1.',
+    quote: '"Cada cliente tem sua exceção. Um agente novo nunca sabe de cor. E quando a operação escala, nem os seniores conseguem acompanhar tudo."',
+    stitle: 'Copilot — previsões da IA baseadas no histórico',
+    stext: 'O Brainer analisa padrões do motorista, tipo do alerta e contexto do cliente para gerar a previsão mais provável e as ações mais eficazes. Não são procedimentos fixos — são previsões que melhoram a cada ciclo. Agente novo age igual ao sênior desde o dia 1.',
     kpis: [
-      { abbr:'PCA', name:'conformidade ≥95% — todo agente segue o fluxo correto', style:'' },
-      { abbr:'ARR', name:'cada like/dislike treina o modelo autopilot', style:'' }
+      { id:'ART', style:'', impact:'ação correta com 1 clique — sem precisar pensar no procedimento' },
+      { id:'ARA', style:'', impact:'decisão baseada em dados, não em memória do agente' },
+      { id:'ARR', style:'', impact:'like/dislike treina o modelo — cada ciclo melhora a previsão' }
     ]
   },
 
   /* 7 — Histórico do motorista */
   {
-    section: 'Detalhe do Serviço',
-    color: 'green',
-    setup: async () => { navigateTo('service-detail','svc-001'); await demowait(500); },
+    section:'Detalhe · Motorista', color:'green',
+    setup: async () => { navigateTo('service-detail','svc-001'); await dw(500); },
     target: () => {
       const cards = document.querySelectorAll('.info-card');
-      for(const c of cards) { if(c.textContent.includes('motorista') || c.textContent.includes('driver')) return c; }
-      return document.querySelector('.driver-stats');
+      for(const c of cards) { if(c.textContent.includes('motorista')||c.textContent.includes('driver')) return c; }
+      return document.querySelector('.driver-stats') || document.querySelector('.info-card');
     },
-    quote: '"Quando o motorista tem ficha limpa e não deu play, é mais provável que seja problema real. Mas eu sei disso de cabeça — não está no sistema."',
-    solTitle: 'Histórico do motorista + serviços do dia',
-    solText: 'O copilot exibe: atrasos nos últimos 30 dias, incidentes, status do push enviado e todos os serviços do motorista no dia com ETA previsto. O que era conhecimento tácito vira dado visível.',
+    quote: '"Quando o motorista tem ficha limpa e não deu play, é mais provável que seja problema real. Mas esse contexto fica na minha cabeça — não está no sistema."',
+    stitle: 'Histórico do motorista + todos os serviços do dia',
+    stext: 'Copilot exibe: atrasos e incidentes nos últimos 30 dias, status do push enviado e todos os serviços do motorista no dia com ETA previsto para cada um. Contexto que era tácito vira dado visível para qualquer agente.',
     kpis: [
-      { abbr:'ARA', name:'diagnóstico correto — contexto que muda a decisão', style:'' }
+      { id:'ARA', style:'', impact:'diagnóstico correto — contexto do motorista muda a decisão' },
     ]
   },
 
-  /* 8 — Log do serviço */
+  /* 8 — Cascata + banner CC */
   {
-    section: 'Detalhe do Serviço',
-    color: 'green',
-    setup: async () => { navigateTo('service-detail','svc-001'); await demowait(500); },
+    section:'Detalhe · Alertas', color:'green',
+    setup: async () => { navigateTo('service-detail','svc-001'); await dw(500); },
+    target: () => document.querySelector('.cascade-banner') || document.querySelector('.cc-banner') || document.querySelector('.detail-left'),
+    quote: '"Às vezes um alerta fecha o outro — o major delay some quando resolvo o no play, e eu não registro isso. E quando o CC abre um chamado, eu não fico sabendo pelo sistema."',
+    stitle: 'Banner de cascata + indicador de chamado CC',
+    stext: 'Banner verde avisa que há alertas dependentes antes de qualquer ação — resolve o no play primeiro para desbloquear o major delay. Banner roxo indica chamado ativo do Customer Care naquele serviço. Ambos visíveis antes de qualquer clique.',
+    kpis: [
+      { id:'ART', style:'', impact:'fechar dependências junto — resolução mais rápida e completa' },
+      { id:'ARA', style:'', impact:'alerta dependente não some sem ser registrado' }
+    ]
+  },
+
+  /* 9 — Log: ciclo de vida */
+  {
+    section:'Detalhe · Log', color:'green',
+    setup: async () => { navigateTo('service-detail','svc-001'); await dw(500); },
     target: () => document.querySelector('.log-timeline'),
-    quote: '"Às vezes um alerta fecha o outro — o major delay some e eu não tabulo. Eu não consigo quantificar, então não consigo qualificar."',
-    solTitle: 'Log persistente com timeline completa',
-    solText: 'Todos os eventos registrados com timestamp: disparos de alerta, ações do agente, retornos do CC. O log persiste mesmo se o serviço terminar antes do fechamento manual.',
+    quote: '"Não tenho visibilidade do ciclo de vida do serviço. Gostaria de saber: que horas foi atribuído, que horas o alerta foi resolvido, o que aconteceu no meio. Isso não existe hoje."',
+    stitle: 'Log completo do ciclo de vida — do disparo ao fechamento',
+    stext: 'Timeline com timestamp de cada evento: disparo do alerta, atribuição ao agente, contato com o provider, retorno do CC, resolução. Persiste mesmo se o serviço terminar antes do fechamento manual. Pela primeira vez existe rastreio verificável de ponta a ponta.',
     kpis: [
-      { abbr:'ARA', name:'+50% precisão — incidente classificado na hora certa', style:'' },
-      { abbr:'PCA', name:'trilha auditável por alerta, não por memória', style:'' }
+      { id:'PCA', style:'', impact:'trilha auditável por alerta — não depende da memória do agente' },
+      { id:'ARA', style:'', impact:'incidente classificado no momento certo, dado não se perde' }
     ]
   },
 
-  /* 9 — Chatbot de resolução (V2) */
+  /* 10 — Chatbot de resolução */
   {
-    section: 'Resolução com Chat',
-    color: 'green',
+    section:'Resolução · Chat', color:'green',
     setup: async () => {
-      navigateTo('service-detail','svc-001'); await demowait(500);
-      // Abrir popup de resolução do primeiro alerta
+      navigateTo('service-detail','svc-001'); await dw(500);
       const btn = document.querySelector('.resolve-btn');
       if(btn) btn.click();
-      await demowait(600);
+      await dw(600);
     },
     target: () => document.querySelector('.chat-popup') || document.querySelector('.popup-overlay'),
-    quote: '"O fluxo de resolução não existe hoje. Cada agente faz do seu jeito — e não fica registrado."',
-    solTitle: 'Assistente conversacional de resolução',
-    solText: 'Chat guiado com quick replies — IA apresenta a próxima pergunta baseada na resposta anterior. Múltiplos caminhos para o mesmo tipo de alerta. Cada clique é dado estruturado que treina o modelo.',
+    quote: '"O fluxo de resolução não existe. Cada agente faz do seu jeito — e nada fica registrado de forma estruturada."',
+    stitle: 'Assistente conversacional de resolução (V2)',
+    stext: 'Chat guiado com quick replies: a IA apresenta a próxima pergunta baseada na resposta anterior. Múltiplos caminhos para o mesmo tipo de alerta. Contexto do serviço e SLA visíveis no topo. Cada clique é dado estruturado que alimenta o modelo.',
     kpis: [
-      { abbr:'PCA', name:'procedimento seguido em todo alerta, por todo agente', style:'' },
-      { abbr:'ARR', name:'dados que constroem a rota para autopilot', style:'' }
+      { id:'PCA', style:'', impact:'procedimento correto seguido em todo alerta, por todo agente' },
+      { id:'ARR', style:'', impact:'dados estruturados constroem a rota para o autopilot' }
     ],
     cleanup: async () => {
       const ov = document.querySelector('.popup-overlay');
-      if(ov) { const close = ov.querySelector('.popup-close'); if(close) close.click(); }
+      if(ov) { const cl = ov.querySelector('.popup-close'); if(cl) cl.click(); }
     }
   },
 
-  /* 10 — CC chatbot */
+  /* 11 — CC integrado */
   {
-    section: 'Customer Care',
-    color: 'cc',
-    setup: async () => { navigateTo('cc-chatbot'); await demowait(400); },
+    section:'Customer Care', color:'cc',
+    setup: async () => { navigateTo('cc-chatbot'); await dw(400); },
     target: () => document.querySelector('.chat-area') || document.querySelector('.cc-layout'),
-    quote: '"Quando vem do CC é pelo WhatsApp ou OCC — não tem rastreio nenhum. Eu não consigo quantificar, então não consigo qualificar."',
-    solTitle: 'CC integrado ao fluxo de tráfego',
-    solText: 'Alertas do Customer Care chegam com badge roxo na lista principal. No modo CC, o assistente abre o caso, puxa o contexto do motorista e dos bookings, e registra tudo. Sem WhatsApp avulso.',
+    quote: '"Quando vem do CC, chega pelo WhatsApp ou OCC — não tem rastreio nenhum. Eu não consigo quantificar, então não consigo qualificar."',
+    stitle: 'CC integrado ao fluxo de tráfego',
+    stext: 'Alertas do Customer Care chegam com badge roxo na lista de tráfego. No modo CC, o assistente abre o caso, puxa contexto do motorista e dos bookings, e registra cada ação no log central. Sem WhatsApp avulso, sem OCC paralelo.',
     kpis: [
-      { abbr:'ARA', name:'log central — CC e tráfego no mesmo sistema', style:'cc' },
-      { abbr:'ARR', name:'cada ação vira dado para o modelo autopilot', style:'cc' }
+      { id:'ARA', style:'cc', impact:'log central — tráfego e CC no mesmo sistema, rastreável' },
+      { id:'ARR', style:'cc', impact:'cada ação CC vira dado que treina o modelo autopilot' }
     ]
   }
 ];
 
-/* ════════════════════════════════════════════
-   STATE
-════════════════════════════════════════════ */
-const DS = { active: false, cur: 0, paused: false };
+/* ════════ STATE ════════ */
+const DS = { active:false, cur:0, paused:false };
+const dw = ms => new Promise(r => setTimeout(r, ms));
 
-function demowait(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-/* ════════════════════════════════════════════
-   TOGGLE / PAUSE / CLOSE
-════════════════════════════════════════════ */
+/* ════════ TOGGLE / PAUSE ════════ */
 function demoToggle() {
-  if (DS.active) { demoPause(); return; }
-  DS.active = true;
-  DS.paused = false;
+  if(DS.active) { demoPause(); return; }
+  DS.active = true; DS.paused = false;
   document.getElementById('dl-label').textContent = 'Pausar';
   demoGo(DS.cur);
 }
 
 function demoPause() {
-  DS.active = false;
-  DS.paused = true;
-  document.getElementById('dl-label').textContent = 'Retomar (' + (DS.cur + 1) + '/' + DEMO_POINTS.length + ')';
+  DS.active = false; DS.paused = true;
+  document.getElementById('dl-label').textContent = 'Retomar (' + (DS.cur+1) + '/' + DEMO_POINTS.length + ')';
   demoHideRing();
   document.getElementById('demo-card').classList.remove('active');
   document.getElementById('demo-spotlight').classList.remove('active');
 }
 
-function demoClose() {
-  DS.active = false;
-  DS.paused = false;
-  DS.cur = 0;
+function demoReset() {
+  DS.active = false; DS.paused = false; DS.cur = 0;
   document.getElementById('dl-label').textContent = 'Apresentação';
   demoHideRing();
   document.getElementById('demo-card').classList.remove('active');
@@ -3250,137 +3348,129 @@ function demoClose() {
 }
 
 function demoHideRing() {
-  document.getElementById('demo-ring').classList.remove('active','clr-green','clr-red','clr-cc','clr-amber');
-  document.getElementById('demo-badge').classList.remove('active','clr-green','clr-red','clr-cc','clr-amber');
+  document.getElementById('demo-ring').className = '';
+  document.getElementById('demo-badge').className = '';
 }
 
-/* ════════════════════════════════════════════
-   GO TO POINT
-════════════════════════════════════════════ */
+/* ════════ GO ════════ */
 async function demoGo(n) {
-  if (n < 0 || n >= DEMO_POINTS.length) return;
+  if(n < 0 || n >= DEMO_POINTS.length) return;
 
-  // Cleanup do ponto anterior
-  const prev = DEMO_POINTS[DS.cur];
-  if (prev && prev.cleanup && n !== DS.cur) {
-    try { await prev.cleanup(); } catch(e) {}
+  // cleanup do ponto anterior
+  if(DS.cur !== n) {
+    const prev = DEMO_POINTS[DS.cur];
+    if(prev && prev.cleanup) try { await prev.cleanup(); } catch(e) {}
   }
 
-  DS.cur = n;
-  DS.active = true;
-  DS.paused = false;
+  DS.cur = n; DS.active = true; DS.paused = false;
   document.getElementById('dl-label').textContent = 'Pausar';
 
   const pt = DEMO_POINTS[n];
-
-  // Esconde ring enquanto transita
   demoHideRing();
   document.getElementById('demo-card').classList.remove('active');
 
-  // Setup (navega, abre overlays, etc.)
   try { await pt.setup(); } catch(e) {}
 
-  // Posiciona ring e renderiza card
   demoPositionRing(pt, n);
   demoRenderCard(n, pt);
 }
 
-/* ════════════════════════════════════════════
-   RING POSITIONING
-════════════════════════════════════════════ */
-function demoPositionRing(pt, n) {
-  const ring    = document.getElementById('demo-ring');
-  const badge   = document.getElementById('demo-badge');
-  const spot    = document.getElementById('demo-spotlight');
+function demoNext() {
+  const n = DS.cur;
+  if(n >= DEMO_POINTS.length - 1) {
+    // último ponto → mostrar tela final
+    const prev = DEMO_POINTS[n];
+    if(prev && prev.cleanup) prev.cleanup().catch(()=>{});
+    demoReset();
+    document.getElementById('demo-final').classList.add('active');
+  } else {
+    demoGo(n + 1);
+  }
+}
 
-  const el = pt.target ? pt.target() : null;
-  if (!el) { spot.classList.remove('active'); return; }
+/* ════════ RING ════════ */
+function demoPositionRing(pt, n) {
+  const ring  = document.getElementById('demo-ring');
+  const badge = document.getElementById('demo-badge');
+  const spot  = document.getElementById('demo-spotlight');
+  const el    = pt.target ? pt.target() : null;
+  if(!el) { spot.classList.remove('active'); return; }
 
   el.scrollIntoView({ behavior:'smooth', block:'nearest' });
 
-  // Aguardar scroll estabilizar
   setTimeout(() => {
     const box = el.getBoundingClientRect();
-    const pad = pt.targetPad || { x:6, y:6 };
-    const px = typeof pad === 'number' ? pad : (pad.x ?? 6);
-    const py = typeof pad === 'number' ? pad : (pad.y ?? 6);
+    const px = 6, py = 6;
+    ring.style.cssText = `left:${box.left-px}px;top:${box.top-py}px;width:${box.width+px*2}px;height:${box.height+py*2}px`;
+    ring.className = 'active clr-' + (pt.color||'green');
 
-    // Ring
-    ring.style.left   = (box.left - px) + 'px';
-    ring.style.top    = (box.top  - py) + 'px';
-    ring.style.width  = (box.width  + px*2) + 'px';
-    ring.style.height = (box.height + py*2) + 'px';
-    ring.className = 'active clr-' + (pt.color || 'green');
+    badge.style.cssText = `left:${box.right+4}px;top:${box.top-py-4}px`;
+    badge.textContent = n+1;
+    badge.className = 'active clr-' + (pt.color||'green');
 
-    // Badge
-    badge.style.left = (box.right + 4) + 'px';
-    badge.style.top  = (box.top - py - 4) + 'px';
-    badge.textContent = n + 1;
-    badge.className = 'active clr-' + (pt.color || 'green');
-
-    // Spotlight
-    const cx = box.left + box.width / 2;
-    const cy = box.top  + box.height / 2;
-    const rW = Math.max(box.width  / 2 + 60, 80);
-    const rH = Math.max(box.height / 2 + 60, 80);
-    spot.style.background =
-      `radial-gradient(ellipse ${rW}px ${rH}px at ${cx}px ${cy}px,
-        transparent 0%, transparent 55%,
-        rgba(0,0,0,0.5) 100%)`;
+    const cx = box.left + box.width/2, cy = box.top + box.height/2;
+    const rW = Math.max(box.width/2+80,100), rH = Math.max(box.height/2+80,100);
+    spot.style.background = `radial-gradient(ellipse ${rW}px ${rH}px at ${cx}px ${cy}px,transparent 0%,transparent 50%,rgba(0,0,0,.52) 100%)`;
     spot.classList.add('active');
-  }, 120);
+  }, 130);
 }
 
-/* ════════════════════════════════════════════
-   CARD RENDER
-════════════════════════════════════════════ */
+/* ════════ CARD ════════ */
 function demoRenderCard(n, pt) {
   const total = DEMO_POINTS.length;
+  document.getElementById('dc-section').textContent = pt.section||'—';
+  document.getElementById('dc-qtext').innerHTML   = pt.quote;
+  document.getElementById('dc-stitle').textContent = pt.stitle;
+  document.getElementById('dc-stext').textContent  = pt.stext;
 
-  document.getElementById('dc-section').textContent = pt.section || '—';
-  document.getElementById('dc-quote-text').innerHTML = pt.quote;
-  document.getElementById('dc-sol-title').textContent = pt.solTitle;
-  document.getElementById('dc-sol-text').textContent = pt.solText;
-
-  // KPIs
-  document.getElementById('dc-kpis').innerHTML = (pt.kpis || []).map(k =>
-    `<div class="dc-kpi ${k.style || ''}">
-      <span class="kk-abbr">${k.abbr}</span>
-      <span class="kk-name">${k.name}</span>
-    </div>`
-  ).join('');
+  // KPIs com nome completo + descrição
+  document.getElementById('dc-kpis').innerHTML = (pt.kpis||[]).map(k => {
+    const def = KPIS[k.id] || {};
+    return `<div class="dc-kpi ${k.style==='cc'?'kcc':k.style==='amber'?'kamb':''}">
+      <span class="ka">${k.id}</span>
+      <span class="kn">${def.name||''}</span>
+      <span class="kd">${k.impact||def.desc||''}</span>
+    </div>`;
+  }).join('');
 
   // Dots
   document.getElementById('dc-dots').innerHTML = DEMO_POINTS.map((_,i) =>
     `<div class="dc-dot${i===n?' active':''}" onclick="demoGo(${i})" title="${DEMO_POINTS[i].section}"></div>`
   ).join('');
 
-  document.getElementById('dc-counter').textContent = (n+1) + '/' + total;
+  document.getElementById('dc-ctr').textContent = (n+1)+'/'+total;
 
   const prev = document.getElementById('dc-prev');
-  const next = document.getElementById('dc-next');
   prev.disabled = n === 0;
-  if (n === total - 1) {
-    next.textContent = '✓ encerrar';
-    next.onclick = () => demoClose();
+
+  const next = document.getElementById('dc-next');
+  if(n === total-1) {
+    next.textContent = '✦ ver conclusão';
+    next.className   = 'dc-btn end';
   } else {
     next.textContent = 'próximo →';
-    next.onclick = () => demoGo(DS.cur + 1);
+    next.className   = 'dc-btn pr';
   }
 
   document.getElementById('demo-card').classList.add('active');
 }
 
-/* ════════════════════════════════════════════
-   RESIZE — reposiciona ring
-════════════════════════════════════════════ */
-window.addEventListener('resize', () => {
-  if (DS.active) demoPositionRing(DEMO_POINTS[DS.cur], DS.cur);
-});
+/* ════════ TELA FINAL ════════ */
+function demoFinalClose() {
+  document.getElementById('demo-final').classList.remove('active');
+  document.getElementById('dl-label').textContent = 'Apresentação';
+  DS.cur = 0;
+}
 
-/* Fechar com Escape (pausa, não zera) */
+/* ════════ RESIZE / ESC ════════ */
+window.addEventListener('resize', () => {
+  if(DS.active) demoPositionRing(DEMO_POINTS[DS.cur], DS.cur);
+});
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && DS.active) demoPause();
+  if(e.key==='Escape') {
+    if(document.getElementById('demo-final').classList.contains('active')) { demoFinalClose(); return; }
+    if(DS.active) demoPause();
+  }
 });
 </script>
 
